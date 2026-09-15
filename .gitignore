@@ -1,0 +1,5 @@
+__pycache__/
+*.pyc
+scripts/verificacao_mapa.png
+Thumbs.db
+.DS_Store
