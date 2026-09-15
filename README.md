@@ -1,19 +1,22 @@
-# Mapa do Haras Rio São José
+# Mapa de Unidades — Haras Rio São José
 
-App web estático (HTML + CSS + JavaScript puro, sem build e sem dependências além das Google Fonts) que mostra o mapa das unidades do chacreamento **Haras Rio São José** (Poções/BA): 654 unidades em 57 glebas, com destaque para as **disponíveis**, busca por número, painel com área/medidas/status, botão de WhatsApp e link compartilhável por lote.
+Página de vendas estática (HTML + CSS + JavaScript puro, sem build e sem dependências além das Google Fonts) com o **mapa ilustrado e interativo** das unidades do chacreamento **Haras Rio São José** (Poções/BA): 654 unidades em 57 glebas, coloridas por status (**verde = disponível**, **vermelho = vendido**, **azul = reservado**), ruas desenhadas com nome, áreas comuns numeradas, busca por número, painel com área/medidas/status, WhatsApp e link compartilhável por lote.
 
-Feito para o corretor e para o cliente consultarem rapidamente qualquer lote — inclusive no celular.
+Feita para o corretor e para o cliente consultarem qualquer lote rapidamente — inclusive no celular.
 
 ## Estrutura
 
 ```
 haras-mapa-app/
-├── index.html          # página única
-├── css/styles.css      # estilos (identidade visual, mobile-first)
-├── js/app.js           # mapa SVG, pan/zoom, busca, painel, deep link, compartilhar
-├── data/lotes.json     # DADOS (glebas, lotes, vias, áreas) — hoje é um EXEMPLO com 12 lotes
-├── assets/             # logo.png, drone.mp4, drone-poster.jpg (colocar aqui)
-├── .nojekyll           # impede o GitHub Pages de processar a pasta com Jekyll
+├── index.html               # página única: cabeçalho, hero, "Veja do alto", mapa, fotos, como chegar, rodapé
+├── css/styles.css           # estilos (identidade visual, mobile-first)
+├── js/app.js                # mapa SVG, pan/zoom, vias, marcadores, legenda numerada, mini-mapa, busca, painel, deep link
+├── data/lotes.json          # DADOS reais (gerados pelo pipeline — não editar à mão)
+├── data/lotes.exemplo.json  # exemplo pequeno com TODOS os campos do contrato (para testes)
+├── assets/                  # logo.png, drone-poster.jpg, favicon.png, icon-512.png
+├── assets/fotos/            # fotos reais e renders do projeto usados na seção "O que já está pronto"
+├── scripts/gerar_dados.py   # pipeline que gera data/lotes.json
+├── .nojekyll                # impede o GitHub Pages de processar a pasta com Jekyll
 └── README.md
 ```
 
@@ -31,12 +34,11 @@ O arquivo `.nojekyll` já está incluído e deve ser mantido.
 > Para testar localmente basta abrir a pasta com qualquer servidor estático
 > (por exemplo `python -m http.server` dentro da pasta, ou a extensão *Live Server* do VS Code).
 > Abrir o `index.html` direto do disco (`file://`) não funciona porque o navegador bloqueia o `fetch` do JSON.
+> Para testar com o exemplo pequeno, troque temporariamente `DATA_URL` no topo de `js/app.js` para `data/lotes.exemplo.json`.
 
-## Como atualizar os dados (`data/lotes.json`)
+## Formato dos dados (`data/lotes.json`)
 
-Substitua o arquivo `data/lotes.json` por um novo com o **mesmo formato** e publique (commit + push). Não é preciso mexer em mais nada.
-
-Formato:
+O app lê um único JSON. Os campos abaixo são o contrato; os marcados como *opcional* podem faltar sem quebrar nada.
 
 ```json
 {
@@ -47,27 +49,42 @@ Formato:
     "bbox": [0, 0, 2100, 700],
     "total": 654, "disponiveis": 157, "vendidos": 464, "reservados": 33,
     "preco_m2": 27.5,
-    "whatsapp": "5577999999999"
+    "whatsapp": "5577999999999",
+    "avenidas": ["Avenida Pau Ferro", "Avenida Umbuzeiro"],
+    "ruas": 12,
+    "area_total_m2": 1409864.55
   },
   "glebas": [ { "id": "01", "poly": [[x,y], ...], "label": [x,y], "lotes": ["001","002"] } ],
   "lotes":  [ { "id": "001", "gleba": "01", "poly": [[x,y], ...], "c": [x,y], "area": 3594.79,
                 "frente": 82.37, "fundo": 4.62, "esq": 87.52, "dir": 97.63, "status": "disponivel" } ],
-  "vias":   [ [[x,y], [x,y], ...] ],
-  "areas":  [ { "tipo": "reserva", "nome": "Reserva legal", "poly": [[x,y], ...] } ]
+  "areas":  [ { "tipo": "imovel",  "nome": "Haras Rio São José", "poly": [[x,y], ...] },
+              { "tipo": "reserva", "nome": "Área de preservação", "poly": [[x,y], ...] },
+              { "tipo": "clube",   "nome": "Área de lazer", "poly": [[x,y], ...] },
+              { "tipo": "lago",    "nome": "Lago", "poly": [[x,y], ...] },
+              { "tipo": "area_comum", "nome": "Área verde", "poly": [[x,y], ...] } ],
+  "vias":   [ { "nome": "Avenida Pau Ferro", "tipo": "avenida", "pts": [[x,y], ...] },
+              { "nome": "Rua 1", "tipo": "rua", "pts": [[x,y], ...] },
+              { "nome": "", "tipo": "acesso", "pts": [[x,y], ...] } ],
+  "pontos": [ { "n": 1, "id": "guarita", "nome": "Portaria e guarita", "tipo": "guarita", "c": [x,y],
+                "situacao": "pronto", "prazo": null, "desc": "Portaria construída na entrada." } ]
 }
 ```
 
 Regras:
 
 - Coordenadas em **metros**, num plano local: `x` cresce para a direita, `y` cresce **para baixo** (como no SVG).
-- `meta.bbox` = `[minx, miny, maxx, maxy]`. Se faltar ou for inválido, o app calcula a partir dos polígonos.
+- `meta.bbox` = `[minx, miny, maxx, maxy]`. Se faltar ou for inválido, o app calcula a partir de tudo que é desenhado.
 - `status` deve ser `"disponivel"`, `"vendido"` ou `"reservado"`. Reserva técnica e reserva estratégica entram como `"reservado"`.
   Qualquer valor desconhecido é tratado como **reservado** (nunca como disponível).
-- `meta.preco_m2` pode ser `null`. Se for número, o painel mostra "Valor de referência" = área × preço, com a nota "sujeito a confirmação".
-- `meta.whatsapp` no formato E.164 sem `+` (ex.: `5577999999999`). Se vier vazio/`null`, o botão de WhatsApp não aparece.
-- A legenda exibe a contagem **real** do array `lotes`; se `meta.disponiveis/vendidos/reservados/total` divergirem, o app avisa no console do navegador (F12).
-- `c` (centro do lote) e `label` (posição do rótulo da gleba) são opcionais — o app usa o centroide do polígono quando faltam.
-- `vias` são polilinhas (linhas de centro); `areas.tipo` pode ser `reserva`, `area_comum` ou `lazer` (todas desenhadas com hachura leve).
+- `meta.preco_m2` pode ser `null`. Se for número, o painel mostra "Valor de referência" = área × preço **só em lotes disponíveis**, com a nota "sujeito a confirmação".
+- `meta.whatsapp` no formato E.164 sem `+` (ex.: `5577999999999`). Se vier vazio/`null`, os botões de WhatsApp (painel e "Como chegar") não aparecem.
+- `meta.avenidas` (2 nomes: ida e volta) e `meta.ruas` (quantidade) alimentam o mini-mapa "Como se orientar" e o texto ao lado; se faltarem, o app usa "Avenida Pau Ferro"/"Avenida Umbuzeiro" e não numera ruas.
+- `meta.area_total_m2` alimenta o número "de área total" do hero (em hectares). Se faltar, o app usa a área do polígono `imovel`; sem ele, a soma das glebas; sem glebas, a soma dos lotes.
+- A legenda e o hero exibem a contagem **real** do array `lotes`; se `meta.disponiveis/vendidos/reservados/total` divergirem, o app avisa no console do navegador (F12).
+- `c` (centro do lote) e `label` (posição do rótulo da gleba/área) são opcionais — o app usa o centroide do polígono quando faltam.
+- `areas.tipo`: `imovel` (contorno de todo o imóvel, desenhado por baixo de tudo com sombra), `reserva` (padrão de mata), `lago` (azul), `clube` (área de lazer) ou `area_comum` (verde suave). O `nome` vira rótulo; nome vazio não desenha rótulo.
+- `vias`: objetos `{nome, tipo, pts}`. `tipo` define a largura em metros: `avenida` ≈ 14 m, `rua` ≈ 9 m, `acesso` ≈ 10 m. O nome é escrito ao longo do traçado e só aparece quando o zoom o deixa legível (e se couber no comprimento da via). **Compatibilidade**: um array de pontos puro (formato antigo) ainda funciona e é tratado como rua sem nome. `vias` vazio é aceito.
+- `pontos` (áreas comuns): `n` é o número do marcador e da legenda; `tipo` escolhe o ícone (`guarita`, `salao`, `piscina`, `quiosque`, `banheiro`, `quadra`, `baias`, `fazendinha`, `agua`, `reserva`, `estacionamento`; qualquer outro usa um ícone genérico); `situacao` é `pronto`, `em_obra` ou `previsto` (com `prazo` no formato `dd/mm/aaaa` ou `null`). Se `c` for `null`, o item aparece na legenda mas sem marcador no mapa. Vários pontos na mesma coordenada abrem em leque. `pontos` ausente é aceito.
 - **Nenhum dado pessoal** deve entrar no JSON (sem nomes de compradores).
 
 Para conferir se o JSON está válido antes de publicar:
@@ -76,32 +93,39 @@ Para conferir se o JSON está válido antes de publicar:
 python -c "import json;json.load(open('data/lotes.json', encoding='utf-8'));print('ok')"
 ```
 
-## Como atualizar os assets
-
-Coloque os arquivos na pasta `assets/` com exatamente estes nomes:
+## Assets
 
 | Arquivo | Uso | Observações |
 |---|---|---|
-| `assets/logo.png` | Logo no cabeçalho e favicon | PNG com fundo transparente, ~200×200 px |
-| `assets/drone.mp4` | Vídeo da seção "Veja do alto" | MP4 (H.264/AAC), de preferência até ~20 MB; sem áudio necessário (o player inicia mudo) |
-| `assets/drone-poster.jpg` | Imagem de capa do vídeo | JPG 1600×900 px aprox. |
+| `assets/logo.png` | Logo no cabeçalho | PNG com fundo transparente, ~200×200 px |
+| `assets/favicon.png`, `assets/icon-512.png` | Ícones do site | |
+| `assets/drone-poster.jpg` | Fundo do hero e do quadro "Vídeo 360° em breve" | JPG 1600×900 px aprox. |
+| `assets/fotos/aerea-1.jpg` … `aerea-5.jpg` | Vistas aéreas (seção "O que já está pronto") | 4:3 ou 16:9 |
+| `assets/fotos/paineis-solares.jpg`, `reservatorio.jpg`, `obra-agua.jpg` | Sistema de água | `reservatorio.jpg` é vertical |
+| `assets/fotos/projeto-salao-piscina.jpg`, `projeto-baias-redondel.jpg`, `projeto-guarita.jpg` | Renders do projeto | **Sempre** exibidos com a tarja "Imagem ilustrativa do projeto" |
 
-Se algum arquivo faltar, o app continua funcionando: o logo some, e a seção de vídeo mostra "Vídeo em breve." sem quebrar o layout.
+Se algum arquivo faltar, o app continua funcionando: o logo some, o quadro do vídeo fica verde-escuro e o card da foto desaparece sem quebrar a galeria.
+
+O vídeo 360° ainda não existe: a seção "Veja do alto" mostra apenas o quadro "Vídeo 360° em breve". Não há `<video>` nem referência a `assets/drone.mp4` na página.
 
 ## Uso
 
-- **Arrastar** move o mapa; **roda do mouse** ou **pinça** dá zoom; botões **+**, **−** e **Ver tudo** no canto.
-- **Clique/toque** num lote abre o painel com número, gleba, status, área, medidas, valor de referência, WhatsApp e Compartilhar.
+- **Arrastar** move o mapa; **roda do mouse** ou **pinça** dá zoom; botões **+**, **−** e **Ver tudo** no canto. Rosa dos ventos e escala em metros ficam no canto inferior direito.
+- **Visão geral**: lotes coloridos por status e números das glebas. **Ao ampliar**: números dos lotes e nomes das ruas.
+- **Clique/toque** num lote abre o painel com número, gleba, status, área, medidas, valor de referência (só disponíveis), WhatsApp e Compartilhar.
+- **Áreas comuns**: marcadores dourados numerados no mapa. Clicar num item da legenda "Áreas comuns" centraliza e destaca o marcador; clicar no marcador (ou Enter com ele focado) abre o mini-painel com nome, situação e descrição.
 - **Busca** no topo aceita `12`, `012` ou `lote 12`.
 - **Só disponíveis** esmaece vendidos e reservados.
 - **Link direto**: `...?lote=123` abre o app já centralizado no lote 123 com o painel aberto (é esse link que o botão Compartilhar copia/envia).
-- **Esc** fecha o painel. No celular, puxe o painel para baixo para fechar.
+- **Esc** fecha o painel e o mini-painel. No celular, puxe o painel para baixo para fechar.
 
 ## Regras de conteúdo
 
 - Usar sempre "chacreamento", "unidade", "lote", "gleba", "fração" — nunca a palavra vetada pelo jurídico (a que começa com "lotea…").
-- O app não promete infraestrutura; mostra apenas mapa, medidas e status.
-- Rodapé fixo: "Medidas conforme memorial descritivo. Disponibilidade sujeita a confirmação. Imagens ilustrativas."
+- Não mostrar nem citar lago com píer, deck, parque infantil ou churrasqueira; não prometer energia ligada nem vazão de água.
+- Imagens de projeto sempre com a tarja "Imagem ilustrativa do projeto".
+- Nenhum dado pessoal na página ou no JSON.
+- Rodapé fixo: "Medidas conforme memorial descritivo. Disponibilidade sujeita a confirmação. Imagens de projeto são ilustrativas. Infraestrutura conforme contrato."
 
 ## Como os dados são gerados (pipeline oficial)
 

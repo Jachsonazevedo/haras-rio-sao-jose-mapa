@@ -4,18 +4,19 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>Mapa de unidades — Haras Rio São José</title>
-  <meta name="description" content="Mapa interativo das unidades do chacreamento Haras Rio São José, em Poções/BA: número do lote, gleba, área, medidas e disponibilidade.">
+  <meta name="description" content="Mapa ilustrado e interativo das unidades do chacreamento Haras Rio São José, em Poções/BA: terrenos a partir de 2.000 m², glebas, áreas comuns, medidas e disponibilidade.">
   <meta name="theme-color" content="#183827">
   <meta property="og:title" content="Mapa de unidades — Haras Rio São José">
-  <meta property="og:description" content="Consulte número, gleba, área, medidas e disponibilidade de cada unidade do chacreamento.">
+  <meta property="og:description" content="Terrenos a partir de 2.000 m² para a sua chácara rural, a menos de dez minutos do centro de Poções. Consulte o mapa de unidades.">
   <meta property="og:type" content="website">
-  <link rel="icon" href="assets/logo.png">
-  <link rel="apple-touch-icon" href="assets/logo.png">
+  <meta property="og:image" content="assets/drone-poster.jpg">
+  <link rel="icon" href="assets/favicon.png">
+  <link rel="apple-touch-icon" href="assets/icon-512.png">
 
   <!-- Fontes (única dependência externa) -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
   <link rel="stylesheet" href="css/styles.css">
 </head>
@@ -23,162 +24,322 @@
 
   <!-- ===================== CABEÇALHO ===================== -->
   <header class="topo" id="topo">
-    <div class="topo__marca">
-      <!-- O logo será colocado em assets/logo.png; se faltar, a imagem some sem quebrar o layout -->
-      <img class="topo__logo" src="assets/logo.png" alt="" width="40" height="40" onerror="this.classList.add('is-hidden')">
-      <div class="topo__titulos">
-        <h1 class="topo__titulo">Haras Rio São José</h1>
-        <p class="topo__subtitulo">Mapa de unidades</p>
-      </div>
-    </div>
-
-    <form class="busca" id="busca" role="search" autocomplete="off">
-      <label class="sr-only" for="busca-input">Buscar lote pelo número</label>
-      <input id="busca-input" class="busca__input" type="search" inputmode="numeric"
-             placeholder="Buscar lote (ex.: 12)" enterkeyhint="search" aria-describedby="busca-dica">
-      <span id="busca-dica" class="sr-only">Digite o número do lote e pressione Enter.</span>
-      <button class="busca__btn" type="submit" aria-label="Buscar lote">
-        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="10.5" cy="10.5" r="6.5" fill="none" stroke="currentColor" stroke-width="2.2"/><path d="M15.5 15.5 21 21" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
-      </button>
-    </form>
+    <a class="topo__marca" href="#inicio" aria-label="Haras Rio São José — início">
+      <img class="topo__logo" src="assets/logo.png" alt="" width="42" height="42" onerror="this.classList.add('is-hidden')">
+      <span class="topo__titulos">
+        <span class="topo__titulo">Haras Rio São José</span>
+        <span class="topo__subtitulo">Mapa de unidades</span>
+      </span>
+    </a>
+    <nav class="topo__nav" aria-label="Seções">
+      <a href="#mapa">Mapa</a>
+      <a href="#pronto">Fotos</a>
+      <a href="#como-chegar">Como chegar</a>
+    </nav>
+    <a class="topo__cta" href="#mapa">Ver o mapa</a>
   </header>
 
-  <main>
-    <!-- ===================== MAPA ===================== -->
-    <section class="mapa" id="mapa" aria-label="Mapa das unidades">
+  <main id="inicio">
 
-      <svg id="svg" class="mapa__svg" xmlns="http://www.w3.org/2000/svg" role="img"
-           aria-label="Mapa interativo das unidades do chacreamento. Use os botões de mais e menos para ampliar ou reduzir, e a busca para localizar um lote.">
-        <defs>
-          <!-- Hachuras leves para áreas (reserva, área comum etc.) -->
-          <pattern id="hachura" width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
-            <rect width="8" height="8" fill="#e9e6da"/>
-            <line x1="0" y1="0" x2="0" y2="8" stroke="#cfcab8" stroke-width="1.5"/>
-          </pattern>
-          <pattern id="hachura-verde" width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
-            <rect width="8" height="8" fill="#e3e9e0"/>
-            <line x1="0" y1="0" x2="0" y2="8" stroke="#b6c7b6" stroke-width="1.5"/>
-          </pattern>
-        </defs>
-
-        <!-- Todo o pan/zoom é um único transform neste <g> raiz -->
-        <g id="mundo">
-          <g id="g-areas"></g>
-          <g id="g-glebas"></g>
-          <g id="g-vias"></g>
-          <g id="g-lotes"></g>
-          <!-- Destaque do lote selecionado: halo dourado + contorno verde -->
-          <g id="g-destaque" style="display:none">
-            <polygon id="halo" points=""/>
-            <polygon id="contorno" points=""/>
-          </g>
-          <!-- Rótulos em grupos separados para poder escondê-los conforme o zoom -->
-          <g id="g-rotulos"></g>
-          <g id="g-rotulos-areas"></g>
-          <g id="g-rotulos-glebas"></g>
-        </g>
-      </svg>
-
-      <!-- Controles flutuantes -->
-      <div class="controles" role="group" aria-label="Controles do mapa">
-        <button class="ctrl" id="zoom-mais" type="button" aria-label="Ampliar" title="Ampliar">
-          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>
-        </button>
-        <button class="ctrl" id="zoom-menos" type="button" aria-label="Reduzir" title="Reduzir">
-          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 12h14" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>
-        </button>
-        <button class="ctrl" id="ver-tudo" type="button" aria-label="Ver o mapa inteiro" title="Ver tudo">
-          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        </button>
-      </div>
-
-      <!-- Atalho para a seção do vídeo (o mapa captura o gesto de rolagem) -->
-      <a class="ver-alto" href="#veja-do-alto">Veja do alto <span aria-hidden="true">↓</span></a>
-
-      <!-- Legenda + filtro -->
-      <div class="legenda" id="legenda" aria-label="Legenda">
-        <ul class="legenda__itens">
-          <li class="legenda__item"><span class="legenda__cor legenda__cor--disponivel" aria-hidden="true"></span>Disponíveis <span class="legenda__n" id="n-disponivel">–</span></li>
-          <li class="legenda__item"><span class="legenda__cor legenda__cor--reservado" aria-hidden="true"></span>Reservados <span class="legenda__n" id="n-reservado">–</span></li>
-          <li class="legenda__item"><span class="legenda__cor legenda__cor--vendido" aria-hidden="true"></span>Vendidos <span class="legenda__n" id="n-vendido">–</span></li>
-        </ul>
-        <label class="alternar">
-          <input type="checkbox" id="so-disponiveis" role="switch" aria-checked="false">
-          <span class="alternar__trilho" aria-hidden="true"></span>
-          <span>Só disponíveis</span>
-        </label>
-      </div>
-
-      <!-- Mensagens curtas (busca, link copiado etc.) -->
-      <div class="toast" id="toast" role="status" aria-live="polite"></div>
-
-      <!-- ===================== PAINEL DO LOTE ===================== -->
-      <!-- Desktop: cartão lateral. Mobile: bottom sheet arrastável. -->
-      <aside class="painel" id="painel" aria-hidden="true" aria-labelledby="painel-titulo">
-        <div class="painel__alca" id="painel-alca" aria-hidden="true"><span></span></div>
-        <div class="painel__topo">
-          <div>
-            <p class="painel__sobre">Gleba <span id="p-gleba">—</span></p>
-            <h2 class="painel__titulo" id="painel-titulo" tabindex="-1">Lote <span id="p-lote">—</span></h2>
-          </div>
-          <button class="painel__fechar" id="painel-fechar" type="button" aria-label="Fechar painel do lote">
-            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
-          </button>
-        </div>
-
-        <p class="status" id="p-status">—</p>
-
-        <dl class="medidas">
-          <div class="medidas__area"><dt>Área</dt><dd id="p-area">—</dd></div>
-          <div><dt>Frente</dt><dd id="p-frente">—</dd></div>
-          <div><dt>Fundo</dt><dd id="p-fundo">—</dd></div>
-          <div><dt>Esquerda</dt><dd id="p-esq">—</dd></div>
-          <div><dt>Direita</dt><dd id="p-dir">—</dd></div>
+    <!-- ===================== HERO ===================== -->
+    <section class="hero" aria-labelledby="hero-titulo">
+      <img class="hero__fundo" src="assets/drone-poster.jpg" alt="" onerror="this.classList.add('is-hidden')">
+      <div class="hero__conteudo">
+        <p class="hero__sobre">Chacreamento · Poções – BA</p>
+        <h1 class="hero__titulo" id="hero-titulo">Terrenos a partir de 2.000 m² para a sua chácara rural, a menos de dez minutos do centro de Poções.</h1>
+        <p class="hero__sub">Entrada facilitada e até 140 meses para pagar.</p>
+        <a class="btn btn--dourado btn--grande" href="#mapa">
+          Ver o mapa
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 5v14M6 13l6 6 6-6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </a>
+        <dl class="numeros" aria-label="Números do chacreamento">
+          <div class="numeros__item"><dd id="h-disponiveis">—</dd><dt>unidades disponíveis</dt></div>
+          <div class="numeros__item"><dd id="h-glebas">—</dd><dt>glebas</dt></div>
+          <div class="numeros__item"><dd id="h-area">—</dd><dt>de área total</dt></div>
         </dl>
-
-        <div class="painel__valor" id="p-valor" hidden>
-          <span class="painel__valor-rotulo">Valor de referência</span>
-          <strong id="p-valor-num">—</strong>
-          <small>sujeito a confirmação</small>
-        </div>
-
-        <div class="painel__acoes">
-          <a class="btn btn--primario" id="p-whats" href="#" target="_blank" rel="noopener noreferrer">
-            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="currentColor" d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2Zm0 1.8a8.2 8.2 0 1 1-4.2 15.3l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 0 1 12 3.8Zm-3.3 4.4c-.2 0-.5 0-.7.3-.3.3-1 1-1 2.4s1 2.8 1.2 3c.1.2 2 3.2 5 4.4 2.5 1 3 .8 3.5.7.5 0 1.7-.7 2-1.4.2-.7.2-1.2.1-1.4l-.5-.3-1.9-.9c-.3-.1-.5-.2-.7.2l-.9 1.1c-.2.2-.3.2-.6.1a6.8 6.8 0 0 1-3.4-3c-.2-.4 0-.5.2-.7l.4-.5.3-.5c.1-.2 0-.4 0-.5l-.9-2.1c-.2-.5-.4-.5-.6-.5h-.5Z"/></svg>
-            WhatsApp
-          </a>
-          <button class="btn btn--secundario" id="p-share" type="button">
-            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M18 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6ZM6 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Zm12 7a3 3 0 1 0 0-6 3 3 0 0 0 0 6ZM8.6 10.6l6.8-3.9M8.6 13.4l6.8 3.9" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-            Compartilhar
-          </button>
-        </div>
-
-        <p class="painel__nota">Medidas conforme memorial descritivo. Disponibilidade sujeita a confirmação.</p>
-      </aside>
-
-      <!-- Estado de carregamento / erro (cobre o mapa) -->
-      <div class="estado" id="estado" aria-live="polite">
-        <div class="estado__caixa">
-          <div class="spinner" aria-hidden="true"></div>
-          <p class="estado__titulo" id="estado-titulo">Carregando o mapa…</p>
-          <p class="estado__texto" id="estado-texto">Preparando as unidades e glebas.</p>
-          <button class="btn btn--primario" id="estado-tentar" type="button" hidden>Tentar novamente</button>
-        </div>
       </div>
     </section>
 
     <!-- ===================== VEJA DO ALTO ===================== -->
-    <section class="video" id="veja-do-alto" aria-labelledby="video-titulo">
-      <h2 class="video__titulo" id="video-titulo">Veja do alto</h2>
-      <p class="video__texto">Sobrevoo do chacreamento para você se localizar antes de escolher a sua unidade.</p>
-      <div class="video__quadro" id="video-quadro">
-        <!-- Os arquivos serão colocados depois em assets/. Se faltarem, mostra-se o aviso abaixo. -->
-        <video id="video-drone" src="assets/drone.mp4" poster="assets/drone-poster.jpg"
-               muted playsinline loop controls preload="metadata"
-               aria-label="Vídeo aéreo do chacreamento Haras Rio São José"></video>
-        <div class="video__fallback" aria-hidden="true">Vídeo em breve.</div>
+    <section class="secao video" id="veja-do-alto" aria-labelledby="video-titulo">
+      <div class="secao__inner">
+        <p class="secao__sobre">Vídeo 360°</p>
+        <h2 class="secao__titulo" id="video-titulo">Veja do alto</h2>
+        <p class="secao__texto">Sobrevoo do chacreamento para você se localizar antes de escolher a sua unidade.</p>
+        <div class="video__quadro" role="img" aria-label="Vídeo 360° em breve">
+          <img class="video__fundo" src="assets/drone-poster.jpg" alt="" onerror="this.classList.add('is-hidden')">
+          <div class="video__centro">
+            <span class="video__icone" aria-hidden="true">
+              <svg viewBox="0 0 24 24" focusable="false"><path d="M12 3a9 9 0 1 0 9 9" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M21 3v6h-6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M10 9.5v5l4-2.5z" fill="currentColor"/></svg>
+            </span>
+            <span class="video__msg">Vídeo 360° em breve</span>
+          </div>
+        </div>
       </div>
-      <p class="video__nota">Imagens ilustrativas.</p>
+    </section>
+
+    <!-- ===================== MAPA ===================== -->
+    <section class="secao mapa-secao" id="mapa" aria-labelledby="mapa-titulo">
+      <div class="secao__inner">
+        <div class="mapa-secao__cabeca">
+          <div>
+            <p class="secao__sobre">Mapa interativo</p>
+            <h2 class="secao__titulo" id="mapa-titulo">Escolha a sua unidade</h2>
+            <p class="secao__texto">Toque em um lote para ver área, medidas e disponibilidade. Use a busca para ir direto ao número.</p>
+          </div>
+        </div>
+
+        <div class="mapa-grade">
+          <!-- ---------- Quadro do mapa ---------- -->
+          <div class="mapa" id="mapa-quadro" aria-label="Mapa das unidades">
+
+            <svg id="svg" class="mapa__svg" xmlns="http://www.w3.org/2000/svg" role="img"
+                 aria-label="Mapa ilustrado e interativo das unidades do chacreamento. Use os botões de mais e menos para ampliar ou reduzir, e a busca para localizar um lote.">
+              <defs>
+                <!-- Textura sutil do fundo -->
+                <pattern id="textura" width="26" height="26" patternUnits="userSpaceOnUse">
+                  <rect width="26" height="26" fill="#F6F2E8"/>
+                  <circle cx="4" cy="4" r=".9" fill="#183827" fill-opacity=".045"/>
+                  <circle cx="17" cy="15" r=".9" fill="#183827" fill-opacity=".04"/>
+                  <circle cx="9" cy="21" r=".7" fill="#6A3C25" fill-opacity=".04"/>
+                </pattern>
+                <!-- Mata (área de preservação) -->
+                <pattern id="mata" width="22" height="22" patternUnits="userSpaceOnUse">
+                  <rect width="22" height="22" fill="#D5E4CC"/>
+                  <circle cx="5" cy="6" r="2.6" fill="#8FB08A" fill-opacity=".85"/>
+                  <circle cx="16" cy="12" r="3" fill="#7FA47A" fill-opacity=".8"/>
+                  <circle cx="8" cy="18" r="2.2" fill="#9CBB93" fill-opacity=".8"/>
+                  <circle cx="19" cy="3" r="1.8" fill="#A7C49F" fill-opacity=".8"/>
+                </pattern>
+                <!-- Área de lazer -->
+                <pattern id="lazer" width="14" height="14" patternUnits="userSpaceOnUse">
+                  <rect width="14" height="14" fill="#E4EBD6"/>
+                  <circle cx="7" cy="7" r="1.1" fill="#9FB48A" fill-opacity=".7"/>
+                </pattern>
+                <!-- Sombra sob o contorno do imóvel -->
+                <filter id="sombra" x="-10%" y="-10%" width="120%" height="130%">
+                  <feGaussianBlur stdDeviation="5"/>
+                </filter>
+                <!-- Sombra dos marcadores (em px, porque o marcador não escala) -->
+                <filter id="sombra-pin" x="-50%" y="-50%" width="200%" height="200%">
+                  <feDropShadow dx="0" dy="2" stdDeviation="2" flood-color="#183827" flood-opacity=".35"/>
+                </filter>
+              </defs>
+
+              <rect class="mapa__fundo" x="-100000" y="-100000" width="200000" height="200000" fill="url(#textura)"/>
+
+              <!-- Todo o pan/zoom é um único transform neste <g> raiz -->
+              <g id="mundo">
+                <g id="g-imovel"></g>
+                <g id="g-areas"></g>
+                <g id="g-vias"></g>
+                <g id="g-lotes"></g>
+                <g id="g-glebas"></g>
+                <!-- Destaque do lote selecionado: halo dourado + contorno verde -->
+                <g id="g-destaque" style="display:none">
+                  <polygon id="halo" points=""/>
+                  <polygon id="contorno" points=""/>
+                </g>
+                <!-- Rótulos em grupos separados para poder escondê-los conforme o zoom -->
+                <g id="g-rotulos"></g>
+                <g id="g-nomes-vias"></g>
+                <g id="g-rotulos-areas"></g>
+                <g id="g-rotulos-glebas"></g>
+                <g id="g-pontos"></g>
+              </g>
+
+              <!-- Elementos fixos na tela (não acompanham o pan/zoom) -->
+              <g id="g-fixos" aria-hidden="true">
+                <g id="rosa" class="rosa">
+                  <circle r="21" class="rosa__fundo"/>
+                  <path d="M0 -17 L4 0 L0 17 L-4 0 Z" class="rosa__n"/>
+                  <path d="M-17 0 L0 -4 L17 0 L0 4 Z" class="rosa__eo"/>
+                  <text y="-9.5" class="rosa__texto">N</text>
+                </g>
+                <g id="escala" class="escala">
+                  <rect id="escala-fundo" class="escala__fundo" rx="6"/>
+                  <line id="escala-linha" class="escala__linha"/>
+                  <text id="escala-texto" class="escala__texto"></text>
+                </g>
+              </g>
+            </svg>
+
+            <!-- Busca (flutua sobre o mapa) -->
+            <form class="busca" id="busca" role="search" autocomplete="off">
+              <label class="sr-only" for="busca-input">Buscar lote pelo número</label>
+              <svg class="busca__icone" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="10.5" cy="10.5" r="6.5" fill="none" stroke="currentColor" stroke-width="2.2"/><path d="M15.5 15.5 21 21" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
+              <input id="busca-input" class="busca__input" type="search" inputmode="numeric"
+                     placeholder="Buscar lote (ex.: 12)" enterkeyhint="search" aria-describedby="busca-dica">
+              <span id="busca-dica" class="sr-only">Digite o número do lote e pressione Enter.</span>
+              <button class="busca__btn" type="submit" aria-label="Buscar lote">Ir</button>
+            </form>
+
+            <!-- Controles flutuantes -->
+            <div class="controles" role="group" aria-label="Controles do mapa">
+              <button class="ctrl" id="zoom-mais" type="button" aria-label="Ampliar" title="Ampliar">
+                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>
+              </button>
+              <button class="ctrl" id="zoom-menos" type="button" aria-label="Reduzir" title="Reduzir">
+                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 12h14" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>
+              </button>
+              <button class="ctrl" id="ver-tudo" type="button" aria-label="Ver o mapa inteiro" title="Ver tudo">
+                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </button>
+            </div>
+
+            <!-- Legenda + filtro -->
+            <div class="legenda" id="legenda" aria-label="Legenda">
+              <ul class="legenda__itens">
+                <li class="legenda__item"><span class="legenda__cor legenda__cor--disponivel" aria-hidden="true"></span>Disponíveis <span class="legenda__n" id="n-disponivel">–</span></li>
+                <li class="legenda__item"><span class="legenda__cor legenda__cor--reservado" aria-hidden="true"></span>Reservados <span class="legenda__n" id="n-reservado">–</span></li>
+                <li class="legenda__item"><span class="legenda__cor legenda__cor--vendido" aria-hidden="true"></span>Vendidos <span class="legenda__n" id="n-vendido">–</span></li>
+              </ul>
+              <label class="alternar">
+                <input type="checkbox" id="so-disponiveis" role="switch" aria-checked="false">
+                <span class="alternar__trilho" aria-hidden="true"></span>
+                <span>Só disponíveis</span>
+              </label>
+            </div>
+
+            <!-- Mensagens curtas (busca, link copiado etc.) -->
+            <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+            <!-- Mini-painel de área comum (abre ao clicar num marcador) -->
+            <div class="popover" id="popover" role="dialog" aria-labelledby="pop-nome" hidden>
+              <button class="popover__fechar" id="pop-fechar" type="button" aria-label="Fechar">
+                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
+              </button>
+              <div class="popover__topo">
+                <span class="popover__n" id="pop-n">1</span>
+                <span class="popover__icone" id="pop-icone" aria-hidden="true"></span>
+                <div class="popover__titulos">
+                  <strong class="popover__nome" id="pop-nome">—</strong>
+                  <span class="chip" id="pop-chip">—</span>
+                </div>
+              </div>
+              <p class="popover__desc" id="pop-desc"></p>
+            </div>
+
+            <!-- ===================== PAINEL DO LOTE ===================== -->
+            <!-- Desktop: cartão lateral. Mobile: bottom sheet arrastável. -->
+            <aside class="painel" id="painel" aria-hidden="true" aria-labelledby="painel-titulo">
+              <div class="painel__alca" id="painel-alca" aria-hidden="true"><span></span></div>
+              <div class="painel__topo">
+                <div>
+                  <p class="painel__sobre">Gleba <span id="p-gleba">—</span></p>
+                  <h2 class="painel__titulo" id="painel-titulo" tabindex="-1">Lote <span id="p-lote">—</span></h2>
+                </div>
+                <button class="painel__fechar" id="painel-fechar" type="button" aria-label="Fechar painel do lote">
+                  <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
+                </button>
+              </div>
+
+              <p class="status" id="p-status">—</p>
+
+              <dl class="medidas">
+                <div class="medidas__area"><dt>Área</dt><dd id="p-area">—</dd></div>
+                <div><dt>Frente</dt><dd id="p-frente">—</dd></div>
+                <div><dt>Fundo</dt><dd id="p-fundo">—</dd></div>
+                <div><dt>Esquerda</dt><dd id="p-esq">—</dd></div>
+                <div><dt>Direita</dt><dd id="p-dir">—</dd></div>
+              </dl>
+
+              <div class="painel__valor" id="p-valor" hidden>
+                <span class="painel__valor-rotulo">Valor de referência</span>
+                <strong id="p-valor-num">—</strong>
+                <small>sujeito a confirmação</small>
+              </div>
+
+              <div class="painel__acoes">
+                <a class="btn btn--primario" id="p-whats" href="#" target="_blank" rel="noopener noreferrer">
+                  <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="currentColor" d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2Zm0 1.8a8.2 8.2 0 1 1-4.2 15.3l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 0 1 12 3.8Zm-3.3 4.4c-.2 0-.5 0-.7.3-.3.3-1 1-1 2.4s1 2.8 1.2 3c.1.2 2 3.2 5 4.4 2.5 1 3 .8 3.5.7.5 0 1.7-.7 2-1.4.2-.7.2-1.2.1-1.4l-.5-.3-1.9-.9c-.3-.1-.5-.2-.7.2l-.9 1.1c-.2.2-.3.2-.6.1a6.8 6.8 0 0 1-3.4-3c-.2-.4 0-.5.2-.7l.4-.5.3-.5c.1-.2 0-.4 0-.5l-.9-2.1c-.2-.5-.4-.5-.6-.5h-.5Z"/></svg>
+                  WhatsApp
+                </a>
+                <button class="btn btn--secundario" id="p-share" type="button">
+                  <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M18 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6ZM6 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Zm12 7a3 3 0 1 0 0-6 3 3 0 0 0 0 6ZM8.6 10.6l6.8-3.9M8.6 13.4l6.8 3.9" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                  Compartilhar
+                </button>
+              </div>
+
+              <p class="painel__nota">Medidas conforme memorial descritivo. Disponibilidade sujeita a confirmação.</p>
+            </aside>
+
+            <!-- Estado de carregamento / erro (cobre o mapa) -->
+            <div class="estado" id="estado" aria-live="polite">
+              <div class="estado__caixa">
+                <div class="spinner" aria-hidden="true"></div>
+                <p class="estado__titulo" id="estado-titulo">Carregando o mapa…</p>
+                <p class="estado__texto" id="estado-texto">Preparando as unidades e glebas.</p>
+                <button class="btn btn--primario" id="estado-tentar" type="button" hidden>Tentar novamente</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- ---------- Coluna lateral: orientação + áreas comuns ---------- -->
+          <aside class="lateral" aria-label="Orientação e áreas comuns">
+            <div class="cartao" id="orientacao">
+              <h3 class="cartao__titulo">Como se orientar no Haras</h3>
+              <p class="cartao__texto" id="orientacao-texto">Entre pela portaria, siga pela avenida de ida; as ruas transversais cruzam até a avenida de volta.</p>
+              <div class="orientacao__svg" id="orientacao-svg" aria-hidden="true"></div>
+            </div>
+
+            <div class="cartao" id="areas-comuns" hidden>
+              <h3 class="cartao__titulo">Áreas comuns</h3>
+              <p class="cartao__texto">Toque em um item para localizar no mapa.</p>
+              <ol class="comuns" id="lista-comuns"></ol>
+            </div>
+          </aside>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== O QUE JÁ ESTÁ PRONTO ===================== -->
+    <section class="secao fotos" id="pronto" aria-labelledby="fotos-titulo">
+      <div class="secao__inner">
+        <p class="secao__sobre">Fotos reais</p>
+        <h2 class="secao__titulo" id="fotos-titulo">O que já está pronto</h2>
+        <p class="secao__texto">Registros do terreno e da infraestrutura já executada.</p>
+
+        <div class="galeria" id="galeria-real">
+          <figure class="card-foto"><img src="assets/fotos/aerea-1.jpg" alt="Vista aérea do chacreamento Haras Rio São José" loading="lazy" onerror="this.closest('figure').remove()"><figcaption>Vista aérea do chacreamento</figcaption></figure>
+          <figure class="card-foto"><img src="assets/fotos/aerea-2.jpg" alt="Vista aérea da rede elétrica do chacreamento" loading="lazy" onerror="this.closest('figure').remove()"><figcaption>Rede elétrica instalada: 215 postes e 13 transformadores</figcaption></figure>
+          <figure class="card-foto"><img src="assets/fotos/aerea-3.jpg" alt="Vista aérea das glebas e ruas" loading="lazy" onerror="this.closest('figure').remove()"><figcaption>Glebas e ruas vistas do alto</figcaption></figure>
+          <figure class="card-foto"><img src="assets/fotos/aerea-4.jpg" alt="Vista aérea com a área de preservação ao fundo" loading="lazy" onerror="this.closest('figure').remove()"><figcaption>Área de preservação ao fundo</figcaption></figure>
+          <figure class="card-foto"><img src="assets/fotos/aerea-5.jpg" alt="Vista geral do imóvel" loading="lazy" onerror="this.closest('figure').remove()"><figcaption>Vista geral do imóvel</figcaption></figure>
+          <figure class="card-foto"><img src="assets/fotos/paineis-solares.jpg" alt="Painéis solares do bombeamento dos poços" loading="lazy" onerror="this.closest('figure').remove()"><figcaption>Bombeamento solar dos poços</figcaption></figure>
+          <figure class="card-foto card-foto--vertical"><img src="assets/fotos/reservatorio.jpg" alt="Reservatório de água e painéis solares" loading="lazy" onerror="this.closest('figure').remove()"><figcaption>3 poços com bombeamento solar e 140 mil litros de reservação</figcaption></figure>
+          <figure class="card-foto"><img src="assets/fotos/obra-agua.jpg" alt="Obras do sistema de água" loading="lazy" onerror="this.closest('figure').remove()"><figcaption>Obras do sistema de água</figcaption></figure>
+        </div>
+
+        <div class="subgaleria" id="bloco-projeto">
+          <h3 class="subgaleria__titulo">Projeto das áreas comuns</h3>
+          <p class="secao__texto">Imagens de projeto — ilustrativas, sujeitas a ajustes na execução.</p>
+          <div class="galeria galeria--projeto" id="galeria-projeto">
+            <figure class="card-foto card-foto--projeto"><span class="tarja">Imagem ilustrativa do projeto</span><img src="assets/fotos/projeto-salao-piscina.jpg" alt="Projeto do salão de festas e da piscina" loading="lazy" onerror="this.closest('figure').remove()"><figcaption>Salão de festas, piscina e quiosques em obra, entrega até 31/12/2027</figcaption></figure>
+            <figure class="card-foto card-foto--projeto"><span class="tarja">Imagem ilustrativa do projeto</span><img src="assets/fotos/projeto-baias-redondel.jpg" alt="Projeto das baias e do redondel" loading="lazy" onerror="this.closest('figure').remove()"><figcaption>Baias e redondel — projeto</figcaption></figure>
+            <figure class="card-foto card-foto--projeto"><span class="tarja">Imagem ilustrativa do projeto</span><img src="assets/fotos/projeto-guarita.jpg" alt="Projeto da portaria" loading="lazy" onerror="this.closest('figure').remove()"><figcaption>Portaria — projeto</figcaption></figure>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== COMO CHEGAR ===================== -->
+    <section class="secao chegar" id="como-chegar" aria-labelledby="chegar-titulo">
+      <div class="secao__inner chegar__inner">
+        <div>
+          <p class="secao__sobre secao__sobre--claro">Localização</p>
+          <h2 class="secao__titulo" id="chegar-titulo">Como chegar</h2>
+          <p class="chegar__endereco">
+            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 22s7-6.6 7-12a7 7 0 0 0-14 0c0 5.4 7 12 7 12z" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="10" r="2.6" fill="none" stroke="currentColor" stroke-width="1.8"/></svg>
+            Estrada de Duas Vendas, km 4,5 · Zona Rural · Poções – BA
+          </p>
+          <p class="chegar__texto">A menos de dez minutos do centro de Poções.</p>
+        </div>
+        <a class="btn btn--dourado btn--grande" id="chegar-whats" href="#" target="_blank" rel="noopener noreferrer" hidden>
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="currentColor" d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2Zm0 1.8a8.2 8.2 0 1 1-4.2 15.3l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 0 1 12 3.8Zm-3.3 4.4c-.2 0-.5 0-.7.3-.3.3-1 1-1 2.4s1 2.8 1.2 3c.1.2 2 3.2 5 4.4 2.5 1 3 .8 3.5.7.5 0 1.7-.7 2-1.4.2-.7.2-1.2.1-1.4l-.5-.3-1.9-.9c-.3-.1-.5-.2-.7.2l-.9 1.1c-.2.2-.3.2-.6.1a6.8 6.8 0 0 1-3.4-3c-.2-.4 0-.5.2-.7l.4-.5.3-.5c.1-.2 0-.4 0-.5l-.9-2.1c-.2-.5-.4-.5-.6-.5h-.5Z"/></svg>
+          Falar no WhatsApp
+        </a>
+      </div>
     </section>
   </main>
 
@@ -188,7 +349,7 @@
       <p class="rodape__marca">Haras Rio São José · Poções/BA</p>
       <p>Atualizado em <span id="r-atualizado">—</span></p>
       <p>Fonte: <span id="r-fonte">—</span></p>
-      <p class="rodape__legal">Medidas conforme memorial descritivo. Disponibilidade sujeita a confirmação. Imagens ilustrativas.</p>
+      <p class="rodape__legal">Medidas conforme memorial descritivo. Disponibilidade sujeita a confirmação. Imagens de projeto são ilustrativas. Infraestrutura conforme contrato.</p>
     </div>
   </footer>
 

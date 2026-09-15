@@ -1,0 +1,61 @@
+{
+  "meta": {
+    "gerado_em": "2026-09-15T14:08",
+    "fonte": "EXEMPLO — Planilha Mestre 01/09/2026 · Memorial de Lotes · Planta Fracionada (Jan/2021)",
+    "unidade": "m",
+    "bbox": [0, 0, 640, 320],
+    "total": 12,
+    "disponiveis": 6,
+    "vendidos": 4,
+    "reservados": 2,
+    "preco_m2": 27.5,
+    "whatsapp": null,
+    "avenidas": ["Avenida Pau Ferro", "Avenida Umbuzeiro"],
+    "ruas": 3,
+    "area_total_m2": 25920
+  },
+  "glebas": [
+    { "id": "01", "poly": [[40, 120], [202, 120], [202, 200], [40, 200]], "label": [121, 160],
+      "lotes": ["001", "002", "003", "004", "005", "006"] },
+    { "id": "02", "poly": [[250, 120], [412, 120], [412, 200], [250, 200]], "label": [331, 160],
+      "lotes": ["007", "008", "009", "010", "011", "012"] }
+  ],
+  "lotes": [
+    { "id": "001", "gleba": "01", "poly": [[40, 120], [67, 120], [67, 200], [40, 200]], "c": [53.5, 160], "area": 2160, "frente": 27, "fundo": 27, "esq": 80, "dir": 80, "status": "disponivel" },
+    { "id": "002", "gleba": "01", "poly": [[67, 120], [94, 120], [94, 200], [67, 200]], "c": [80.5, 160], "area": 2160, "frente": 27, "fundo": 27, "esq": 80, "dir": 80, "status": "vendido" },
+    { "id": "003", "gleba": "01", "poly": [[94, 120], [121, 120], [121, 200], [94, 200]], "c": [107.5, 160], "area": 2160, "frente": 27, "fundo": 27, "esq": 80, "dir": 80, "status": "disponivel" },
+    { "id": "004", "gleba": "01", "poly": [[121, 120], [148, 120], [148, 200], [121, 200]], "c": [134.5, 160], "area": 2160, "frente": 27, "fundo": 27, "esq": 80, "dir": 80, "status": "vendido" },
+    { "id": "005", "gleba": "01", "poly": [[148, 120], [175, 120], [175, 200], [148, 200]], "c": [161.5, 160], "area": 2160, "frente": 27, "fundo": 27, "esq": 80, "dir": 80, "status": "reservado" },
+    { "id": "006", "gleba": "01", "poly": [[175, 120], [202, 120], [202, 200], [175, 200]], "c": [188.5, 160], "area": 2160, "frente": 27, "fundo": 27, "esq": 80, "dir": 80, "status": "disponivel" },
+    { "id": "007", "gleba": "02", "poly": [[250, 120], [277, 120], [277, 200], [250, 200]], "c": [263.5, 160], "area": 2160, "frente": 27, "fundo": 27, "esq": 80, "dir": 80, "status": "vendido" },
+    { "id": "008", "gleba": "02", "poly": [[277, 120], [304, 120], [304, 200], [277, 200]], "c": [290.5, 160], "area": 2160, "frente": 27, "fundo": 27, "esq": 80, "dir": 80, "status": "disponivel" },
+    { "id": "009", "gleba": "02", "poly": [[304, 120], [331, 120], [331, 200], [304, 200]], "c": [317.5, 160], "area": 2160, "frente": 27, "fundo": 27, "esq": 80, "dir": 80, "status": "disponivel" },
+    { "id": "010", "gleba": "02", "poly": [[331, 120], [358, 120], [358, 200], [331, 200]], "c": [344.5, 160], "area": 2160, "frente": 27, "fundo": 27, "esq": 80, "dir": 80, "status": "reservado" },
+    { "id": "011", "gleba": "02", "poly": [[358, 120], [385, 120], [385, 200], [358, 200]], "c": [371.5, 160], "area": 2160, "frente": 27, "fundo": 27, "esq": 80, "dir": 80, "status": "vendido" },
+    { "id": "012", "gleba": "02", "poly": [[385, 120], [412, 120], [412, 200], [385, 200]], "c": [398.5, 160], "area": 2160, "frente": 27, "fundo": 27, "esq": 80, "dir": 80, "status": "disponivel" }
+  ],
+  "areas": [
+    { "tipo": "imovel", "nome": "Haras Rio São José", "poly": [[0, 20], [640, 0], [640, 320], [0, 300]] },
+    { "tipo": "clube", "nome": "Área de lazer", "poly": [[250, 30], [412, 30], [412, 100], [250, 100]] },
+    { "tipo": "lago", "nome": "Lago", "poly": [[470, 150], [485, 132], [510, 126], [535, 135], [545, 158], [535, 182], [508, 192], [482, 184], [468, 168]] },
+    { "tipo": "reserva", "nome": "Área de preservação ambiental", "poly": [[560, 2], [640, 0], [640, 320], [560, 318]] }
+  ],
+  "vias": [
+    { "nome": "Avenida Pau Ferro", "tipo": "avenida", "pts": [[20, 110], [560, 110]] },
+    { "nome": "Avenida Umbuzeiro", "tipo": "avenida", "pts": [[560, 212], [20, 212]] },
+    { "nome": "", "tipo": "acesso", "pts": [[20, 110], [20, 212]] },
+    { "nome": "Rua 1", "tipo": "rua", "pts": [[225, 40], [225, 290]] },
+    { "nome": "Rua 2", "tipo": "rua", "pts": [[435, 40], [435, 290]] },
+    { "nome": "Rua 3", "tipo": "rua", "pts": [[548, 40], [548, 290]] }
+  ],
+  "pontos": [
+    { "n": 1, "id": "guarita", "nome": "Portaria e guarita", "tipo": "guarita", "c": [14, 161], "situacao": "pronto", "prazo": null, "desc": "Portaria construída na entrada, pela Estrada de Duas Vendas." },
+    { "n": 2, "id": "salao", "nome": "Salão de festas", "tipo": "salao", "c": [285, 55], "situacao": "em_obra", "prazo": "31/12/2027", "desc": "Salão para eventos dos proprietários, na área de lazer." },
+    { "n": 3, "id": "piscina", "nome": "Piscina", "tipo": "piscina", "c": [330, 80], "situacao": "em_obra", "prazo": "31/12/2027", "desc": "Piscina ao lado do salão de festas." },
+    { "n": 4, "id": "quiosques", "nome": "Quiosques e banheiros", "tipo": "quiosque", "c": [380, 50], "situacao": "em_obra", "prazo": "31/12/2027", "desc": "Quiosques cobertos com banheiros de apoio." },
+    { "n": 5, "id": "quadra", "nome": "Quadra de areia", "tipo": "quadra", "c": [395, 88], "situacao": "previsto", "prazo": "30/06/2028", "desc": "Quadra de areia para vôlei e futevôlei." },
+    { "n": 6, "id": "baias", "nome": "Baias e redondel", "tipo": "baias", "c": [90, 255], "situacao": "previsto", "prazo": "30/06/2028", "desc": "Baias para cavalos e redondel para manejo." },
+    { "n": 7, "id": "agua", "nome": "Sistema de água", "tipo": "agua", "c": [140, 60], "situacao": "pronto", "prazo": null, "desc": "3 poços com bombeamento solar e 140 mil litros de reservação." },
+    { "n": 8, "id": "reserva", "nome": "Área de preservação", "tipo": "reserva", "c": [600, 160], "situacao": "pronto", "prazo": null, "desc": "Mata preservada no fim da Avenida Pau Ferro." }
+  ]
+}
