@@ -134,6 +134,20 @@ Para alterar a lista da reserva estratégica, edite `reserva_estrategica.txt` (u
 
 Campos de configuração em `data/lotes.json → meta` que o script preenche: `preco_m2` (valor de referência por m²; `null` esconde o preço) e `whatsapp` (número em formato internacional sem `+`; `null` esconde o botão). Ambos são definidos no topo de `scripts/gerar_dados.py`.
 
+
+### Vias, áreas comuns e pontos de interesse
+
+Depois de extrair os lotes, `gerar_dados.py` chama `scripts/enriquecer.py`, que trabalha só em metros e em segundos:
+
+- **Contorno do imóvel**: união dos lotes com as áreas especiais, fechada com 30 m.
+- **Avenidas**: corredor livre logo abaixo da faixa superior de glebas (**Avenida Pau Ferro**, sentido entrada → área de preservação) e logo acima da faixa inferior (**Avenida Umbuzeiro**, sentido de volta). Os nomes ficam em `meta.avenidas`.
+- **Ruas transversais**: vãos verticais regulares (11–13 m) entre as colunas de glebas, numeradas **Rua 1 … Rua N** a partir da entrada. A quantidade fica em `meta.ruas`.
+- **Acesso**: ligação do ponto "ENTRADA" da planta até a Avenida Pau Ferro.
+- **Áreas**: `reserva` (área de preservação ambiental), `clube` (área comum de lazer, rótulo "ÁREA VERDE E [LAZER]" da planta), `area_comum` (área verde junto à entrada) e `imovel`.
+- **Pontos de interesse**: definidos em `pontos.json` (raiz do projeto). Cada item tem `n`, `id`, `nome`, `tipo`, `situacao` (`pronto` | `em_obra` | `previsto`), `prazo` e `desc`. O campo `onde` diz onde o pino cai: `"entrada"`, `"reserva"`, `"clube"` (distribuído automaticamente dentro da área comum, **posição aproximada**), uma coordenada `[x, y]` em metros, ou `null` (item só na legenda, sem pino). Edite esse arquivo e rode `scripts/enriquecer.py` para atualizar.
+
+Regra de conteúdo: só entram em `pontos.json` itens que constam do contrato de compra e venda vigente. Lago com píer, deck, parque infantil e churrasqueira não entram.
+
 ## Publicação
 
 Repositório: https://github.com/Jachsonazevedo/haras-rio-sao-jose-mapa · Site: https://jachsonazevedo.github.io/haras-rio-sao-jose-mapa/

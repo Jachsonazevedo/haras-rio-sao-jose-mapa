@@ -213,24 +213,29 @@ for gid, ids in sorted(por_gleba.items()):
     glebas_out.append({"id": gid, "poly": poly, "label": [round(label[0], 2), round(label[1], 2)], "lotes": ids})
 print("glebas:", len(glebas_out))
 
-# áreas especiais pelos textos
+# áreas especiais pelos textos da planta (rótulo -> região que o contém)
 areas_out = []
-for chave, tipo, nome in (("PRESERVA", "reserva", "Área de preservação ambiental"), ("ÁREA COMUM", "area_comum", "Área comum"), ("AREA COMUM", "area_comum", "Área comum")):
+ESPECIAIS = (("ÁREA DE PRESERVAÇÃO", "reserva", "Área de preservação ambiental", False),
+             ("ÁREA VERDE E", "clube", "Área comum de lazer", True),
+             ("ÁREA VERDE", "area_comum", "Área verde", True))
+for chave, tipo, nome, exato in ESPECIAIS:
     for t, cx, cy in textos:
-        if chave in t.upper():
-            cid = comp_em(cx, cy, 12)
+        up = t.upper().strip()
+        if (up == chave) if exato else (chave in up):
+            cid = comp_em(cx, cy, 14)
             if cid and stats[cid, cv2.CC_STAT_AREA] < 0.5 * Wp * Hp and cid not in comp_lotes:
                 poly = [M(x, y) for x, y in contorno(cid, 3)]
-                if not any(a["poly"] == poly for a in areas_out):
+                if not any(a["tipo"] == tipo and a["poly"] == poly for a in areas_out):
                     areas_out.append({"tipo": tipo, "nome": nome, "poly": poly})
-print("áreas especiais:", [(a["tipo"], len(a["poly"])) for a in areas_out])
+entrada = [M(cx, cy) for t, cx, cy in textos if t.upper().strip() == "ENTRADA"]
+print("áreas especiais:", [(a["tipo"], len(a["poly"])) for a in areas_out], "| entrada:", entrada[:1])
 
 allpts = [p for l in lotes_out for p in l["poly"]] + [p for g in glebas_out for p in g["poly"]] + [p for a in areas_out for p in a["poly"]]
 bbox = [round(min(p[0] for p in allpts), 1), round(min(p[1] for p in allpts), 1), round(max(p[0] for p in allpts), 1), round(max(p[1] for p in allpts), 1)]
 cnt = Counter(l["status"] for l in lotes_out)
 out = {"meta": {"gerado_em": datetime.datetime.now().isoformat(timespec="minutes"), "fonte": "Planilha Mestre 01/09/2026 · Memorial de Lotes · Planta Fracionada (Jan/2021)",
                 "unidade": "m", "bbox": bbox, "total": len(lotes_out), "disponiveis": cnt["disponivel"], "vendidos": cnt["vendido"], "reservados": cnt["reservado"],
-                "preco_m2": 27.5, "whatsapp": None, "escala_pt_m": round(PT_M, 5), "reserva_estrategica": origem_res},
+                "preco_m2": 27.5, "whatsapp": None, "escala_pt_m": round(PT_M, 5), "reserva_estrategica": origem_res, "entrada": entrada[0] if entrada else None},
        "glebas": glebas_out, "lotes": lotes_out, "vias": [], "areas": areas_out}
 os.makedirs(os.path.join(OUTDIR, "data"), exist_ok=True)
 json.dump(out, open(os.path.join(OUTDIR, "data", "lotes.json"), "w", encoding="utf-8"), ensure_ascii=False, separators=(",", ":"))
@@ -250,5 +255,11 @@ for g in glebas_out:
 for a in areas_out:
     pts = np.array([[(p[0]-bbox[0])*SC + 10, (p[1]-bbox[1])*SC + 10] for p in a["poly"]], np.int32)
     cv2.polylines(ver, [pts], True, (60, 120, 60), 2)
-cv2.imwrite(os.path.join(OUTDIR, "verificacao_mapa.png"), ver)
-print("verificação:", os.path.join(OUTDIR, "verificacao_mapa.png"))
+cv2.imwrite(os.path.join(HERE, "verificacao_mapa.png"), ver)
+print("verificação:", os.path.join(HERE, "verificacao_mapa.png"))
+
+# ---------- 8) enriquecimento (vias, pontos, contorno, metadados) ----------
+import subprocess
+r = subprocess.run([sys.executable, os.path.join(HERE, "enriquecer.py")], capture_output=True, text=True, encoding="utf-8", errors="replace")
+print(r.stdout[-1500:]); 
+if r.returncode: print("ENRIQUECER FALHOU:", r.stderr[-1500:])

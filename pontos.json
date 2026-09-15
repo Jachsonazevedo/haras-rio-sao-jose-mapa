@@ -1,0 +1,22 @@
+[
+  {"n": 1, "id": "guarita", "nome": "Portaria e guarita", "tipo": "guarita", "onde": "entrada", "situacao": "pronto", "prazo": null,
+   "desc": "Guarita de 15 m² com banheiro, duas entradas e uma saída de veículos. Construída."},
+  {"n": 2, "id": "salao", "nome": "Salão de festas", "tipo": "salao", "onde": "clube", "situacao": "em_obra", "prazo": "31/12/2027",
+   "desc": "150 m² de área construída, com estrutura e cobertura prontas e acabamentos em andamento."},
+  {"n": 3, "id": "piscina", "nome": "Piscina", "tipo": "piscina", "onde": "clube", "situacao": "previsto", "prazo": "31/12/2027",
+   "desc": "120 m², com áreas adulto e infantil."},
+  {"n": 4, "id": "quiosques", "nome": "Quiosques", "tipo": "quiosque", "onde": "clube", "situacao": "em_obra", "prazo": "31/12/2027",
+   "desc": "Três quiosques, com estrutura, cobertura e piso prontos."},
+  {"n": 5, "id": "banheiros", "nome": "Banheiros coletivos", "tipo": "banheiro", "onde": "clube", "situacao": "em_obra", "prazo": "31/12/2027",
+   "desc": "Dois banheiros coletivos, feminino e masculino, com estrutura pronta."},
+  {"n": 6, "id": "quadra", "nome": "Quadra de areia", "tipo": "quadra", "onde": "clube", "situacao": "previsto", "prazo": "31/12/2027",
+   "desc": "Quadra de areia para a área comum."},
+  {"n": 7, "id": "baias", "nome": "Baias e redondel", "tipo": "baias", "onde": "clube", "situacao": "previsto", "prazo": "31/12/2027",
+   "desc": "Cinco baias e redondel."},
+  {"n": 8, "id": "fazendinha", "nome": "Fazendinha", "tipo": "fazendinha", "onde": "clube", "situacao": "previsto", "prazo": "31/12/2027",
+   "desc": "Área reservada e cercada para criação de pequenos animais e aves."},
+  {"n": 9, "id": "agua", "nome": "Sistema de água", "tipo": "agua", "onde": null, "situacao": "em_obra", "prazo": "31/12/2026",
+   "desc": "Três poços com bombeamento solar, 140 mil litros de reservação e duas redes-tronco nas avenidas. Uso doméstico."},
+  {"n": 10, "id": "reserva", "nome": "Área de preservação ambiental", "tipo": "reserva", "onde": "reserva", "situacao": "pronto", "prazo": null,
+   "desc": "Reserva legal e área de preservação permanente do empreendimento. Caça, pesca e captação de água proibidas."}
+]
