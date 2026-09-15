@@ -20,7 +20,11 @@ ZOOM = 2.6
 ESPESSURA = 2
 
 def num(v):
-    s = str(v or "").strip().replace(".", "").replace(",", ".")
+    """Célula numérica (float/int) vem direto; texto pt-BR ("2.503,00" / "25,03") é convertido."""
+    if v is None or v == "": return None
+    if isinstance(v, (int, float)): return float(v)
+    s = str(v).strip()
+    if "," in s: s = s.replace(".", "").replace(",", ".")
     try: return float(s)
     except: return None
 

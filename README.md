@@ -102,3 +102,40 @@ Se algum arquivo faltar, o app continua funcionando: o logo some, e a seção de
 - Usar sempre "chacreamento", "unidade", "lote", "gleba", "fração" — nunca a palavra vetada pelo jurídico (a que começa com "lotea…").
 - O app não promete infraestrutura; mostra apenas mapa, medidas e status.
 - Rodapé fixo: "Medidas conforme memorial descritivo. Disponibilidade sujeita a confirmação. Imagens ilustrativas."
+
+## Como os dados são gerados (pipeline oficial)
+
+O arquivo `data/lotes.json` **não é editado à mão**. Ele sai do script `scripts/gerar_dados.py`, que cruza três fontes internas:
+
+| Fonte | O que fornece |
+|---|---|
+| `- 01 - PL. FRACIONADA - Haras Rio São José.pdf` (planta CAD vetorial, Jan/2021) | geometria de cada lote e de cada gleba |
+| `Haras-Rio-Sao-Jose_Base-Glebas-Lotes_v3.xlsx` (memorial) | gleba, área e medidas (frente, fundo, esquerda, direita) |
+| `PLANILHA MESTRE POR UNIDADE - 654 lotes - 01-09-2026 - v2.xlsx` | status de cada unidade |
+
+Como funciona: o script rasteriza só os traços vetoriais da planta, encontra as regiões fechadas e casa cada rótulo de lote com a região que o contém. A escala é calibrada pelas áreas do memorial (1 pt = 0,7289 m). Erro mediano de área: 0,9%.
+
+Regras aplicadas:
+- `DISPONÍVEL` e `DISTRATADA — sem revenda` → **disponível**
+- `VENDIDA` (vigente ou quitada) → **vendido**
+- Lotes 267, 269 e 470 (reservas técnicas) e os lotes listados em `reserva_estrategica.txt` (reserva estratégica, 30 unidades) → **reservado**
+- Erro conhecido da planta: o rótulo "312" aparece duas vezes e "321" não existe; o script resolve pela área do memorial.
+
+Para atualizar (depois de mudar a Planilha Mestre ou a lista de reserva):
+
+```bash
+"C:/Users/Usuário/AppData/Local/Programs/Python/Python312/python.exe" scripts/gerar_dados.py
+git add data/lotes.json && git commit -m "Atualiza disponibilidade" && git push
+```
+
+O script depende de `pymupdf`, `openpyxl`, `numpy` e `opencv-python-headless` (este último instalado em `D:\Programas\pylibs`). Ele também grava `scripts/verificacao_mapa.png`, uma imagem para conferência visual.
+
+Para alterar a lista da reserva estratégica, edite `reserva_estrategica.txt` (um número de lote por linha) e rode o script de novo.
+
+Campos de configuração em `data/lotes.json → meta` que o script preenche: `preco_m2` (valor de referência por m²; `null` esconde o preço) e `whatsapp` (número em formato internacional sem `+`; `null` esconde o botão). Ambos são definidos no topo de `scripts/gerar_dados.py`.
+
+## Publicação
+
+Repositório: https://github.com/Jachsonazevedo/haras-rio-sao-jose-mapa · Site: https://jachsonazevedo.github.io/haras-rio-sao-jose-mapa/
+
+Link direto para um lote: `https://jachsonazevedo.github.io/haras-rio-sao-jose-mapa/?lote=318`
