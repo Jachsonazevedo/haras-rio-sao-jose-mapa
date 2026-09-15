@@ -178,6 +178,8 @@ Repositório: https://github.com/Jachsonazevedo/haras-rio-sao-jose-mapa · Site:
 
 Link direto para um lote: `https://jachsonazevedo.github.io/haras-rio-sao-jose-mapa/?lote=318`
 
-## Mapa-guia ilustrado
+## Mapa ilustrado 2,5D (o próprio mapa interativo)
 
-`scripts/gerar_mapa_guia.py` desenha `assets/mapa-guia.svg` (e o app exibe na seção "Conheça o empreendimento") a partir do mesmo `data/lotes.json`: projeção 2,5D com relevo, árvores, placas das avenidas e ruas, portaria, detalhe ampliado da área de lazer com ícones numerados e legenda. Rode depois de `gerar_dados.py` sempre que a geometria, as vias ou `pontos.json` mudarem. `assets/mapa-guia.png` é a versão em imagem (2000×900) para WhatsApp/impressão.
+Desde a rodada 4 o mapa interativo é desenhado em projeção oblíqua (`<g id="mundo-3d" transform="matrix(1 0 0.26 0.74 0 0)">`): a geometria real em metros fica nessa camada e recebe o relevo; rótulos, placas, árvores, ícones e marcadores ficam em camadas planas posicionadas pelo JS com a mesma projeção (`proj()` em `js/app.js`), por isso não distorcem. `scripts/decorar.py` (chamado no fim de `gerar_dados.py`) grava em `data/lotes.json` o contorno do chão (`areas[tipo=imovel]`) e o bloco `decor`: árvores (`[x, y, tipo 1-3, escala]`), a Estrada de Duas Vendas rumo ao norte (Poções), a placa "Poções" e os ícones da área de lazer (`decor.lazer`, ids de `pontos.json`), que aparecem quando o zoom deixa a área de lazer com ≥ 200 px de largura. Os lotes seguem coloridos por status em qualquer zoom.
+
+`scripts/gerar_mapa_guia.py` gera a versão estática para compartilhar (`assets/mapa-guia.svg` e `assets/mapa-guia.png`, 2000×900), com legenda numerada e detalhe ampliado da área de lazer. Rode depois de `gerar_dados.py`.

@@ -107,11 +107,17 @@ print("lotes com região:", len(lote_comp), "| regiões partilhadas por 2+ lotes
 # ---------- 4) contornos ----------
 PT_M = None
 def contorno(cid, eps=1.6):
-    m = (comp == cid).astype(np.uint8)
-    cs, _ = cv2.findContours(m, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    # recorte do componente (com folga) para a morfologia ser rápida
+    K = int(44 * ZOOM) | 1
+    x, y, w, h = stats[cid, cv2.CC_STAT_LEFT], stats[cid, cv2.CC_STAT_TOP], stats[cid, cv2.CC_STAT_WIDTH], stats[cid, cv2.CC_STAT_HEIGHT]
+    x0, y0 = max(0, x - K), max(0, y - K)
+    sub = (comp[y0:y + h + K, x0:x + w + K] == cid).astype(np.uint8)
+    # fecha reentrâncias (círculo do número da gleba, marcas de cota) que o CAD abre dentro do lote
+    sub = cv2.morphologyEx(sub, cv2.MORPH_CLOSE, cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (K, K)))
+    cs, _ = cv2.findContours(sub, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     c = max(cs, key=cv2.contourArea)
     c = cv2.approxPolyDP(c, eps, True)
-    return [(float(p[0][0]) / ZOOM, float(p[0][1]) / ZOOM) for p in c]      # em pt
+    return [((float(p[0][0]) + x0) / ZOOM, (float(p[0][1]) + y0) / ZOOM) for p in c]      # em pt
 def area_pt(poly):
     s = 0
     for i in range(len(poly)):
@@ -263,3 +269,8 @@ import subprocess
 r = subprocess.run([sys.executable, os.path.join(HERE, "enriquecer.py")], capture_output=True, text=True, encoding="utf-8", errors="replace")
 print(r.stdout[-1500:]); 
 if r.returncode: print("ENRIQUECER FALHOU:", r.stderr[-1500:])
+
+# ---------- 9) camada decorativa (chão, árvores, estrada, área de lazer) ----------
+r = subprocess.run([sys.executable, os.path.join(HERE, "decorar.py")], capture_output=True, text=True, encoding="utf-8", errors="replace")
+print(r.stdout[-800:])
+if r.returncode: print("DECORAR FALHOU:", r.stderr[-1500:])

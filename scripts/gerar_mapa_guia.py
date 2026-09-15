@@ -102,7 +102,7 @@ o.append(f'''<title>Mapa-guia ilustrado do Chacreamento Haras Rio São José</ti
 # --- estrada externa (Estrada de Duas Vendas) chegando à portaria
 ent = J["meta"]["entrada"]
 acesso = next(v for v in J["vias"] if v["tipo"] == "acesso")
-ext = [[ent[0] - 520, ent[1] + 150], [ent[0] - 260, ent[1] + 70], ent]
+ext = list(reversed(J["decor"]["estrada"]))  # do norte (Poções) até a portaria
 o.append(f'<polyline points="{pts(ext)}" fill="none" stroke="{ESTRADA_BORDA}" stroke-width="16" stroke-linecap="round" stroke-linejoin="round"/>')
 o.append(f'<polyline points="{pts(ext)}" fill="none" stroke="{ESTRADA}" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>')
 o.append(f'<polyline points="{pts(ext)}" fill="none" stroke="#fff" stroke-width="1.4" stroke-dasharray="9 8" stroke-linecap="round" stroke-linejoin="round"/>')
@@ -256,8 +256,9 @@ for v in vias:
         x, y = P(base); o.append(placa_rua(v["nome"], x, y + 2, acima=False))
 
 # estrada externa: rótulo + placa de direção
-ex, ey = P(ext[0]); o.append(rotulo("Estrada de Duas Vendas · km 4,5", ex + 70, ey + 30, 11.5, cor=MADEIRA, italic=False))
-o.append(f'<g filter="url(#sombra)" transform="translate({f(ex + 40)} {f(ey - 46)})"><line x1="0" y1="0" x2="0" y2="40" stroke="{MADEIRA}" stroke-width="2.2"/><path d="M-4 -12 H70 L82 0 L70 12 H-4 Z" fill="#2F5C8F"/><text x="34" y="4" font-size="11" font-weight="700" fill="#fff" text-anchor="middle">POÇÕES</text></g>')
+ex, ey = P(ext[0]); (mx_, my_), _ = along(ext, 0.55)
+o.append(rotulo("Estrada de Duas Vendas · km 4,5", mx_ - 96, my_, 11.5, cor=MADEIRA, italic=False))
+o.append(f'<g filter="url(#sombra)" transform="translate({f(ex)} {f(ey - 30)})"><rect x="-46" y="-12" width="92" height="24" rx="5" fill="#2F5C8F" stroke="#fff" stroke-width="1.2"/><text x="0" y="4" font-size="11.5" font-weight="700" fill="#fff" text-anchor="middle" letter-spacing=".06em">POÇÕES ↑</text></g>')
 # reserva
 rx, ry = P(pos["reserva"]); o.append(rotulo("Área de Preservação Ambiental", rx, ry + 44, 14))
 o.append(rotulo("Reserva Legal e APP · caça, pesca e captação de água proibidas", rx, ry + 66, 9.5, cor="#3E5C43", italic=False, peso="500"))

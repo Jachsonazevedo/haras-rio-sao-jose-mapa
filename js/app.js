@@ -37,6 +37,10 @@
   const PONTO_ZOOM_FATOR = 2.6; // ao focar uma área comum a partir da legenda, zoom mínimo = kAjuste × fator
   const CLIQUE_TOLERANCIA = 6;  // px de movimento até virar arrasto
   const ANIM_MS = 380;
+  const SH = 0.26, YF = 0.74;   // projeção 2,5D: x' = x + SH·y, y' = YF·y (mesma matriz do <g id="mundo-3d">)
+  const proj = (p) => [p[0] + SH * p[1], YF * p[1]];
+  const projBbox = (b) => [b[0] + SH * b[1], YF * b[1], b[2] + SH * b[3], YF * b[3]];
+  const LAZER_MIN_PX = 200;     // largura da área de lazer na tela a partir da qual os ícones aparecem
 
   // Largura das vias em METROS (escala com o zoom, como no mundo real)
   const VIA_LARGURA = { avenida: 14, rua: 9, acesso: 10 };
@@ -72,7 +76,8 @@
     gImovel: $('#g-imovel'), gAreas: $('#g-areas'), gVias: $('#g-vias'), gLotes: $('#g-lotes'), gGlebas: $('#g-glebas'),
     gDestaque: $('#g-destaque'), halo: $('#halo'), contorno: $('#contorno'),
     gRotulos: $('#g-rotulos'), gNomesVias: $('#g-nomes-vias'), gRotulosAreas: $('#g-rotulos-areas'), gRotulosGlebas: $('#g-rotulos-glebas'),
-    gPontos: $('#g-pontos'),
+    gPontos: $('#g-pontos'), gRelevo: $('#g-relevo'), gEstrada: $('#g-estrada'), gArvores: $('#g-arvores'), gLazer: $('#g-lazer'),
+    comunsBarra: $('#comuns-barra'), comunsChips: $('#comuns-chips'),
     rosa: $('#rosa'), escala: $('#escala'), escalaFundo: $('#escala-fundo'), escalaLinha: $('#escala-linha'), escalaTexto: $('#escala-texto'),
     controles: $('.controles'),
     zoomMais: $('#zoom-mais'), zoomMenos: $('#zoom-menos'), verTudo: $('#ver-tudo'),
@@ -104,7 +109,8 @@
     glebaLarguraSoma: 0, glebaQtd: 0, glebasVisiveis: true,
     placas: [],              // { el, c, tipo, principal } — placas das vias (tamanho fixo em px)
     espRuaM: 160, avLenM: 1900,
-    pontos: [],              // { ...ponto, el, item }
+    pontos: [],              // { ...ponto, pc (projetado), el, item }
+    lazerVisivel: null, clubeLargM: 100,
     pontoAtivo: null,
     faixaStroke: '',         // último ajuste de espessura (evita reescrever a cada frame)
   };
@@ -244,7 +250,7 @@
 
   // ---------------------------------------------------------------- Construção do mapa
   function construirMapa(data) {
-    [el.gImovel, el.gAreas, el.gVias, el.gLotes, el.gGlebas, el.gRotulos, el.gNomesVias, el.gRotulosAreas, el.gRotulosGlebas, el.gPontos].forEach(limpar);
+    [el.gImovel, el.gAreas, el.gVias, el.gLotes, el.gGlebas, el.gRotulos, el.gNomesVias, el.gRotulosAreas, el.gRotulosGlebas, el.gPontos, el.gRelevo, el.gEstrada, el.gArvores, el.gLazer].forEach(limpar);
     state.lotes.clear(); state.porNumero.clear();
     state.contagem = { disponivel: 0, vendido: 0, reservado: 0 };
     state.glebaLarguraSoma = 0; state.glebaQtd = 0;
@@ -252,12 +258,24 @@
 
     const NSS = 'non-scaling-stroke';
 
-    // 1) Imóvel: base do desenho, com sombra suave sob o contorno
+    // 1) Chão em relevo: sombra e lado (extrusão) na camada plana, já projetados; o topo fica na camada 2,5D
     for (const a of data.areas) {
       if (a && a.tipo === 'imovel' && polyValido(a.poly)) {
-        el.gImovel.appendChild(criar('polygon', { class: 'imovel-sombra', points: pontos(a.poly), transform: 'translate(0 5)', filter: 'url(#sombra)' }));
+        const pp = pontos(a.poly.map(proj));
+        el.gRelevo.appendChild(criar('polygon', { class: 'relevo-sombra', points: pp, transform: 'translate(16 44)' }));
+        el.gRelevo.appendChild(criar('polygon', { class: 'relevo-lado', points: pp, transform: 'translate(0 28)' }));
         el.gImovel.appendChild(criar('polygon', { class: 'imovel', points: pontos(a.poly), 'vector-effect': NSS }));
       }
+    }
+    // Estrada de Duas Vendas, fora do imóvel: sai da portaria rumo ao norte, onde fica Poções
+    if (data.decor && Array.isArray(data.decor.estrada) && data.decor.estrada.length > 1) {
+      const pe = pontos(data.decor.estrada.map(proj));
+      el.gEstrada.appendChild(criar('polyline', { class: 'estrada estrada--borda', points: pe }));
+      el.gEstrada.appendChild(criar('polyline', { class: 'estrada estrada--pista', points: pe }));
+      el.gEstrada.appendChild(criar('polyline', { class: 'estrada estrada--eixo', points: pe }));
+      const fim = data.decor.estrada[data.decor.estrada.length - 1];
+      criarPlaca({ texto: 'POÇÕES \u2191', tipo: 'destino', c: proj(fim), dy: -6, principal: true, sempre: true });
+      criarPlaca({ texto: 'ESTRADA DE DUAS VENDAS', tipo: 'rua', c: proj(pontoAoLongo(data.decor.estrada, 0.5)), dy: 0, principal: true, sempre: true });
     }
 
     // 2) Áreas: reserva (mata), lago, clube (lazer), área comum + nome
@@ -266,7 +284,7 @@
       const tipo = String(a.tipo || 'area_comum').replace(/[^a-z_]/gi, '') || 'area_comum';
       el.gAreas.appendChild(criar('polygon', { class: `area area--${tipo}`, points: pontos(a.poly), 'vector-effect': NSS }));
       if (a.nome && tipo !== 'clube' && tipo !== 'area_comum') {
-        const c = Array.isArray(a.label) && pontoValido(a.label) ? a.label : centroide(a.poly);
+        const c = proj(Array.isArray(a.label) && pontoValido(a.label) ? a.label : centroide(a.poly));
         el.gRotulosAreas.appendChild(criar('text', { class: `rotulo-area rotulo-area--${tipo}`, x: c[0], y: c[1] }, String(a.nome)));
       }
     }
@@ -287,13 +305,13 @@
           const nome = v.nome.replace(/^Avenida\s+/i, 'Av. ').toUpperCase();
           const texto = volta ? `\u2190 ${nome}` : `${nome} \u2192`;
           for (const fr of [0.18, 0.5, 0.82]) {
-            criarPlaca({ texto, tipo: 'avenida', c: pontoAoLongo(v.pts, fr), dy: volta ? 46 : -46, principal: fr === 0.5 });
+            criarPlaca({ texto, tipo: 'avenida', c: proj(pontoAoLongo(v.pts, fr)), dy: volta ? 46 : -46, principal: fr === 0.5 });
           }
         } else {
           const topo = v.pts.reduce((a, b) => (b[1] < a[1] ? b : a));
           const base = v.pts.reduce((a, b) => (b[1] > a[1] ? b : a));
-          criarPlaca({ texto: v.nome.toUpperCase(), tipo: 'rua', c: topo, dy: -13, principal: true });
-          criarPlaca({ texto: v.nome.toUpperCase(), tipo: 'rua', c: base, dy: 14, principal: false });
+          criarPlaca({ texto: v.nome.toUpperCase(), tipo: 'rua', c: proj(topo), dy: -13, principal: true });
+          criarPlaca({ texto: v.nome.toUpperCase(), tipo: 'rua', c: proj(base), dy: 14, principal: false });
         }
       }
     });
@@ -320,9 +338,10 @@
 
       // Tamanho do rótulo proporcional ao lote (em metros), limitado ao tamanho base
       const fonte = limitar(Math.sqrt(Math.max(l.area || 0, 1)) / 6, 3.5, ROTULO_FONTE_M);
-      fragRotulos.appendChild(criar('text', { class: `rotulo rotulo--${status}`, x: centro[0], y: centro[1], 'font-size': fonte }, id));
+      const pc = proj(centro);
+      fragRotulos.appendChild(criar('text', { class: `rotulo rotulo--${status}`, x: pc[0], y: pc[1], 'font-size': fonte }, id));
 
-      const lote = { ...l, id, status, el: p, centro, bbox: bboxDe(l.poly) };
+      const lote = { ...l, id, status, el: p, centro, pc, bbox: bboxDe(l.poly), bboxP: bboxDe(l.poly.map(proj)) };
       state.lotes.set(id, lote);
       const n = parseInt(id, 10);
       if (!Number.isNaN(n) && !state.porNumero.has(n)) state.porNumero.set(n, lote);
@@ -335,7 +354,10 @@
     for (const g of data.glebas) {
       if (!g || !polyValido(g.poly)) continue;
       el.gGlebas.appendChild(criar('polygon', { class: 'gleba', points: pontos(g.poly), 'vector-effect': NSS }));
-      const c = pontoValido(g.label) ? g.label : centroide(g.poly);
+      // Selo da gleba: cobre o círculo que a planta CAD abre entre os lotes no ponto do número (camada 2,5D, em metros)
+      const cw = pontoValido(g.label) ? g.label : centroide(g.poly);
+      el.gGlebas.appendChild(criar('circle', { class: 'gleba-selo', cx: cw[0], cy: cw[1], r: 11.5, 'vector-effect': NSS }));
+      const c = proj(cw);
       el.gRotulosGlebas.appendChild(criar('text', { class: 'rotulo-gleba', x: c[0], y: c[1] }, String(g.id)));
       const bb = bboxDe(g.poly);
       state.glebaLarguraSoma += (bb[2] - bb[0]); state.glebaQtd++;
@@ -345,8 +367,10 @@
     const clube = data.areas.find((a) => a && a.tipo === 'clube' && polyValido(a.poly));
     const grupo = [];
     const marcadores = [];
+    if (clube) { const bc = bboxDe(clube.poly); state.clubeLargM = Math.max(bc[2] - bc[0], 1); }
     for (const p of data.pontos) {
-      if (!p.c || p.tipo === 'reserva') continue; // a reserva já tem o nome escrito sobre a mata
+      if (!p.c) continue;
+      if (p.tipo === 'reserva') { state.pontos.push({ ...p, pc: proj(p.c), el: null, item: null, dx: 0 }); continue; } // sem marcador: o nome já está sobre a mata
       if (clube && dentroDePoligono(p.c, clube.poly)) { grupo.push(p); continue; }
       marcadores.push({ ...p, rotulo: p.tipo === 'guarita' ? 'Portaria' : p.nome });
     }
@@ -365,14 +389,48 @@
       g.appendChild(ic);
       g.appendChild(criar('text', { class: 'ponto__rotulo', x: -w / 2 + 34, y: -26 }, p.rotulo));
       el.gPontos.appendChild(g);
-      state.pontos.push({ ...p, el: g, item: null, dx: 0 });
+      state.pontos.push({ ...p, pc: proj(p.c), el: g, item: null, dx: 0 });
+    }
+
+    // 7) Árvores (camada plana; tamanho em metros, escalam com o zoom)
+    if (data.decor && Array.isArray(data.decor.arvores)) {
+      const frag = document.createDocumentFragment();
+      for (const a of data.decor.arvores) {
+        if (!Array.isArray(a) || a.length < 2 || !Number.isFinite(a[0]) || !Number.isFinite(a[1])) continue;
+        const [px, py] = proj(a);
+        frag.appendChild(usar(`#arv${[1, 2, 3].includes(a[2]) ? a[2] : 1}`, { transform: `translate(${px.toFixed(1)} ${py.toFixed(1)}) scale(${((a[3] || 1) * 0.95).toFixed(2)})` }));
+      }
+      el.gArvores.appendChild(frag);
+    }
+
+    // 8) Área de lazer: ícones ilustrados (aparecem quando o zoom permite; clique abre o mini-painel) + portaria na entrada
+    const itensLazer = data.decor && Array.isArray(data.decor.lazer) ? data.decor.lazer : [];
+    for (const it of itensLazer) {
+      if (!it || !pontoValido(it.c) || !it.id) continue;
+      const pc = proj(it.c);
+      const g = criar('g', { class: `lazer lazer--${it.tipo}`, 'data-id': String(it.id), role: 'button', tabindex: '0', 'aria-label': String(it.nome || ''), transform: `translate(${pc[0]} ${pc[1]})` });
+      g.appendChild(usar(`#ico-${String(it.tipo).replace(/[^a-z_]/gi, '')}`, { transform: 'scale(.8)' }));
+      g.appendChild(criar('text', { class: 'lazer__nome', x: 0, y: 10 }, String(it.nome || '')));
+      el.gLazer.appendChild(g);
+      state.pontos.push({ id: String(it.id), n: 0, nome: String(it.nome || ''), tipo: String(it.tipo || 'padrao'), desc: it.desc || '', c: it.c, pc, el: g, item: null, dx: 0, lazer: true });
+    }
+    if (pontoValido(data.meta.entrada)) {
+      const pc = proj(data.meta.entrada);
+      el.gArvores.appendChild(usar('#ico-guarita', { class: 'portal', transform: `translate(${pc[0]} ${pc[1]}) scale(.62)` }));
     }
 
     // Caixa do mundo: meta.bbox ou calculada a partir de tudo que foi desenhado
-    state.bbox = bboxValido(data.meta.bbox) ? data.meta.bbox : calcularBbox(data);
+    state.bbox = projBbox(bboxValido(data.meta.bbox) ? data.meta.bbox : calcularBbox(data));
   }
 
   function iconeDe(p) { return p.tipo === 'lazer' ? 'piscina' : p.tipo; }
+
+  function usar(ref, attrs) {
+    const u = criar('use', attrs);
+    u.setAttribute('href', ref);
+    u.setAttributeNS(XLINK_NS, 'xlink:href', ref);
+    return u;
+  }
 
   // Ponto (mundo) a uma fração do comprimento de uma polilinha
   function pontoAoLongo(pl, frac) {
@@ -399,7 +457,7 @@
   }
 
   // Placa de via: tamanho fixo em px (o transform aplica scale(1/k)); geometria em px em torno do ponto da via
-  function criarPlaca({ texto, tipo, c, dy, principal }) {
+  function criarPlaca({ texto, tipo, c, dy, principal, sempre = false }) {
     const fonte = tipo === 'avenida' ? 11 : 9;
     const w = Math.round(texto.length * fonte * 0.68 + 16);
     const h = tipo === 'avenida' ? 22 : 17;
@@ -410,7 +468,7 @@
     corpo.appendChild(criar('text', { class: 'placa__texto', x: 0, y: 0, 'font-size': fonte }, texto));
     g.appendChild(corpo);
     el.gNomesVias.appendChild(g);
-    state.placas.push({ el: g, c, tipo, principal, visivel: null });
+    state.placas.push({ el: g, c, tipo, principal, sempre, visivel: null });
   }
 
   const bboxValido = (b) => Array.isArray(b) && b.length === 4 && b.every(Number.isFinite) && b[2] > b[0] && b[3] > b[1];
@@ -493,6 +551,23 @@
 
   function pontoPorId(id) { return state.pontos.find((p) => p.id === id) || null; }
 
+  // Barra de áreas comuns sob o mapa: um chip por item; clique leva até ele no mapa
+  function construirChips() {
+    if (!el.comunsChips || !el.comunsBarra) return;
+    limpar(el.comunsChips);
+    const itens = state.pontos.filter((p) => p.tipo !== 'lazer' && pontoValido(p.c));
+    el.comunsBarra.hidden = itens.length === 0;
+    for (const p of itens) {
+      const b = document.createElement('button');
+      b.type = 'button'; b.className = 'chip-comum'; b.dataset.id = p.id;
+      b.appendChild(iconeSvg(iconeDe(p)));
+      b.append(p.tipo === 'guarita' ? 'Portaria' : p.nome);
+      b.addEventListener('click', () => focarPonto(p));
+      el.comunsChips.appendChild(b);
+      p.item = b;
+    }
+  }
+
   function ativarPonto(p) {
     if (state.pontoAtivo && state.pontoAtivo !== p) {
       if (state.pontoAtivo.el) state.pontoAtivo.el.classList.remove('is-ativo');
@@ -527,8 +602,8 @@
     const p = state.pontoAtivo;
     if (!p || !p.c || el.popover.hidden) return;
     const { w, h } = tamanhoSvg();
-    const sx = p.c[0] * vista.k + vista.tx + (p.dx || 0);
-    const sy = p.c[1] * vista.k + vista.ty;
+    const sx = p.pc[0] * vista.k + vista.tx + (p.dx || 0);
+    const sy = p.pc[1] * vista.k + vista.ty;
     const pw = el.popover.offsetWidth || 280, ph = el.popover.offsetHeight || 120;
     const abaixo = sy - 40 - ph < 8 && sy + 16 + ph < h;
     el.popover.classList.toggle('is-abaixo', abaixo);
@@ -540,10 +615,11 @@
   function focarPonto(p) {
     if (!p || !p.c) return;
     if (state.selecionado) fecharPainel();
-    const k = limitarK(Math.max(vista.k, vista.kAjuste * PONTO_ZOOM_FATOR));
+    const kLazer = (LAZER_MIN_PX + 320) / state.clubeLargM; // zoom em que os ícones da área de lazer aparecem
+    const k = limitarK(Math.max(vista.k, (p.lazer || p.tipo === 'lazer') ? kLazer : vista.kAjuste * PONTO_ZOOM_FATOR));
     const alvo = pontoVisivel();
     vista.mexeu = true;
-    irPara(k, alvo.x - p.c[0] * k - (p.dx || 0), alvo.y - p.c[1] * k, true);
+    irPara(k, alvo.x - p.pc[0] * k - (p.dx || 0), alvo.y - p.pc[1] * k, true);
     abrirPopover(p);
     if (!DESKTOP.matches) {
       try { el.mapa.scrollIntoView({ behavior: MENOS_MOVIMENTO.matches ? 'auto' : 'smooth', block: 'center' }); } catch (_) { /* sem suporte */ }
@@ -580,6 +656,7 @@
       state.glebasVisiveis = mostrarGlebas;
       el.gRotulosGlebas.style.display = mostrarGlebas ? '' : 'none';
       el.gRotulosAreas.style.display = mostrarGlebas ? '' : 'none';
+      el.svg.classList.toggle('glebas-ocultas', !mostrarGlebas);
     }
     // Rótulos dos lotes só aparecem quando legíveis
     const mostrar = ROTULO_FONTE_M * k >= ROTULO_MIN_PX;
@@ -594,12 +671,19 @@
     const mostrarRuasBase = espRua >= 120;
     const tresPlacas = state.avLenM * k >= 460;
     for (const p of state.placas) {
-      const vis = p.tipo === 'rua' ? (mostrarRuas && (p.principal || mostrarRuasBase)) : (p.principal || tresPlacas);
+      const vis = p.sempre || (p.tipo === 'rua' ? (mostrarRuas && (p.principal || mostrarRuasBase)) : (p.principal || tresPlacas));
       if (vis !== p.visivel) { p.visivel = vis; p.el.style.display = vis ? '' : 'none'; }
       if (vis) p.el.setAttribute('transform', `translate(${p.c[0]} ${p.c[1]}) scale(${inv})`);
     }
-    // Marcadores: posição no mundo, tamanho constante em px
-    for (const p of state.pontos) if (p.el) p.el.setAttribute('transform', `translate(${p.c[0]} ${p.c[1]}) scale(${inv})`);
+    // Ícones da área de lazer só quando ela ocupa largura suficiente na tela; nessa hora o marcador "Área de lazer" sai
+    const mostrarLazer = state.clubeLargM * k >= LAZER_MIN_PX;
+    if (mostrarLazer !== state.lazerVisivel) {
+      state.lazerVisivel = mostrarLazer;
+      el.gLazer.style.display = mostrarLazer ? '' : 'none';
+      for (const p of state.pontos) if (p.el && p.tipo === 'lazer') p.el.style.display = mostrarLazer ? 'none' : '';
+    }
+    // Marcadores: posição no mundo (projetada), tamanho constante em px
+    for (const p of state.pontos) if (p.el && !p.lazer) p.el.setAttribute('transform', `translate(${p.pc[0]} ${p.pc[1]}) scale(${inv})`);
 
     posicionarPopover();
     atualizarEscala();
@@ -704,13 +788,13 @@
   }
 
   function centralizarLote(lote, comZoom) {
-    const [bx0, by0, bx1, by1] = lote.bbox;
+    const [bx0, by0, bx1, by1] = lote.bboxP;
     const maior = Math.max(bx1 - bx0, by1 - by0, 1);
     let k = vista.k;
     if (comZoom) k = limitarK(Math.max(vista.k, LOTE_ALVO_PX / maior));
     const alvo = pontoVisivel();
     vista.mexeu = true;
-    irPara(k, alvo.x - lote.centro[0] * k, alvo.y - lote.centro[1] * k, true);
+    irPara(k, alvo.x - lote.pc[0] * k, alvo.y - lote.pc[1] * k, true);
   }
 
   // ---------------------------------------------------------------- Gestos (pointer events, delegação no <svg>)
@@ -776,7 +860,7 @@
       // pointerup é sempre o <svg>, não o polígono.
       const alvo = gesto.alvo && gesto.alvo.closest ? gesto.alvo : null;
       const lote = alvo ? alvo.closest('.lote') : null;
-      const ponto = alvo ? alvo.closest('.ponto') : null;
+      const ponto = alvo ? alvo.closest('.ponto, .lazer') : null;
       if (ponto) {
         const p = pontoPorId(ponto.getAttribute('data-id'));
         if (p) { if (state.selecionado) fecharPainel(); abrirPopover(p); }
@@ -1082,6 +1166,7 @@
       validar(data);
       state.data = data;
       construirMapa(data);
+      construirChips();
       preencherLegenda();
       preencherHero();
       preencherRodape();

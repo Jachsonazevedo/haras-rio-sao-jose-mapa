@@ -622,3 +622,49 @@ button, input { font: inherit; }
   .guia__link { overflow-x: auto; -webkit-overflow-scrolling: touch; }
   .guia__img { width: 1100px; max-width: none; }
 }
+
+/* =====================================================================
+   Rodada 4 — mapa ilustrado 2,5D: relevo, mata, estrada, área de lazer
+   ===================================================================== */
+.mapa__fundo { fill: #F7F2E4; }
+.imovel { fill: #A9CF88; stroke: #5E8A44; stroke-width: 2px; stroke-opacity: 1; }
+.relevo-lado { fill: #587A3B; pointer-events: none; }
+.relevo-sombra { fill: #2b3d1f; fill-opacity: .16; pointer-events: none; }
+.area--reserva { fill: #7BAD5C; stroke: #5E8A44; stroke-width: 1.4px; }
+.area--clube, .area--lazer { fill: #F0E4C3; stroke: #D8C69A; stroke-width: 1.4px; }
+.area--area_comum { fill: #B6D896; stroke: #5E8A44; stroke-width: 1px; }
+.via--borda { stroke: #CDB98F; }
+.via--pista { stroke: #EFE2BF; }
+.lote { stroke: #fff; stroke-opacity: .85; }
+.estrada { fill: none; stroke-linecap: round; stroke-linejoin: round; pointer-events: none; }
+.estrada--borda { stroke: #B9B4A8; stroke-width: 17px; }
+.estrada--pista { stroke: #D9D5CB; stroke-width: 13px; }
+.estrada--eixo { stroke: #fff; stroke-width: 1.4px; stroke-dasharray: 9 8; }
+.portal { pointer-events: none; }
+.lazer { cursor: pointer; }
+.lazer:focus { outline: none; }
+.lazer__nome {
+  font-family: var(--fonte-texto); font-weight: 700; font-size: 6.5px; fill: var(--verde); text-anchor: middle; pointer-events: none;
+  paint-order: stroke; stroke: rgba(255, 255, 255, .92); stroke-width: 2px; stroke-linejoin: round;
+}
+.lazer.is-ativo .lazer__nome { fill: var(--madeira); }
+.rotulo-area--reserva { fill: #1f3d24; stroke: rgba(255, 255, 255, .9); }
+.placa--destino .placa__fundo { fill: #2F5C8F; stroke: #fff; stroke-width: 1.2px; filter: url(#sombra-pin); }
+.placa--destino .placa__texto { fill: #fff; font-weight: 700; letter-spacing: .06em; }
+
+/* ---------- Barra de áreas comuns sob o mapa ---------- */
+.comuns-barra { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 10px; margin-top: 14px; }
+.comuns-barra__titulo { font-size: .74rem; letter-spacing: .14em; text-transform: uppercase; color: var(--madeira); font-weight: 600; margin-right: 4px; }
+.comuns-barra__chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip-comum {
+  display: inline-flex; align-items: center; gap: 7px; padding: 7px 13px; border-radius: 999px;
+  border: 1px solid var(--linha); background: #fff; color: var(--verde); font-weight: 600; font-size: .84rem; cursor: pointer;
+  box-shadow: 0 1px 4px rgba(24, 56, 39, .08);
+}
+.chip-comum svg { width: 16px; height: 16px; color: var(--verde-medio); }
+.chip-comum:hover, .chip-comum.is-ativo { background: var(--dourado-claro); border-color: var(--dourado); }
+.comuns-barra__link { margin-left: auto; font-size: .84rem; color: var(--verde); font-weight: 600; }
+
+/* Selo da gleba (círculo no ponto do número; some junto com os números) */
+.gleba-selo { fill: #FDFAF2; stroke: var(--verde); stroke-width: 1.4px; stroke-opacity: .85; pointer-events: none; }
+.glebas-ocultas .gleba-selo { display: none; }
