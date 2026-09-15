@@ -33,6 +33,7 @@
     </a>
     <nav class="topo__nav" aria-label="Seções">
       <a href="#mapa">Mapa</a>
+      <a href="#guia">Mapa-guia</a>
       <a href="#veja-do-alto">Vídeo 360°</a>
       <a href="#pronto">Fotos</a>
       <a href="#como-chegar">Como chegar</a>
@@ -51,9 +52,9 @@
           <p class="faixa__sub">Entrada facilitada e até 140 meses para pagar.</p>
         </div>
         <dl class="numeros numeros--faixa" aria-label="Números do chacreamento">
-          <div class="numeros__item"><dd id="h-disponiveis">—</dd><dt>unidades disponíveis</dt></div>
-          <div class="numeros__item"><dd id="h-glebas">—</dd><dt>glebas</dt></div>
           <div class="numeros__item"><dd id="h-area">—</dd><dt>de área total</dt></div>
+          <div class="numeros__item"><dd id="h-glebas">—</dd><dt>glebas</dt></div>
+          <div class="numeros__item"><dd>2.000 m²</dd><dt>lotes a partir de</dt></div>
         </dl>
       </div>
     </section>
@@ -63,7 +64,7 @@
       <div class="secao__inner">
         <div class="mapa-secao__cabeca">
           <div>
-            <p class="secao__sobre">Mapa ilustrado · disponibilidade em tempo real</p>
+            <p class="secao__sobre">Mapa ilustrado · disponibilidade atualizada</p>
             <h2 class="secao__titulo" id="mapa-titulo">Escolha a sua unidade</h2>
           </div>
           <p class="mapa-secao__dica">Aproxime para ver cada lote: verde disponível, vermelho vendido, azul reservado. Toque em um lote para ver área e medidas, ou busque pelo número.</p>
@@ -189,9 +190,10 @@
             <!-- Legenda + filtro -->
             <div class="legenda" id="legenda" aria-label="Legenda">
               <ul class="legenda__itens">
-                <li class="legenda__item"><span class="legenda__cor legenda__cor--disponivel" aria-hidden="true"></span>Disponíveis <span class="legenda__n" id="n-disponivel">–</span></li>
-                <li class="legenda__item"><span class="legenda__cor legenda__cor--reservado" aria-hidden="true"></span>Reservados <span class="legenda__n" id="n-reservado">–</span></li>
-                <li class="legenda__item"><span class="legenda__cor legenda__cor--vendido" aria-hidden="true"></span>Vendidos <span class="legenda__n" id="n-vendido">–</span></li>
+                <li class="legenda__item"><span class="legenda__cor legenda__cor--disponivel" aria-hidden="true"></span>Disponível</li>
+                <li class="legenda__item"><span class="legenda__cor legenda__cor--reservado" aria-hidden="true"></span>Reservado</li>
+                <li class="legenda__item"><span class="legenda__cor legenda__cor--reserva_tecnica" aria-hidden="true"></span>Reserva técnica</li>
+                <li class="legenda__item"><span class="legenda__cor legenda__cor--vendido" aria-hidden="true"></span>Vendido</li>
               </ul>
               <label class="alternar">
                 <input type="checkbox" id="so-disponiveis" role="switch" aria-checked="false">
@@ -280,6 +282,21 @@
       </div>
     </section>
 
+    <!-- ===================== MAPA-GUIA ILUSTRADO ===================== -->
+    <section class="secao guia" id="guia" aria-labelledby="guia-titulo">
+      <div class="secao__inner">
+        <p class="secao__sobre">Mapa-guia</p>
+        <h2 class="secao__titulo" id="guia-titulo">Para você se situar no Haras</h2>
+        <p class="secao__texto">Portaria, Avenida Pau Ferro, Avenida Umbuzeiro, Ruas 1 a 12, área de lazer, lago e reserva ambiental, com a legenda numerada.</p>
+        <figure class="guia__quadro">
+          <a class="guia__link" href="assets/mapa-guia.svg" target="_blank" rel="noopener" aria-label="Abrir o mapa-guia em tela cheia">
+            <img class="guia__img" src="assets/mapa-guia.svg" alt="Mapa-guia ilustrado do Haras Rio São José: portaria e guarita, Avenida Pau Ferro, Avenida Umbuzeiro, Ruas 1 a 12, 57 glebas, área de lazer com salão de festas, piscina, quiosques, banheiros, quadra de areia, baias e redondel e fazendinha, lago e área de preservação ambiental." loading="lazy" width="2000" height="900">
+          </a>
+          <figcaption>Ilustração baseada na planta do empreendimento, sem escala. Toque para abrir em tela cheia.</figcaption>
+        </figure>
+      </div>
+    </section>
+
     <!-- ===================== VEJA DO ALTO ===================== -->
     <section class="secao video" id="veja-do-alto" aria-labelledby="video-titulo">
       <div class="secao__inner">
@@ -301,9 +318,9 @@
     <!-- ===================== O QUE JÁ ESTÁ PRONTO ===================== -->
     <section class="secao fotos" id="pronto" aria-labelledby="fotos-titulo">
       <div class="secao__inner">
-        <p class="secao__sobre">Fotos reais</p>
-        <h2 class="secao__titulo" id="fotos-titulo">O que já está pronto</h2>
-        <p class="secao__texto">Registros do terreno e da infraestrutura já executada.</p>
+        <p class="secao__sobre">Fotos</p>
+        <h2 class="secao__titulo" id="fotos-titulo">Conheça o Haras hoje</h2>
+        <p class="secao__texto">Imagens aéreas do chacreamento e da infraestrutura já executada.</p>
 
         <div class="galeria" id="galeria-real">
           <figure class="card-foto"><img src="assets/fotos/aerea-1.jpg" alt="Vista aérea do chacreamento Haras Rio São José" loading="lazy" onerror="this.closest('figure').remove()"><figcaption>Vista aérea do chacreamento</figcaption></figure>
@@ -317,8 +334,8 @@
         </div>
 
         <div class="subgaleria" id="bloco-projeto">
-          <h3 class="subgaleria__titulo">Projeto das áreas comuns</h3>
-          <p class="secao__texto">Imagens de projeto, ilustrativas.</p>
+          <h3 class="subgaleria__titulo">Como vai ficar</h3>
+          <p class="secao__texto">Imagens de projeto das áreas comuns, ilustrativas.</p>
           <div class="galeria galeria--projeto" id="galeria-projeto">
             <figure class="card-foto card-foto--projeto"><span class="tarja">Imagem ilustrativa do projeto</span><img src="assets/fotos/projeto-salao-piscina.jpg" alt="Projeto do salão de festas e da piscina" loading="lazy" onerror="this.closest('figure').remove()"><figcaption>Salão de festas, piscina e quiosques — projeto</figcaption></figure>
             <figure class="card-foto card-foto--projeto"><span class="tarja">Imagem ilustrativa do projeto</span><img src="assets/fotos/projeto-baias-redondel.jpg" alt="Projeto das baias e do redondel" loading="lazy" onerror="this.closest('figure').remove()"><figcaption>Baias e redondel — projeto</figcaption></figure>

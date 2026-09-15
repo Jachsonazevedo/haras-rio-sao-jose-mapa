@@ -668,3 +668,13 @@ button, input { font: inherit; }
 /* Selo da gleba (círculo no ponto do número; some junto com os números) */
 .gleba-selo { fill: #FDFAF2; stroke: var(--verde); stroke-width: 1.4px; stroke-opacity: .85; pointer-events: none; }
 .glebas-ocultas .gleba-selo { display: none; }
+
+/* ---------- Rodada 5: reserva técnica na simbologia; legenda sem números ---------- */
+:root { --rtec: #7C8A99; --rtec-hover: #66737F; }
+.lote--reserva_tecnica { fill: var(--rtec); }
+.lote--reserva_tecnica:hover { fill: var(--rtec-hover); }
+.so-disponiveis .lote--reserva_tecnica { opacity: .22; }
+.so-disponiveis .rotulo--reserva_tecnica { opacity: .3; }
+.legenda__cor--reserva_tecnica { background: var(--rtec); }
+.status--reserva_tecnica { background: #E8ECF0; color: #4A5560; }
+.legenda__itens { gap: 6px 12px; }

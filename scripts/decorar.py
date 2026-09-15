@@ -59,19 +59,36 @@ def semear(poly_np, bbox, passo, jitter, n_max, evitar_lotes=False):
 
 # --- área de lazer: posições dos ícones (interior do clube, afastados entre si)
 cbb = bb(clube["poly"])
+# o clube fica na parte ALTA da faixa (junto à entrada, conforme a implantação); a ponta baixa é o lago
+Y_CLUBE = cbb[1] + 0.48 * (cbb[3] - cbb[1])
 cand = []
-for gy in np.arange(cbb[1] + 10, cbb[3], 10):
-    for gx in np.arange(cbb[0] + 10, cbb[2], 10):
+for gy in np.arange(cbb[1] + 10, Y_CLUBE, 8):
+    for gx in np.arange(cbb[0] + 10, cbb[2], 8):
         d = cv2.pointPolygonTest(clu_np, (float(gx), float(gy)), True)
-        if d >= 16: cand.append((float(gx), float(gy), d))
+        if d >= 15: cand.append((float(gx), float(gy), d))
 cand.sort(key=lambda q: -q[2])
 ordem = ["salao", "piscina", "quiosques", "banheiros", "quadra", "baias", "fazendinha"]
 esc = [cand[0][:2]]
 while len(esc) < len(ordem):
-    esc.append(max(cand, key=lambda q: min(math.dist(q[:2], e) for e in esc) + q[2] * .35)[:2])
+    esc.append(max(cand, key=lambda q: min(math.dist(q[:2], e) for e in esc) + q[2] * .25)[:2])
 esc.sort(key=lambda q: (q[1], q[0]))
 nomes = {p["id"]: p for p in PONTOS}
 lazer = [{"id": k, "nome": nomes[k]["nome"], "tipo": nomes[k]["tipo"], "desc": nomes[k].get("desc", ""), "c": [round(esc[i][0], 1), round(esc[i][1], 1)]} for i, k in enumerate(ordem)]
+
+# --- lago natural na ponta baixa da faixa (sem píer/deck): elipse ajustada ao interior do polígono
+ponta = max(clube["poly"], key=lambda p: p[1])
+lago = None
+for frac in (0.86, 0.82, 0.78, 0.74):
+    cy_ = cbb[1] + frac * (cbb[3] - cbb[1])
+    xs_ = [gx for gx in np.arange(cbb[0], cbb[2], 2) if cv2.pointPolygonTest(clu_np, (float(gx), float(cy_)), True) >= 6]
+    if len(xs_) < 12: continue
+    cx_ = (min(xs_) + max(xs_)) / 2; rx = (max(xs_) - min(xs_)) / 2 * .8; ry = min(rx * .75, 34)
+    lago = [[round(cx_ + rx * math.cos(t), 1), round(cy_ + ry * math.sin(t) * 1.0), 1] for t in np.linspace(0, 2 * math.pi, 24, endpoint=False)]
+    lago = [[a, round(b, 1)] for a, b, _ in lago]
+    break
+if lago:
+    J["areas"] = [a for a in J["areas"] if a["tipo"] != "lago"] + [{"tipo": "lago", "nome": "Lago", "poly": lago}]
+    print("lago:", len(lago), "vértices, centro", lago[0])
 
 # --- árvores
 arv = []
@@ -83,8 +100,9 @@ for i in range(len(CHAO)):
         p = (a[0] + (b[0] - a[0]) * t / d + random.uniform(-8, 8), a[1] + (b[1] - a[1]) * t / d + random.uniform(-8, 8))
         if dentro(res_np, p) or dentro(clu_np, p) or em_lote(p) or math.dist(p, ent) < 70: continue
         arv.append((p, "b"))
-for p in semear(clu_np, cbb, 40, 12, 40):
-    if all(math.dist(p, it["c"]) > 34 for it in lazer): arv.append((p, "c"))
+lago_np = np.array(lago, np.float32) if lago else None
+for p in semear(clu_np, cbb, 34, 12, 60):
+    if all(math.dist(p, it["c"]) > 34 for it in lazer) and (lago_np is None or cv2.pointPolygonTest(lago_np, (float(p[0]), float(p[1])), True) < -10): arv.append((p, "c"))
 # nunca em cima das vias
 def perto_de_via(p, folga):
     for v in J["vias"]:

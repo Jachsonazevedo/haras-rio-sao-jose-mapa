@@ -116,6 +116,10 @@ o.append(f'<polygon points="{pts(CHAO)}" fill="url(#chao)" stroke="{CHAO_BORDA}"
 o.append(f'<polygon points="{pts(reserva["poly"])}" fill="{MATA}" stroke="{MATA_BORDA}" stroke-width="1.5" stroke-linejoin="round"/>')
 o.append(f'<polygon points="{pts(clube["poly"])}" fill="{AREIA}" stroke="{AREIA_BORDA}" stroke-width="1.5" stroke-linejoin="round"/>')
 if verde: o.append(f'<polygon points="{pts(verde["poly"])}" fill="#B6D896" stroke="{MATA_BORDA}" stroke-width="1" stroke-linejoin="round"/>')
+lago = areas.get("lago")
+if lago:
+    o.append(f'<polygon points="{pts(lago["poly"])}" fill="#8FC4DE" stroke="#6FA9C6" stroke-width="1.4" stroke-linejoin="round"/>')
+    o.append(f'<polygon points="{pts([[p[0] * .8 + centroide(lago["poly"])[0] * .2, p[1] * .8 + centroide(lago["poly"])[1] * .2] for p in lago["poly"]])}" fill="{AGUA_CLARA}" fill-opacity=".55"/>')
 
 # --- lotes e glebas
 o.append(f'<g stroke="{LOTE_TRACO}" stroke-width=".7" stroke-opacity=".85" stroke-linejoin="round">')
@@ -182,9 +186,10 @@ def grade_no_clube():
         esc.append(melhor[:2])
     esc.sort(key=lambda q: (q[1], q[0]))
     return esc
-cels = grade_no_clube()
 ordem_clube = ["salao", "piscina", "quiosques", "banheiros", "quadra", "baias", "fazendinha"]
-pos = {k: cels[i % len(cels)] for i, k in enumerate(ordem_clube)}
+_lz = {it["id"]: tuple(it["c"]) for it in J.get("decor", {}).get("lazer", [])}
+cels = [_lz[k] for k in ordem_clube if k in _lz] or grade_no_clube()
+pos = {k: (_lz.get(k) or cels[i % len(cels)]) for i, k in enumerate(ordem_clube)}
 pos["guarita"] = tuple(ent)
 pos["reserva"] = tuple(centroide(reserva["poly"]))
 # árvores não podem ficar em cima dos ícones
@@ -258,7 +263,7 @@ for v in vias:
 # estrada externa: rótulo + placa de direção
 ex, ey = P(ext[0]); (mx_, my_), _ = along(ext, 0.55)
 o.append(rotulo("Estrada de Duas Vendas · km 4,5", mx_ - 96, my_, 11.5, cor=MADEIRA, italic=False))
-o.append(f'<g filter="url(#sombra)" transform="translate({f(ex)} {f(ey - 30)})"><rect x="-46" y="-12" width="92" height="24" rx="5" fill="#2F5C8F" stroke="#fff" stroke-width="1.2"/><text x="0" y="4" font-size="11.5" font-weight="700" fill="#fff" text-anchor="middle" letter-spacing=".06em">POÇÕES ↑</text></g>')
+o.append(f'<g filter="url(#sombra)" transform="translate({f(ex + 62)} {f(ey + 8)})"><rect x="-46" y="-12" width="92" height="24" rx="5" fill="#2F5C8F" stroke="#fff" stroke-width="1.2"/><text x="0" y="4" font-size="11.5" font-weight="700" fill="#fff" text-anchor="middle" letter-spacing=".06em">POÇÕES ↑</text></g>')
 # reserva
 rx, ry = P(pos["reserva"]); o.append(rotulo("Área de Preservação Ambiental", rx, ry + 44, 14))
 o.append(rotulo("Reserva Legal e APP · caça, pesca e captação de água proibidas", rx, ry + 66, 9.5, cor="#3E5C43", italic=False, peso="500"))
@@ -281,10 +286,10 @@ x, y = P(pos["reserva"]); o.append(pino(x, y, numeros["reserva"]))
 
 # --- detalhe ampliado da área de lazer (canto inferior esquerdo)
 DX, DY, DW, DH = 50, 585, 470, 290
-ZC = 1.85
-cc = centroide(clube["poly"]); ccx, ccy = P(cc)
+ZC = 2.4
+cc = [sum(pos[k][0] for k in ordem_clube) / len(ordem_clube), sum(pos[k][1] for k in ordem_clube) / len(ordem_clube)]; ccx, ccy = P(cc)
 def PD(p):
-    x, y = P(p); return (DX + DW / 2 + 10 + (x - ccx) * ZC, DY + DH / 2 + 50 + (y - ccy) * ZC)
+    x, y = P(p); return (DX + DW / 2 + 10 + (x - ccx) * ZC, DY + DH / 2 + 12 + (y - ccy) * ZC)
 def ptsD(poly): return " ".join(f"{x:.1f},{y:.1f}" for x, y in (PD(p) for p in poly))
 o.append(f'<line x1="{f(cx_)}" y1="{f(cy_)}" x2="{f(DX + DW / 2)}" y2="{f(DY)}" stroke="{CHAO_BORDA}" stroke-width="1.4" stroke-dasharray="5 4"/>')
 o.append(f'<circle cx="{f(cx_)}" cy="{f(cy_)}" r="7" fill="none" stroke="{CHAO_BORDA}" stroke-width="1.6"/>')
@@ -294,6 +299,7 @@ o.append('<g clip-path="url(#clip-det)">')
 o.append(f'<rect x="{DX}" y="{DY}" width="{DW}" height="{DH}" fill="url(#chao)"/>')
 o.append(f'<polygon points="{ptsD(clube["poly"])}" transform="translate(0 10)" fill="{CHAO_LADO}"/>')
 o.append(f'<polygon points="{ptsD(clube["poly"])}" fill="{AREIA}" stroke="{AREIA_BORDA}" stroke-width="2" stroke-linejoin="round"/>')
+if lago: o.append(f'<polygon points="{ptsD(lago["poly"])}" fill="#8FC4DE" stroke="#6FA9C6" stroke-width="2" stroke-linejoin="round"/>')
 cam = [PD(pos[k]) for k in ordem_clube]
 o.append('<polyline points="' + " ".join(f"{a:.1f},{b:.1f}" for a, b in cam) + f'" fill="none" stroke="{VIA}" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>')
 det_arv = [p for p in semear(clu_np, cbb, 26, 8, 60) if all(math.dist(p, pos[k]) > 34 for k in ordem_clube)]
@@ -308,10 +314,12 @@ for k in ordem_clube:
 o.append('</g>')
 o.append(f'<rect x="{DX}" y="{DY}" width="{DW}" height="{DH}" rx="18" fill="none" stroke="{CHAO_BORDA}" stroke-width="1.2"/>')
 o.append(f'<g transform="translate({DX + 14} {DY + 24})"><rect x="-4" y="-16" width="176" height="24" rx="12" fill="{VERDE}"/><text x="84" y="1" font-size="12.5" font-weight="700" fill="#fff" text-anchor="middle" letter-spacing=".06em">ÁREA DE LAZER · DETALHE</text></g>')
-o.append(rotulo("Área de lazer (ver detalhe)", cx_ - 64, cy_ - 34, 12.5))
+o.append(rotulo("Área de lazer (ver detalhe)", cx_ - 70, cy_ - 30, 12.5))
+if lago:
+    lx, ly = P(centroide(lago["poly"])); o.append(rotulo("Lago", lx - 34, ly + 4, 11))
 
 # --- cartucho de título
-o.append(f'''<g transform="translate(40 34)">
+o.append(f'''<g transform="translate(300 34)">
   <text x="0" y="22" font-family="Georgia, 'Times New Roman', serif" font-size="30" font-weight="700" fill="{VERDE}">Mapa-guia do Haras Rio São José</text>
   <text x="0" y="46" font-size="13" fill="#5f6f66" letter-spacing=".12em">CHACREAMENTO · POÇÕES – BA · ILUSTRAÇÃO SEM ESCALA</text>
 </g>''')

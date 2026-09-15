@@ -23,7 +23,7 @@
   const SVG_NS = 'http://www.w3.org/2000/svg';
   const XLINK_NS = 'http://www.w3.org/1999/xlink';
 
-  const STATUS = { disponivel: 'Disponível', vendido: 'Vendido', reservado: 'Reservado' };
+  const STATUS = { disponivel: 'Disponível', vendido: 'Vendido', reservado: 'Reservado', reserva_tecnica: 'Reserva técnica' };
   const STATUS_VALIDOS = new Set(Object.keys(STATUS));
 
   const ROTULO_MIN_PX = 9;      // rótulo do lote só aparece quando tiver pelo menos 9 px
@@ -83,7 +83,6 @@
     zoomMais: $('#zoom-mais'), zoomMenos: $('#zoom-menos'), verTudo: $('#ver-tudo'),
     busca: $('#busca'), buscaInput: $('#busca-input'),
     soDisponiveis: $('#so-disponiveis'),
-    nDisponivel: $('#n-disponivel'), nVendido: $('#n-vendido'), nReservado: $('#n-reservado'),
     toast: $('#toast'),
     popover: $('#popover'), popFechar: $('#pop-fechar'), popIcone: $('#pop-icone'),
     popNome: $('#pop-nome'), popDesc: $('#pop-desc'),
@@ -92,7 +91,7 @@
     pFrente: $('#p-frente'), pFundo: $('#p-fundo'), pEsq: $('#p-esq'), pDir: $('#p-dir'),
     pValor: $('#p-valor'), pValorNum: $('#p-valor-num'), pWhats: $('#p-whats'), pShare: $('#p-share'),
     estado: $('#estado'), estadoTitulo: $('#estado-titulo'), estadoTexto: $('#estado-texto'), estadoTentar: $('#estado-tentar'),
-    hDisponiveis: $('#h-disponiveis'), hGlebas: $('#h-glebas'), hArea: $('#h-area'),
+    hGlebas: $('#h-glebas'), hArea: $('#h-area'),
     chegarWhats: $('#chegar-whats'),
     rAtualizado: $('#r-atualizado'), rFonte: $('#r-fonte'),
   };
@@ -103,7 +102,7 @@
     bbox: [0, 0, 1, 1],
     lotes: new Map(),        // id → { ...lote, el, centro, bbox }
     porNumero: new Map(),    // Number(id) → lote (para buscar "12", "012", "lote 12")
-    contagem: { disponivel: 0, vendido: 0, reservado: 0 },
+    contagem: { disponivel: 0, vendido: 0, reservado: 0, reserva_tecnica: 0 },
     selecionado: null,
     rotulosVisiveis: true,
     glebaLarguraSoma: 0, glebaQtd: 0, glebasVisiveis: true,
@@ -252,7 +251,7 @@
   function construirMapa(data) {
     [el.gImovel, el.gAreas, el.gVias, el.gLotes, el.gGlebas, el.gRotulos, el.gNomesVias, el.gRotulosAreas, el.gRotulosGlebas, el.gPontos, el.gRelevo, el.gEstrada, el.gArvores, el.gLazer].forEach(limpar);
     state.lotes.clear(); state.porNumero.clear();
-    state.contagem = { disponivel: 0, vendido: 0, reservado: 0 };
+    state.contagem = { disponivel: 0, vendido: 0, reservado: 0, reserva_tecnica: 0 };
     state.glebaLarguraSoma = 0; state.glebaQtd = 0;
     state.placas = []; state.espRuaM = 160; state.avLenM = 1900; state.pontos = []; state.pontoAtivo = null;
 
@@ -375,7 +374,9 @@
       marcadores.push({ ...p, rotulo: p.tipo === 'guarita' ? 'Portaria' : p.nome });
     }
     if (grupo.length) {
-      marcadores.push({ id: 'lazer', n: 0, nome: 'Área de lazer', tipo: 'lazer', rotulo: 'Área de lazer', c: centroide(clube.poly), desc: grupo.map((p) => p.nome).join(' · '), itens: grupo });
+      const itensDecor = data.decor && Array.isArray(data.decor.lazer) ? data.decor.lazer.filter((it) => it && pontoValido(it.c)) : [];
+      const cLazer = itensDecor.length ? [itensDecor.reduce((s, it) => s + it.c[0], 0) / itensDecor.length, itensDecor.reduce((s, it) => s + it.c[1], 0) / itensDecor.length] : centroide(clube.poly);
+      marcadores.push({ id: 'lazer', n: 0, nome: 'Área de lazer', tipo: 'lazer', rotulo: 'Área de lazer', c: cLazer, desc: grupo.map((p) => p.nome).join(' · '), itens: grupo });
     }
     for (const p of marcadores) {
       const g = criar('g', { class: `ponto ponto--${p.tipo}`, 'data-id': p.id, role: 'button', tabindex: '0', 'aria-label': p.nome });
@@ -487,23 +488,11 @@
   // ---------------------------------------------------------------- Legenda, hero, rodapé
   // Legenda: mostra a contagem real do array e avisa no console se o meta divergir
   function preencherLegenda() {
-    const m = state.data.meta;
-    const doMeta = { disponivel: m.disponiveis, vendido: m.vendidos, reservado: m.reservados };
-    for (const s of Object.keys(STATUS)) {
-      const real = state.contagem[s];
-      if (Number.isFinite(doMeta[s]) && doMeta[s] !== real) {
-        console.warn(`[lotes.json] meta informa ${doMeta[s]} ${s}, mas o array tem ${real}. Exibindo a contagem real.`);
-      }
-    }
-    if (Number.isFinite(m.total) && m.total !== state.lotes.size) {
-      console.warn(`[lotes.json] meta.total=${m.total}, mas o array tem ${state.lotes.size} lotes.`);
-    }
-    el.nDisponivel.textContent = state.contagem.disponivel;
-    el.nReservado.textContent = state.contagem.reservado;
-    el.nVendido.textContent = state.contagem.vendido;
+    // A página é do cliente: a legenda mostra só a simbologia. As contagens ficam no console, para o gestor.
+    const m = state.data.meta || {};
+    console.info('[lotes] contagem real:', { ...state.contagem }, '| meta:', { disponiveis: m.disponiveis, vendidos: m.vendidos, reservados: m.reservados, reserva_tecnica: m.reserva_tecnica });
   }
 
-  // Área total: meta.area_total_m2 → polígono "imovel" → soma das glebas → soma dos lotes
   function areaTotalM2(data) {
     const m = data.meta;
     if (Number.isFinite(m.area_total_m2) && m.area_total_m2 > 0) return m.area_total_m2;
@@ -516,10 +505,9 @@
 
   function preencherHero() {
     const data = state.data;
-    el.hDisponiveis.textContent = fmtInt.format(state.contagem.disponivel);
-    el.hGlebas.textContent = fmtInt.format(state.glebaQtd || data.glebas.length);
-    const m2 = areaTotalM2(data);
-    el.hArea.textContent = m2 > 0 ? `${fmtHa.format(m2 / 10000)} ha` : '—';
+    if (el.hGlebas) el.hGlebas.textContent = fmtInt.format(state.glebaQtd || data.glebas.length);
+    const ha = Number.isFinite(data.meta.area_total_ha) ? data.meta.area_total_ha : areaTotalM2(data) / 10000;
+    if (el.hArea) el.hArea.textContent = ha > 0 ? `${fmtInt.format(Math.round(ha))} ha` : '—';
   }
 
   function numeroWhats() {

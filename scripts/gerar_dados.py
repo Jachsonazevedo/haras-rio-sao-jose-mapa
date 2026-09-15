@@ -194,7 +194,8 @@ for nlote in range(1, 655):
     if nlote not in polys_pt: faltam.append(nlote); continue
     m = mem.get(nlote, {}); st = status.get(nlote, "vendido")
     lid = str(nlote).zfill(3)
-    if lid in RESERVA_TEC or nlote in reserva_est: st = "reservado" if st == "disponivel" else st
+    if lid in RESERVA_TEC and st == "disponivel": st = "reserva_tecnica"
+    elif nlote in reserva_est and st == "disponivel": st = "reservado"
     poly = [M(x, y) for x, y in polys_pt[nlote]]
     cx = sum(p[0] for p in poly)/len(poly); cy = sum(p[1] for p in poly)/len(poly)
     lotes_out.append({"id": lid, "gleba": m.get("gleba", "?"), "poly": poly, "c": [round(cx, 2), round(cy, 2)],
@@ -240,7 +241,7 @@ allpts = [p for l in lotes_out for p in l["poly"]] + [p for g in glebas_out for 
 bbox = [round(min(p[0] for p in allpts), 1), round(min(p[1] for p in allpts), 1), round(max(p[0] for p in allpts), 1), round(max(p[1] for p in allpts), 1)]
 cnt = Counter(l["status"] for l in lotes_out)
 out = {"meta": {"gerado_em": datetime.datetime.now().isoformat(timespec="minutes"), "fonte": "Planilha Mestre 01/09/2026 · Memorial de Lotes · Planta Fracionada (Jan/2021)",
-                "unidade": "m", "bbox": bbox, "total": len(lotes_out), "disponiveis": cnt["disponivel"], "vendidos": cnt["vendido"], "reservados": cnt["reservado"],
+                "unidade": "m", "bbox": bbox, "total": len(lotes_out), "disponiveis": cnt["disponivel"], "vendidos": cnt["vendido"], "reservados": cnt["reservado"], "reserva_tecnica": cnt["reserva_tecnica"], "area_total_ha": 198,
                 "preco_m2": 27.5, "whatsapp": "5511991468192", "escala_pt_m": round(PT_M, 5), "reserva_estrategica": origem_res, "entrada": entrada[0] if entrada else None},
        "glebas": glebas_out, "lotes": lotes_out, "vias": [], "areas": areas_out}
 os.makedirs(os.path.join(OUTDIR, "data"), exist_ok=True)
@@ -250,7 +251,7 @@ print("STATUS:", dict(cnt), "| bbox:", bbox, "| JSON:", os.path.join(OUTDIR, "da
 # imagem de verificação
 SC = 2400 / (bbox[2] - bbox[0] + 1)
 ver = np.full((int((bbox[3]-bbox[1]) * SC) + 20, 2420, 3), 245, np.uint8)
-cor = {"disponivel": (107, 168, 200), "vendido": (217, 222, 217), "reservado": (122, 162, 166)}
+cor = {"disponivel": (107, 168, 200), "vendido": (217, 222, 217), "reservado": (122, 162, 166), "reserva_tecnica": (150, 150, 150)}
 for l in lotes_out:
     pts = np.array([[(p[0]-bbox[0])*SC + 10, (p[1]-bbox[1])*SC + 10] for p in l["poly"]], np.int32)
     cv2.fillPoly(ver, [pts], cor[l["status"]]); cv2.polylines(ver, [pts], True, (39, 56, 24), 1)
