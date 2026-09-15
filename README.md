@@ -47,9 +47,9 @@ O app lê um único JSON. Os campos abaixo são o contrato; os marcados como *op
     "fonte": "Planilha Mestre 01/09/2026",
     "unidade": "m",
     "bbox": [0, 0, 2100, 700],
-    "total": 654, "disponiveis": 157, "vendidos": 464, "reservados": 33,
+    "total": 654, "disponiveis": 187, "vendidos": 464, "reservados": 3,
     "preco_m2": 27.5,
-    "whatsapp": "5577999999999",
+    "whatsapp": "5511991468192",
     "avenidas": ["Avenida Pau Ferro", "Avenida Umbuzeiro"],
     "ruas": 12,
     "area_total_m2": 1409864.55
