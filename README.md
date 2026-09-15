@@ -142,7 +142,7 @@ Como funciona: o script rasteriza só os traços vetoriais da planta, encontra a
 Regras aplicadas:
 - `DISPONÍVEL` e `DISTRATADA — sem revenda` → **disponível**
 - `VENDIDA` (vigente ou quitada) → **vendido**
-- Lotes 267, 269 e 470 (reservas técnicas) e os lotes listados em `reserva_estrategica.txt` (reserva estratégica, 30 unidades) → **reservado**
+- Lotes 267, 269 e 470 (reservas técnicas) e os lotes listados em `reserva_estrategica.txt` (reserva estratégica; arquivo vazio desde 15/09/2026 = nenhum, a definir pelo Jachson) → **reservado**
 - Erro conhecido da planta: o rótulo "312" aparece duas vezes e "321" não existe; o script resolve pela área do memorial.
 
 Para atualizar (depois de mudar a Planilha Mestre ou a lista de reserva):
