@@ -80,15 +80,13 @@
     soDisponiveis: $('#so-disponiveis'),
     nDisponivel: $('#n-disponivel'), nVendido: $('#n-vendido'), nReservado: $('#n-reservado'),
     toast: $('#toast'),
-    popover: $('#popover'), popFechar: $('#pop-fechar'), popN: $('#pop-n'), popIcone: $('#pop-icone'),
-    popNome: $('#pop-nome'), popChip: $('#pop-chip'), popDesc: $('#pop-desc'),
+    popover: $('#popover'), popFechar: $('#pop-fechar'), popIcone: $('#pop-icone'),
+    popNome: $('#pop-nome'), popDesc: $('#pop-desc'),
     painel: $('#painel'), painelAlca: $('#painel-alca'), painelFechar: $('#painel-fechar'), painelTitulo: $('#painel-titulo'),
     pLote: $('#p-lote'), pGleba: $('#p-gleba'), pStatus: $('#p-status'), pArea: $('#p-area'),
     pFrente: $('#p-frente'), pFundo: $('#p-fundo'), pEsq: $('#p-esq'), pDir: $('#p-dir'),
     pValor: $('#p-valor'), pValorNum: $('#p-valor-num'), pWhats: $('#p-whats'), pShare: $('#p-share'),
     estado: $('#estado'), estadoTitulo: $('#estado-titulo'), estadoTexto: $('#estado-texto'), estadoTentar: $('#estado-tentar'),
-    orientacaoSvg: $('#orientacao-svg'), orientacaoTexto: $('#orientacao-texto'),
-    cartaoComuns: $('#areas-comuns'), listaComuns: $('#lista-comuns'),
     hDisponiveis: $('#h-disponiveis'), hGlebas: $('#h-glebas'), hArea: $('#h-area'),
     chegarWhats: $('#chegar-whats'),
     rAtualizado: $('#r-atualizado'), rFonte: $('#r-fonte'),
@@ -104,7 +102,8 @@
     selecionado: null,
     rotulosVisiveis: true,
     glebaLarguraSoma: 0, glebaQtd: 0, glebasVisiveis: true,
-    nomesVias: [],           // { el, fonte } — nomes ao longo das vias
+    placas: [],              // { el, c, tipo, principal } — placas das vias (tamanho fixo em px)
+    espRuaM: 160, avLenM: 1900,
     pontos: [],              // { ...ponto, el, item }
     pontoAtivo: null,
     faixaStroke: '',         // último ajuste de espessura (evita reescrever a cada frame)
@@ -249,7 +248,7 @@
     state.lotes.clear(); state.porNumero.clear();
     state.contagem = { disponivel: 0, vendido: 0, reservado: 0 };
     state.glebaLarguraSoma = 0; state.glebaQtd = 0;
-    state.nomesVias = []; state.pontos = []; state.pontoAtivo = null;
+    state.placas = []; state.espRuaM = 160; state.avLenM = 1900; state.pontos = []; state.pontoAtivo = null;
 
     const NSS = 'non-scaling-stroke';
 
@@ -266,7 +265,7 @@
       if (!a || a.tipo === 'imovel' || !polyValido(a.poly)) continue;
       const tipo = String(a.tipo || 'area_comum').replace(/[^a-z_]/gi, '') || 'area_comum';
       el.gAreas.appendChild(criar('polygon', { class: `area area--${tipo}`, points: pontos(a.poly), 'vector-effect': NSS }));
-      if (a.nome) {
+      if (a.nome && tipo !== 'clube' && tipo !== 'area_comum') {
         const c = Array.isArray(a.label) && pontoValido(a.label) ? a.label : centroide(a.poly);
         el.gRotulosAreas.appendChild(criar('text', { class: `rotulo-area rotulo-area--${tipo}`, x: c[0], y: c[1] }, String(a.nome)));
       }
@@ -282,23 +281,27 @@
       fragPistas.appendChild(criar('polyline', { class: `via via--pista via--${v.tipo}`, points: pts, 'stroke-width': w }));
       if (v.tipo === 'avenida') fragPistas.appendChild(criar('polyline', { class: 'via via--eixo', points: pts, 'stroke-width': 0.5 }));
 
-      if (v.nome) {
-        // Texto sempre da esquerda para a direita: inverte o traçado se ele "volta"
-        const p = v.pts[v.pts.length - 1][0] < v.pts[0][0] ? [...v.pts].reverse() : v.pts;
-        const fonte = VIA_FONTE_M[v.tipo];
-        const larguraTexto = v.nome.length * fonte * 0.78; // estimativa (caixa alta + espaçamento)
-        if (larguraTexto < comprimento(p) * 0.85) {
-          const id = `via-p-${i}`;
-          el.gNomesVias.appendChild(criar('path', { id, d: caminho(p), fill: 'none' }));
-          const t = criar('text', { class: `nome-via nome-via--${v.tipo}`, 'font-size': fonte, dy: 0.35 * fonte });
-          const tp = criar('textPath', { href: `#${id}`, startOffset: '50%', 'text-anchor': 'middle' }, v.nome.toUpperCase());
-          tp.setAttributeNS(XLINK_NS, 'xlink:href', `#${id}`);
-          t.appendChild(tp);
-          el.gNomesVias.appendChild(t);
-          state.nomesVias.push({ el: t, fonte });
+      if (v.nome && v.tipo !== 'acesso') {
+        if (v.tipo === 'avenida') {
+          const volta = (data.meta.avenidas || AVENIDAS_PADRAO)[1] === v.nome;
+          const nome = v.nome.replace(/^Avenida\s+/i, 'Av. ').toUpperCase();
+          const texto = volta ? `\u2190 ${nome}` : `${nome} \u2192`;
+          for (const fr of [0.18, 0.5, 0.82]) {
+            criarPlaca({ texto, tipo: 'avenida', c: pontoAoLongo(v.pts, fr), dy: volta ? 46 : -46, principal: fr === 0.5 });
+          }
+        } else {
+          const topo = v.pts.reduce((a, b) => (b[1] < a[1] ? b : a));
+          const base = v.pts.reduce((a, b) => (b[1] > a[1] ? b : a));
+          criarPlaca({ texto: v.nome.toUpperCase(), tipo: 'rua', c: topo, dy: -13, principal: true });
+          criarPlaca({ texto: v.nome.toUpperCase(), tipo: 'rua', c: base, dy: 14, principal: false });
         }
       }
     });
+    // Espaçamento médio entre ruas e comprimento das avenidas (em m): decidem quando as placas aparecem
+    const ruasX = data.vias.filter((v) => v.tipo === 'rua').map((v) => v.pts[0][0]).sort((a, b) => a - b);
+    if (ruasX.length > 1) state.espRuaM = (ruasX[ruasX.length - 1] - ruasX[0]) / (ruasX.length - 1);
+    const avs = data.vias.filter((v) => v.tipo === 'avenida');
+    if (avs.length) state.avLenM = avs.reduce((s, v) => s + comprimento(v.pts), 0) / avs.length;
     el.gVias.appendChild(fragBordas);
     el.gVias.appendChild(fragPistas);
 
@@ -338,29 +341,76 @@
       state.glebaLarguraSoma += (bb[2] - bb[0]); state.glebaQtd++;
     }
 
-    // 6) Marcadores numerados das áreas comuns (geometria em px; o transform aplica scale(1/k)).
-    //    Pontos na mesma coordenada (ex.: quadra, baias e fazendinha juntas) são abertos em leque, em px.
-    const repetidos = new Map(); // "x,y" → quantos já foram desenhados ali
+    // 6) Marcadores com nome: portaria e área de lazer (os itens do clube viram um único marcador, com a lista no mini-painel)
+    const clube = data.areas.find((a) => a && a.tipo === 'clube' && polyValido(a.poly));
+    const grupo = [];
+    const marcadores = [];
     for (const p of data.pontos) {
-      if (!p.c) { state.pontos.push({ ...p, el: null, item: null, dx: 0 }); continue; }
-      const chave = `${p.c[0]},${p.c[1]}`;
-      const rep = repetidos.get(chave) || 0;
-      repetidos.set(chave, rep + 1);
-      const dx = rep * 26; // 2º, 3º… marcadores no mesmo ponto abrem para a direita
-      const g = criar('g', { class: 'ponto', 'data-id': p.id, role: 'button', tabindex: '0', 'aria-label': `${p.n}. ${p.nome} — ${situacaoTexto(p)}` });
-      const corpo = criar('g', { transform: `translate(${dx} 0)` });
-      corpo.appendChild(criar('ellipse', { class: 'ponto__pe', cx: 0, cy: 0, rx: 5.5, ry: 2.6 }));
-      corpo.appendChild(criar('line', { class: 'ponto__haste', x1: 0, y1: -1, x2: 0, y2: -13 }));
-      corpo.appendChild(criar('circle', { class: 'ponto__anel', cx: 0, cy: -25, r: 17.5 }));
-      corpo.appendChild(criar('circle', { class: 'ponto__circulo', cx: 0, cy: -25, r: 13 }));
-      corpo.appendChild(criar('text', { class: 'ponto__n', x: 0, y: -25 }, String(p.n)));
-      g.appendChild(corpo);
+      if (!p.c || p.tipo === 'reserva') continue; // a reserva já tem o nome escrito sobre a mata
+      if (clube && dentroDePoligono(p.c, clube.poly)) { grupo.push(p); continue; }
+      marcadores.push({ ...p, rotulo: p.tipo === 'guarita' ? 'Portaria' : p.nome });
+    }
+    if (grupo.length) {
+      marcadores.push({ id: 'lazer', n: 0, nome: 'Área de lazer', tipo: 'lazer', rotulo: 'Área de lazer', c: centroide(clube.poly), desc: grupo.map((p) => p.nome).join(' · '), itens: grupo });
+    }
+    for (const p of marcadores) {
+      const g = criar('g', { class: `ponto ponto--${p.tipo}`, 'data-id': p.id, role: 'button', tabindex: '0', 'aria-label': p.nome });
+      const w = Math.round(p.rotulo.length * 7.1 + 46);
+      g.appendChild(criar('ellipse', { class: 'ponto__pe', cx: 0, cy: 0, rx: 5.5, ry: 2.6 }));
+      g.appendChild(criar('line', { class: 'ponto__haste', x1: 0, y1: -1, x2: 0, y2: -14 }));
+      g.appendChild(criar('rect', { class: 'ponto__anel', x: -w / 2 - 4, y: -44, width: w + 8, height: 36, rx: 18 }));
+      g.appendChild(criar('rect', { class: 'ponto__pill', x: -w / 2, y: -40, width: w, height: 28, rx: 14 }));
+      const ic = criar('g', { class: 'ponto__icone', transform: `translate(${-w / 2 + 9} -36) scale(.83)` });
+      ic.appendChild(criar('path', { d: ICONES[iconeDe(p)] || ICONES.padrao, fill: 'none', stroke: 'currentColor', 'stroke-width': '1.9', 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }));
+      g.appendChild(ic);
+      g.appendChild(criar('text', { class: 'ponto__rotulo', x: -w / 2 + 34, y: -26 }, p.rotulo));
       el.gPontos.appendChild(g);
-      state.pontos.push({ ...p, el: g, item: null, dx });
+      state.pontos.push({ ...p, el: g, item: null, dx: 0 });
     }
 
     // Caixa do mundo: meta.bbox ou calculada a partir de tudo que foi desenhado
     state.bbox = bboxValido(data.meta.bbox) ? data.meta.bbox : calcularBbox(data);
+  }
+
+  function iconeDe(p) { return p.tipo === 'lazer' ? 'piscina' : p.tipo; }
+
+  // Ponto (mundo) a uma fração do comprimento de uma polilinha
+  function pontoAoLongo(pl, frac) {
+    const total = comprimento(pl);
+    let alvo = frac * total;
+    for (let i = 0; i < pl.length - 1; i++) {
+      const d = Math.hypot(pl[i + 1][0] - pl[i][0], pl[i + 1][1] - pl[i][1]);
+      if (alvo <= d || i === pl.length - 2) {
+        const t = d ? Math.min(alvo / d, 1) : 0;
+        return [pl[i][0] + (pl[i + 1][0] - pl[i][0]) * t, pl[i][1] + (pl[i + 1][1] - pl[i][1]) * t];
+      }
+      alvo -= d;
+    }
+    return pl[pl.length - 1];
+  }
+
+  function dentroDePoligono(pt, poly) {
+    let dentro = false;
+    for (let i = 0, k = poly.length - 1; i < poly.length; k = i++) {
+      const [xi, yi] = poly[i], [xk, yk] = poly[k];
+      if ((yi > pt[1]) !== (yk > pt[1]) && pt[0] < ((xk - xi) * (pt[1] - yi)) / (yk - yi) + xi) dentro = !dentro;
+    }
+    return dentro;
+  }
+
+  // Placa de via: tamanho fixo em px (o transform aplica scale(1/k)); geometria em px em torno do ponto da via
+  function criarPlaca({ texto, tipo, c, dy, principal }) {
+    const fonte = tipo === 'avenida' ? 11 : 9;
+    const w = Math.round(texto.length * fonte * 0.68 + 16);
+    const h = tipo === 'avenida' ? 22 : 17;
+    const g = criar('g', { class: `placa placa--${tipo}${principal ? ' placa--principal' : ''}` });
+    if (tipo === 'avenida') g.appendChild(criar('line', { class: 'placa__haste', x1: 0, y1: 0, x2: 0, y2: dy }));
+    const corpo = criar('g', { transform: `translate(0 ${dy})` });
+    corpo.appendChild(criar('rect', { class: 'placa__fundo', x: -w / 2, y: -h / 2, width: w, height: h, rx: tipo === 'avenida' ? 5 : 3.5 }));
+    corpo.appendChild(criar('text', { class: 'placa__texto', x: 0, y: 0, 'font-size': fonte }, texto));
+    g.appendChild(corpo);
+    el.gNomesVias.appendChild(g);
+    state.placas.push({ el: g, c, tipo, principal, visivel: null });
   }
 
   const bboxValido = (b) => Array.isArray(b) && b.length === 4 && b.every(Number.isFinite) && b[2] > b[0] && b[3] > b[1];
@@ -441,44 +491,6 @@
     return s;
   }
 
-  function situacaoTexto(p) {
-    if (p.situacao === 'pronto') return 'pronto';
-    if (p.situacao === 'em_obra') return p.prazo ? `em obra · até ${p.prazo}` : 'em obra';
-    return p.prazo ? `previsto até ${p.prazo}` : 'previsto';
-  }
-
-  function construirListaComuns() {
-    limpar(el.listaComuns);
-    if (!state.pontos.length) { el.cartaoComuns.hidden = true; return; }
-    el.cartaoComuns.hidden = false;
-    for (const p of state.pontos) {
-      const li = document.createElement('li');
-      // Sem coordenada no mapa, o item vira só informativo (não é botão)
-      const btn = document.createElement(p.c ? 'button' : 'div');
-      if (p.c) {
-        btn.type = 'button';
-        btn.setAttribute('aria-label', `${p.n}. ${p.nome} — ${situacaoTexto(p)}. Localizar no mapa.`);
-      }
-      btn.className = `comuns__item${p.c ? '' : ' comuns__item--sem-mapa'}`;
-      btn.dataset.id = p.id;
-
-      const n = document.createElement('span'); n.className = 'comuns__n'; n.textContent = p.n; n.setAttribute('aria-hidden', 'true');
-      const ic = document.createElement('span'); ic.className = 'comuns__icone'; ic.setAttribute('aria-hidden', 'true'); ic.appendChild(iconeSvg(p.tipo));
-      const corpo = document.createElement('span'); corpo.className = 'comuns__corpo';
-      const nome = document.createElement('span'); nome.className = 'comuns__nome';
-      nome.append(p.nome);
-      const chip = document.createElement('span'); chip.className = `chip chip--${p.situacao}`; chip.textContent = situacaoTexto(p);
-      nome.appendChild(chip);
-      corpo.appendChild(nome);
-      if (p.desc) { const d = document.createElement('p'); d.className = 'comuns__desc'; d.textContent = p.desc; corpo.appendChild(d); }
-
-      btn.append(n, ic, corpo);
-      li.appendChild(btn);
-      el.listaComuns.appendChild(li);
-      p.item = btn;
-    }
-  }
-
   function pontoPorId(id) { return state.pontos.find((p) => p.id === id) || null; }
 
   function ativarPonto(p) {
@@ -498,11 +510,8 @@
   function abrirPopover(p) {
     if (!p.c) return;
     ativarPonto(p);
-    el.popN.textContent = p.n;
-    limpar(el.popIcone); el.popIcone.appendChild(iconeSvg(p.tipo));
+    limpar(el.popIcone); el.popIcone.appendChild(iconeSvg(iconeDe(p)));
     el.popNome.textContent = p.nome;
-    el.popChip.textContent = situacaoTexto(p);
-    el.popChip.className = `chip chip--${p.situacao}`;
     el.popDesc.textContent = p.desc || '';
     el.popDesc.hidden = !p.desc;
     el.popover.hidden = false;
@@ -538,85 +547,6 @@
     abrirPopover(p);
     if (!DESKTOP.matches) {
       try { el.mapa.scrollIntoView({ behavior: MENOS_MOVIMENTO.matches ? 'auto' : 'smooth', block: 'center' }); } catch (_) { /* sem suporte */ }
-    }
-  }
-
-  // ---------------------------------------------------------------- Mini-mapa de orientação (gerado do JSON)
-  function construirOrientacao() {
-    const m = state.data.meta;
-    const [ida, volta] = m.avenidas;
-    const n = m.ruas;
-    limpar(el.orientacaoSvg);
-
-    const W = 340, H = 220;
-    const svg = criar('svg', { viewBox: `0 0 ${W} ${H}`, role: 'img', 'aria-label': `Diagrama: portaria, ${ida} (ida), ${n ? `ruas 1 a ${n}` : 'ruas transversais'}, ${volta} (volta) e área de preservação ao fundo.` });
-
-    const defs = criar('defs');
-    const pat = criar('pattern', { id: 'ori-mata', width: 10, height: 10, patternUnits: 'userSpaceOnUse' });
-    pat.appendChild(criar('rect', { width: 10, height: 10, fill: '#D5E4CC' }));
-    pat.appendChild(criar('circle', { cx: 3, cy: 3, r: 1.6, fill: '#8FB08A' }));
-    pat.appendChild(criar('circle', { cx: 7.5, cy: 7, r: 1.3, fill: '#9CBB93' }));
-    defs.appendChild(pat);
-    svg.appendChild(defs);
-    svg.appendChild(criar('rect', { class: 'ori__fundo', x: 0, y: 0, width: W, height: H, rx: 12 }));
-
-    // Geometria do diagrama
-    const xIni = 46, xFim = 286, yIda = 92, yVolta = 152;
-    const yTopo = 36, yBase = 208;
-
-    // Área de preservação no fim da avenida de ida
-    svg.appendChild(criar('rect', { class: 'ori__mata', x: 292, y: 30, width: 40, height: 180, rx: 8 }));
-    const tMata = criar('text', { class: 'ori__rot', transform: 'translate(312 120) rotate(-90)' }, 'Área de preservação');
-    svg.appendChild(tMata);
-
-    // Glebas (faixas claras) acima, entre e abaixo das avenidas
-    for (const [y, h] of [[yTopo, yIda - 12 - yTopo], [yIda + 12, yVolta - 12 - (yIda + 12)], [yVolta + 12, yBase - 14 - (yVolta + 12)]]) {
-      svg.appendChild(criar('rect', { class: 'ori__gleba', x: xIni + 8, y, width: xFim - xIni - 8, height: Math.max(h, 8), rx: 4 }));
-    }
-
-    // Ruas transversais numeradas a partir da entrada
-    const ruas = criar('g');
-    const rotulos = criar('g');
-    if (n > 0) {
-      const x0 = xIni + 30, x1 = xFim - 12;
-      const passo = n > 1 ? (x1 - x0) / (n - 1) : 0;
-      const fs = n > 7 ? 7.5 : 8.5;
-      for (let i = 0; i < n; i++) {
-        const x = n > 1 ? x0 + passo * i : (x0 + x1) / 2;
-        ruas.appendChild(criar('line', { class: 'ori__rua', x1: x, y1: yTopo - 4, x2: x, y2: yBase - 10, 'stroke-width': 5 }));
-        // Com muitas ruas, alterna o rótulo acima/abaixo para não sobrepor
-        const emCima = n <= 7 || i % 2 === 0;
-        rotulos.appendChild(criar('text', { class: 'ori__rua-n', x, y: emCima ? yTopo - 9 : yBase - 1, 'font-size': fs }, `Rua ${i + 1}`));
-      }
-    }
-    svg.appendChild(ruas);
-
-    // Avenidas (ida → e volta ←) + acesso da portaria
-    const faixa = (x1, y1, x2, y2, w) => {
-      svg.appendChild(criar('line', { class: 'ori__via', x1, y1, x2, y2, 'stroke-width': w + 3 }));
-      svg.appendChild(criar('line', { class: 'ori__via ori__via--pista', x1, y1, x2, y2, 'stroke-width': w }));
-    };
-    faixa(xIni, yIda, xIni, yVolta, 9);          // acesso
-    faixa(xIni, yIda, xFim, yIda, 11);           // ida
-    faixa(xFim, yVolta, xIni, yVolta, 11);       // volta
-    svg.appendChild(criar('path', { class: 'ori__seta', d: `M${xFim - 2} ${yIda - 6} L${xFim + 8} ${yIda} L${xFim - 2} ${yIda + 6} Z` }));
-    svg.appendChild(criar('path', { class: 'ori__seta', d: `M${xIni + 14} ${yVolta - 6} L${xIni + 4} ${yVolta} L${xIni + 14} ${yVolta + 6} Z` }));
-    svg.appendChild(criar('text', { class: 'ori__nome', x: (xIni + xFim) / 2, y: yIda - 10 }, `${ida} →`));
-    svg.appendChild(criar('text', { class: 'ori__nome', x: (xIni + xFim) / 2, y: yVolta + 17 }, `← ${volta}`));
-    svg.appendChild(rotulos);
-
-    // Portaria (marcador dourado) na entrada
-    const yPort = (yIda + yVolta) / 2;
-    svg.appendChild(criar('line', { class: 'ori__via ori__via--pista', x1: 12, y1: yPort, x2: xIni, y2: yPort, 'stroke-width': 7 }));
-    svg.appendChild(criar('circle', { class: 'ori__pin', cx: 22, cy: yPort, r: 11 }));
-    svg.appendChild(criar('text', { class: 'ori__pin-t', x: 22, y: yPort }, 'P'));
-    svg.appendChild(criar('text', { class: 'ori__rot', x: 22, y: yPort + 24 }, 'Portaria'));
-
-    el.orientacaoSvg.appendChild(svg);
-
-    if (el.orientacaoTexto) {
-      const ruasTxt = n ? `as ruas 1 a ${n}` : 'as ruas transversais';
-      el.orientacaoTexto.textContent = `Entre pela portaria e siga pela ${ida}; ${ruasTxt} cruzam até a ${volta}, que traz de volta à entrada. No fim da ${ida} fica a área de preservação.`;
     }
   }
 
@@ -657,13 +587,18 @@
       state.rotulosVisiveis = mostrar;
       el.gRotulos.style.display = mostrar ? '' : 'none';
     }
-    // Nomes das vias: cada um aparece quando a sua fonte (em metros) fica legível
-    for (const nv of state.nomesVias) {
-      const vis = nv.fonte * k >= NOME_VIA_MIN_PX;
-      if (vis !== nv.visivel) { nv.visivel = vis; nv.el.style.display = vis ? '' : 'none'; }
+    // Placas das vias: tamanho fixo em px; ruas só quando o espaçamento na tela permite; avenidas 1 ou 3 placas
+    const inv = 1 / k;
+    const espRua = state.espRuaM * k;
+    const mostrarRuas = espRua >= 40;
+    const mostrarRuasBase = espRua >= 120;
+    const tresPlacas = state.avLenM * k >= 460;
+    for (const p of state.placas) {
+      const vis = p.tipo === 'rua' ? (mostrarRuas && (p.principal || mostrarRuasBase)) : (p.principal || tresPlacas);
+      if (vis !== p.visivel) { p.visivel = vis; p.el.style.display = vis ? '' : 'none'; }
+      if (vis) p.el.setAttribute('transform', `translate(${p.c[0]} ${p.c[1]}) scale(${inv})`);
     }
     // Marcadores: posição no mundo, tamanho constante em px
-    const inv = 1 / k;
     for (const p of state.pontos) if (p.el) p.el.setAttribute('transform', `translate(${p.c[0]} ${p.c[1]}) scale(${inv})`);
 
     posicionarPopover();
@@ -1115,11 +1050,7 @@
     el.pShare.addEventListener('click', compartilhar);
     ligarArrasteDoPainel();
 
-    // Áreas comuns: legenda numerada (delegação) e mini-painel
-    el.listaComuns.addEventListener('click', (e) => {
-      const btn = e.target.closest('.comuns__item');
-      if (btn) focarPonto(pontoPorId(btn.dataset.id));
-    });
+    // Mini-painel das áreas comuns
     el.popFechar.addEventListener('click', fecharPopover);
 
     // Teclado: Esc fecha painel e mini-painel
@@ -1151,8 +1082,6 @@
       validar(data);
       state.data = data;
       construirMapa(data);
-      construirListaComuns();
-      construirOrientacao();
       preencherLegenda();
       preencherHero();
       preencherRodape();

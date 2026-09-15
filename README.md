@@ -177,3 +177,7 @@ Regra de conteúdo: só entram em `pontos.json` itens que constam do contrato de
 Repositório: https://github.com/Jachsonazevedo/haras-rio-sao-jose-mapa · Site: https://jachsonazevedo.github.io/haras-rio-sao-jose-mapa/
 
 Link direto para um lote: `https://jachsonazevedo.github.io/haras-rio-sao-jose-mapa/?lote=318`
+
+## Mapa-guia ilustrado
+
+`scripts/gerar_mapa_guia.py` desenha `assets/mapa-guia.svg` (e o app exibe na seção "Conheça o empreendimento") a partir do mesmo `data/lotes.json`: projeção 2,5D com relevo, árvores, placas das avenidas e ruas, portaria, detalhe ampliado da área de lazer com ícones numerados e legenda. Rode depois de `gerar_dados.py` sempre que a geometria, as vias ou `pontos.json` mudarem. `assets/mapa-guia.png` é a versão em imagem (2000×900) para WhatsApp/impressão.

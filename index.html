@@ -33,6 +33,8 @@
     </a>
     <nav class="topo__nav" aria-label="Seções">
       <a href="#mapa">Mapa</a>
+      <a href="#guia">Mapa-guia</a>
+      <a href="#veja-do-alto">Vídeo 360°</a>
       <a href="#pronto">Fotos</a>
       <a href="#como-chegar">Como chegar</a>
     </nav>
@@ -41,40 +43,19 @@
 
   <main id="inicio">
 
-    <!-- ===================== HERO ===================== -->
-    <section class="hero" aria-labelledby="hero-titulo">
-      <img class="hero__fundo" src="assets/drone-poster.jpg" alt="" onerror="this.classList.add('is-hidden')">
-      <div class="hero__conteudo">
-        <p class="hero__sobre">Chacreamento · Poções – BA</p>
-        <h1 class="hero__titulo" id="hero-titulo">Terrenos a partir de 2.000 m² para a sua chácara rural, a menos de dez minutos do centro de Poções.</h1>
-        <p class="hero__sub">Entrada facilitada e até 140 meses para pagar.</p>
-        <a class="btn btn--dourado btn--grande" href="#mapa">
-          Ver o mapa
-          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 5v14M6 13l6 6 6-6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        </a>
-        <dl class="numeros" aria-label="Números do chacreamento">
+    <!-- ===================== FAIXA (headline) ===================== -->
+    <section class="faixa" aria-labelledby="hero-titulo">
+      <div class="faixa__inner">
+        <div class="faixa__texto">
+          <p class="faixa__sobre">Chacreamento · Poções – BA</p>
+          <h1 class="faixa__titulo" id="hero-titulo">Terrenos a partir de 2.000 m² para a sua chácara rural, a menos de dez minutos do centro de Poções.</h1>
+          <p class="faixa__sub">Entrada facilitada e até 140 meses para pagar.</p>
+        </div>
+        <dl class="numeros numeros--faixa" aria-label="Números do chacreamento">
           <div class="numeros__item"><dd id="h-disponiveis">—</dd><dt>unidades disponíveis</dt></div>
           <div class="numeros__item"><dd id="h-glebas">—</dd><dt>glebas</dt></div>
           <div class="numeros__item"><dd id="h-area">—</dd><dt>de área total</dt></div>
         </dl>
-      </div>
-    </section>
-
-    <!-- ===================== VEJA DO ALTO ===================== -->
-    <section class="secao video" id="veja-do-alto" aria-labelledby="video-titulo">
-      <div class="secao__inner">
-        <p class="secao__sobre">Vídeo 360°</p>
-        <h2 class="secao__titulo" id="video-titulo">Veja do alto</h2>
-        <p class="secao__texto">Sobrevoo do chacreamento para você se localizar antes de escolher a sua unidade.</p>
-        <div class="video__quadro" role="img" aria-label="Vídeo 360° em breve">
-          <img class="video__fundo" src="assets/drone-poster.jpg" alt="" onerror="this.classList.add('is-hidden')">
-          <div class="video__centro">
-            <span class="video__icone" aria-hidden="true">
-              <svg viewBox="0 0 24 24" focusable="false"><path d="M12 3a9 9 0 1 0 9 9" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M21 3v6h-6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M10 9.5v5l4-2.5z" fill="currentColor"/></svg>
-            </span>
-            <span class="video__msg">Vídeo 360° em breve</span>
-          </div>
-        </div>
       </div>
     </section>
 
@@ -83,13 +64,12 @@
       <div class="secao__inner">
         <div class="mapa-secao__cabeca">
           <div>
-            <p class="secao__sobre">Mapa interativo</p>
+            <p class="secao__sobre">Mapa interativo · disponibilidade em tempo real</p>
             <h2 class="secao__titulo" id="mapa-titulo">Escolha a sua unidade</h2>
-            <p class="secao__texto">Toque em um lote para ver área, medidas e disponibilidade. Use a busca para ir direto ao número.</p>
           </div>
+          <p class="mapa-secao__dica">Toque em um lote para ver área, medidas e disponibilidade. Use a busca para ir direto ao número.</p>
         </div>
 
-        <div class="mapa-grade">
           <!-- ---------- Quadro do mapa ---------- -->
           <div class="mapa" id="mapa-quadro" aria-label="Mapa das unidades">
 
@@ -210,11 +190,9 @@
                 <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
               </button>
               <div class="popover__topo">
-                <span class="popover__n" id="pop-n">1</span>
                 <span class="popover__icone" id="pop-icone" aria-hidden="true"></span>
                 <div class="popover__titulos">
                   <strong class="popover__nome" id="pop-nome">—</strong>
-                  <span class="chip" id="pop-chip">—</span>
                 </div>
               </div>
               <p class="popover__desc" id="pop-desc"></p>
@@ -275,20 +253,38 @@
             </div>
           </div>
 
-          <!-- ---------- Coluna lateral: orientação + áreas comuns ---------- -->
-          <aside class="lateral" aria-label="Orientação e áreas comuns">
-            <div class="cartao" id="orientacao">
-              <h3 class="cartao__titulo">Como se orientar no Haras</h3>
-              <p class="cartao__texto" id="orientacao-texto">Entre pela portaria, siga pela avenida de ida; as ruas transversais cruzam até a avenida de volta.</p>
-              <div class="orientacao__svg" id="orientacao-svg" aria-hidden="true"></div>
-            </div>
+      </div>
+    </section>
 
-            <div class="cartao" id="areas-comuns" hidden>
-              <h3 class="cartao__titulo">Áreas comuns</h3>
-              <p class="cartao__texto">Toque em um item para localizar no mapa.</p>
-              <ol class="comuns" id="lista-comuns"></ol>
-            </div>
-          </aside>
+    <!-- ===================== MAPA-GUIA ILUSTRADO ===================== -->
+    <section class="secao guia" id="guia" aria-labelledby="guia-titulo">
+      <div class="secao__inner">
+        <p class="secao__sobre">Mapa-guia</p>
+        <h2 class="secao__titulo" id="guia-titulo">Conheça o empreendimento</h2>
+        <p class="secao__texto">Portaria, Avenida Pau Ferro, Avenida Umbuzeiro, Ruas 1 a 12, área de lazer e reserva ambiental: o Haras inteiro em um só desenho.</p>
+        <figure class="guia__quadro">
+          <a class="guia__link" href="assets/mapa-guia.svg" target="_blank" rel="noopener" aria-label="Abrir o mapa-guia em tela cheia">
+            <img class="guia__img" src="assets/mapa-guia.svg" alt="Mapa-guia ilustrado do Haras Rio São José: portaria e guarita, Avenida Pau Ferro, Avenida Umbuzeiro, Ruas 1 a 12, 57 glebas, área de lazer com salão de festas, piscina, quiosques, banheiros, quadra de areia, baias e redondel e fazendinha, e a área de preservação ambiental." loading="lazy" width="2000" height="900">
+          </a>
+          <figcaption>Ilustração baseada na planta do empreendimento, sem escala. Toque para abrir em tela cheia.</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <!-- ===================== VEJA DO ALTO ===================== -->
+    <section class="secao video" id="veja-do-alto" aria-labelledby="video-titulo">
+      <div class="secao__inner">
+        <p class="secao__sobre">Vídeo 360°</p>
+        <h2 class="secao__titulo" id="video-titulo">Veja do alto</h2>
+        <p class="secao__texto">Sobrevoo do chacreamento para você se localizar antes de escolher a sua unidade.</p>
+        <div class="video__quadro" role="img" aria-label="Vídeo 360° em breve">
+          <img class="video__fundo" src="assets/drone-poster.jpg" alt="" onerror="this.classList.add('is-hidden')">
+          <div class="video__centro">
+            <span class="video__icone" aria-hidden="true">
+              <svg viewBox="0 0 24 24" focusable="false"><path d="M12 3a9 9 0 1 0 9 9" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M21 3v6h-6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M10 9.5v5l4-2.5z" fill="currentColor"/></svg>
+            </span>
+            <span class="video__msg">Vídeo 360° em breve</span>
+          </div>
         </div>
       </div>
     </section>
@@ -313,9 +309,9 @@
 
         <div class="subgaleria" id="bloco-projeto">
           <h3 class="subgaleria__titulo">Projeto das áreas comuns</h3>
-          <p class="secao__texto">Imagens de projeto — ilustrativas, sujeitas a ajustes na execução.</p>
+          <p class="secao__texto">Imagens de projeto, ilustrativas.</p>
           <div class="galeria galeria--projeto" id="galeria-projeto">
-            <figure class="card-foto card-foto--projeto"><span class="tarja">Imagem ilustrativa do projeto</span><img src="assets/fotos/projeto-salao-piscina.jpg" alt="Projeto do salão de festas e da piscina" loading="lazy" onerror="this.closest('figure').remove()"><figcaption>Salão de festas, piscina e quiosques em obra, entrega até 31/12/2027</figcaption></figure>
+            <figure class="card-foto card-foto--projeto"><span class="tarja">Imagem ilustrativa do projeto</span><img src="assets/fotos/projeto-salao-piscina.jpg" alt="Projeto do salão de festas e da piscina" loading="lazy" onerror="this.closest('figure').remove()"><figcaption>Salão de festas, piscina e quiosques — projeto</figcaption></figure>
             <figure class="card-foto card-foto--projeto"><span class="tarja">Imagem ilustrativa do projeto</span><img src="assets/fotos/projeto-baias-redondel.jpg" alt="Projeto das baias e do redondel" loading="lazy" onerror="this.closest('figure').remove()"><figcaption>Baias e redondel — projeto</figcaption></figure>
             <figure class="card-foto card-foto--projeto"><span class="tarja">Imagem ilustrativa do projeto</span><img src="assets/fotos/projeto-guarita.jpg" alt="Projeto da portaria" loading="lazy" onerror="this.closest('figure').remove()"><figcaption>Portaria — projeto</figcaption></figure>
           </div>

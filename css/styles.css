@@ -178,12 +178,12 @@ button, input { font: inherit; }
 
 .mapa {
   position: relative;
-  height: 62dvh; min-height: 420px; max-height: 640px;
+  height: calc(100dvh - var(--header-h) - 120px); min-height: 460px; max-height: 720px;
   background: var(--mapa-bg);
   border-radius: var(--radius-g); overflow: hidden; isolation: isolate;
   box-shadow: var(--sombra-forte); border: 1px solid rgba(24, 56, 39, .14);
 }
-@media (min-width: 1100px) { .mapa { height: 600px; max-height: none; } }
+@media (min-width: 1100px) { .mapa { height: min(calc(100dvh - var(--header-h) - 130px), 760px); max-height: none; } }
 
 .mapa__svg {
   position: absolute; inset: 0; width: 100%; height: 100%; display: block;
@@ -566,4 +566,59 @@ button, input { font: inherit; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { transition: none !important; animation: none !important; }
   html { scroll-behavior: auto; }
+}
+
+/* =====================================================================
+   Rodada 3 — mapa logo de cara, placas de vias, pinos com nome, mapa-guia
+   ===================================================================== */
+
+/* ---------- Faixa da headline (substitui o hero) ---------- */
+.faixa { background: var(--verde); color: var(--marfim); padding: 22px 16px 24px; border-bottom: 1px solid rgba(200, 168, 107, .35); }
+.faixa__inner { max-width: 1240px; margin: 0 auto; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 18px 40px; }
+.faixa__texto { min-width: 0; flex: 1 1 520px; }
+.faixa__sobre { margin: 0 0 6px; font-size: .72rem; letter-spacing: .18em; text-transform: uppercase; color: var(--dourado); font-weight: 600; }
+.faixa__titulo { margin: 0; color: #fff; font-size: clamp(1.25rem, 2.3vw, 1.75rem); line-height: 1.2; max-width: 34ch; text-wrap: balance; }
+.faixa__sub { margin: 8px 0 0; font-size: clamp(.95rem, 1.4vw, 1.08rem); color: rgba(253, 250, 242, .88); }
+.numeros--faixa { margin: 0; padding: 0; border: 0; gap: 8px 28px; flex: 0 0 auto; }
+.numeros--faixa .numeros__item { min-width: 0; }
+.numeros--faixa dd { font-size: clamp(1.5rem, 2.6vw, 2.1rem); }
+.numeros--faixa dt { font-size: .68rem; }
+@media (min-width: 900px) { .faixa { padding: 22px 32px 24px; } }
+
+/* ---------- Seção do mapa mais enxuta ---------- */
+.mapa-secao { padding: 18px 16px 34px; }
+@media (min-width: 900px) { .mapa-secao { padding: 22px 32px 40px; } }
+.mapa-secao__cabeca { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 6px 24px; margin-bottom: 12px; }
+.mapa-secao__cabeca .secao__sobre { margin-bottom: 2px; }
+.mapa-secao__cabeca .secao__titulo { margin: 0; font-size: clamp(1.4rem, 2.6vw, 1.9rem); }
+.mapa-secao__dica { margin: 0; color: var(--texto-suave); font-size: .9rem; max-width: 60ch; }
+
+/* ---------- Placas de avenidas e ruas (tamanho fixo em px) ---------- */
+.placa { pointer-events: none; }
+.placa__haste { stroke: var(--madeira); stroke-width: 2px; }
+.placa--avenida .placa__fundo { fill: var(--verde); stroke: var(--dourado); stroke-width: 1.2px; filter: url(#sombra-pin); }
+.placa--avenida .placa__texto { fill: #fff; font-weight: 700; letter-spacing: .08em; }
+.placa--rua .placa__fundo { fill: #fff; stroke: var(--verde); stroke-width: 1px; }
+.placa--rua .placa__texto { fill: var(--verde); font-weight: 700; letter-spacing: .04em; }
+.placa__texto { font-family: var(--fonte-texto); text-anchor: middle; dominant-baseline: central; }
+
+/* ---------- Marcadores com nome (pílula) ---------- */
+.ponto__pill { fill: var(--dourado); stroke: var(--marfim); stroke-width: 2px; transition: fill .15s; }
+.ponto__icone { color: var(--verde); }
+.ponto__rotulo { font-family: var(--fonte-texto); font-weight: 700; font-size: 12.5px; fill: var(--verde); dominant-baseline: central; pointer-events: none; }
+.ponto:hover .ponto__pill, .ponto.is-ativo .ponto__pill { fill: var(--dourado-forte); }
+.ponto.is-ativo .ponto__anel, .ponto:focus-visible .ponto__anel { display: block; }
+.ponto__anel { display: none; fill: none; stroke: var(--dourado); stroke-width: 2px; stroke-opacity: .7; }
+.popover { padding-right: 40px; }
+
+/* ---------- Mapa-guia ilustrado ---------- */
+.guia { background: var(--marfim); }
+.guia__quadro { margin: 0; }
+.guia__link { display: block; border-radius: var(--radius-g); overflow: hidden; box-shadow: var(--sombra-forte); border: 1px solid var(--linha); background: #fff; }
+.guia__link:hover { box-shadow: 0 16px 44px rgba(24, 56, 39, .26); }
+.guia__img { display: block; width: 100%; height: auto; background: #fff; }
+.guia__quadro figcaption { margin-top: 10px; font-size: .82rem; color: var(--texto-suave); }
+@media (max-width: 720px) {
+  .guia__link { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .guia__img { width: 1100px; max-width: none; }
 }
