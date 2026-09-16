@@ -1168,7 +1168,23 @@
     }
   }
 
+  // Vídeo 360°: a capa com botão inicia o player; telas pequenas recebem a versão 720p (menor)
+  function ligarVideo() {
+    const v = document.getElementById('video-360');
+    const b = document.getElementById('video-play');
+    const quadro = document.getElementById('video-quadro');
+    if (!v || !b || !quadro) return;
+    if (window.innerWidth <= 720) {
+      const s = v.querySelector('source');
+      if (s) { s.src = 'assets/video-360-720.mp4'; v.load(); }
+    }
+    b.addEventListener('click', () => { quadro.classList.add('is-tocando'); v.play().catch(() => {}); });
+    v.addEventListener('play', () => quadro.classList.add('is-tocando'));
+    v.addEventListener('ended', () => quadro.classList.remove('is-tocando'));
+  }
+
   function iniciar() {
+    ligarVideo();
     medirTopo();
     // Destaque do lote selecionado com espessura constante em px
     el.halo.setAttribute('vector-effect', 'non-scaling-stroke');

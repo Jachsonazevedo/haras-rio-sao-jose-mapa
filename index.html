@@ -9,7 +9,7 @@
   <meta property="og:title" content="Mapa de unidades — Haras Rio São José">
   <meta property="og:description" content="Terrenos a partir de 2.000 m² para a sua chácara rural, a menos de dez minutos do centro de Poções. Consulte o mapa de unidades.">
   <meta property="og:type" content="website">
-  <meta property="og:image" content="assets/drone-poster.jpg">
+  <meta property="og:image" content="assets/video-360-poster.jpg">
   <link rel="icon" href="assets/favicon.png">
   <link rel="apple-touch-icon" href="assets/icon-512.png">
 
@@ -302,16 +302,21 @@
       <div class="secao__inner">
         <p class="secao__sobre">Vídeo 360°</p>
         <h2 class="secao__titulo" id="video-titulo">Veja do alto</h2>
-        <p class="secao__texto">Sobrevoo do chacreamento para você se localizar antes de escolher a sua unidade.</p>
-        <div class="video__quadro" role="img" aria-label="Vídeo 360° em breve">
-          <img class="video__fundo" src="assets/drone-poster.jpg" alt="" onerror="this.classList.add('is-hidden')">
-          <div class="video__centro">
+        <p class="secao__texto">Sobrevoo em 360° do chacreamento, para você se localizar antes de escolher a sua unidade.</p>
+        <div class="video__quadro" id="video-quadro">
+          <video id="video-360" class="video__player" controls playsinline preload="metadata" poster="assets/video-360-poster.jpg"
+                 aria-label="Vídeo 360° do Haras Rio São José, visto do alto">
+            <source src="assets/video-360-1080.mp4" type="video/mp4">
+            Seu navegador não reproduz vídeo. <a href="assets/video-360-1080.mp4">Baixe o vídeo 360°</a>.
+          </video>
+          <button class="video__play" id="video-play" type="button" aria-label="Assistir ao vídeo 360°">
             <span class="video__icone" aria-hidden="true">
-              <svg viewBox="0 0 24 24" focusable="false"><path d="M12 3a9 9 0 1 0 9 9" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M21 3v6h-6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M10 9.5v5l4-2.5z" fill="currentColor"/></svg>
+              <svg viewBox="0 0 24 24" focusable="false"><path d="M8 5.5v13l11-6.5z" fill="currentColor"/></svg>
             </span>
-            <span class="video__msg">Vídeo 360° em breve</span>
-          </div>
+            <span class="video__msg">Assistir ao vídeo 360°</span>
+          </button>
         </div>
+        <p class="video__nota">Imagens ilustrativas. A infraestrutura e as áreas comuns entregues são as descritas no contrato.</p>
       </div>
     </section>
 
