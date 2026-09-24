@@ -777,3 +777,32 @@ button.r3-marca:hover { background: #fff; border-color: var(--dourado-forte); }
 .card-foto > a { display: block; }
 .galeria--projeto { grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); }
 .galeria--projeto .card-foto img { aspect-ratio: 16 / 9; height: auto; }
+
+/* ---- Maquete humanizada (24/09/2026): mesma leitura do mapa ilustrado ---- */
+.mapa3d { background: #EFE9DA; }
+.is-entorno .mapa3d { background: #CFDDE8; }
+/* números das glebas em serifa, como no mapa ilustrado */
+.r3-gleba {
+  width: auto; height: auto; border: 0; border-radius: 0; background: none; box-shadow: none;
+  font: 700 21px var(--fonte-titulo); color: var(--verde); letter-spacing: -.01em;
+  text-shadow: 0 0 3px #FDFAF2, 0 0 3px #FDFAF2, 0 0 6px #FDFAF2, 0 1px 1px rgba(253, 250, 242, .9);
+}
+@media (max-width: 600px) { .r3-gleba { width: auto; height: auto; font-size: 17px; } }
+/* medidas do lote selecionado (memorial descritivo) */
+.r3-medida {
+  padding: 3px 7px; border-radius: 6px; background: rgba(24, 56, 39, .9); color: #fff;
+  font: 700 11px var(--fonte-texto); border: 1px solid var(--dourado); box-shadow: 0 2px 6px rgba(0, 0, 0, .25);
+}
+/* escala gráfica */
+.escala3d {
+  position: absolute; right: 12px; bottom: 12px; z-index: 5; pointer-events: none;
+  display: flex; flex-direction: column; align-items: center; gap: 3px;
+  padding: 6px 10px 5px; border-radius: 8px; background: rgba(253, 250, 242, .92); border: 1px solid var(--linha);
+  box-shadow: var(--sombra);
+}
+.escala3d__barra { display: block; height: 6px; border: 2px solid var(--verde); border-top: 0; min-width: 20px; }
+.escala3d__texto { font: 700 11px var(--fonte-texto); color: var(--verde); }
+.ctrl--entorno svg { width: 22px; height: 22px; }
+.ctrl[aria-pressed="true"] { background: var(--verde); color: var(--marfim); }
+@media (max-width: 600px) { .escala3d { bottom: auto; top: 64px; right: auto; left: 12px; } }
+.r3-sel { margin-top: -34px; }

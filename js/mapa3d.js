@@ -14,7 +14,7 @@
    ===================================================================== */
 import * as THREE from 'three';
 import { MapControls } from 'three/addons/controls/MapControls.js';
-import { construirCena, enquadrarPontos } from './cena3d.js';
+import { construirCena, enquadrarPontos, simplificarPoly } from './cena3d.js?v=20260924c';
 
 const ponte = window.HarasMapa;
 const quadro = document.getElementById('mapa-quadro');
@@ -66,6 +66,8 @@ async function iniciar() {
     cena = construirCena(dados, { qualidade: MOVEL ? 'movel' : 'desktop' });
   } catch (e) { console.error(e); return falhar(e); }
   const { scene } = cena;
+  cena.definirModo('maquete', renderer);             // padrão: maquete sobre fundo claro (como o mapa ilustrado)
+  if (!MOVEL) cena.sombraGlobal(renderer, true, 4096); // sombras reais de árvores, prédios e postes (calculadas uma vez)
 
   // Reflexos suaves do céu (água, vidro, telhados)
   try {
@@ -81,7 +83,6 @@ async function iniciar() {
     g.setAttribute('color', new THREE.Float32BufferAttribute(cols, 3));
     ceuPeq.add(new THREE.Mesh(g, new THREE.MeshBasicMaterial({ vertexColors: true, side: THREE.BackSide })));
     scene.environment = pmrem.fromScene(ceuPeq, 0.02).texture;
-    cena.hemi.intensity = 0.75;
   } catch (_) { /* sem reflexos: segue normal */ }
 
   const camera = new THREE.PerspectiveCamera(40, 1, 2, 90000);
@@ -128,7 +129,7 @@ async function iniciar() {
   function limitarAlvo() {
     const b = cena.bb, m = 350, t = controls.target;
     const x = Math.min(b.maxx + m, Math.max(b.minx - m, t.x));
-    const z = Math.min(b.maxz + m, Math.max(b.minz - 1400, t.z)); // deixa ir um pouco para o norte (estrada para Poções)
+    const z = Math.min(b.maxz + m, Math.max(b.minz - (cena.modo === 'maquete' ? 450 : 1400), t.z)); // no entorno, deixa ir para o norte (Poções)
     if (x !== t.x || z !== t.z || t.y !== 0) {
       const dx = x - t.x, dz = z - t.z, dy = -t.y;
       t.set(x, 0, z); camera.position.x += dx; camera.position.z += dz; camera.position.y += dy;
@@ -138,11 +139,12 @@ async function iniciar() {
 
   function desenhar() {
     const d = camera.position.distanceTo(controls.target);
-    scene.fog.near = Math.max(900, d * 1.25);
-    scene.fog.far = Math.max(7000, d * 5.5);
+    if (scene.fog) { scene.fog.near = Math.max(900, d * 1.25); scene.fog.far = Math.max(7000, d * 5.5); }
+    cena.ajustarDistancia(d);
     renderer.render(scene, camera);
     atualizarRotulos(d);
     atualizarBussola();
+    atualizarEscala();
     if (ponte.reposicionar) ponte.reposicionar();
   }
 
@@ -175,8 +177,8 @@ async function iniciar() {
   // no celular (tela em pé), da portaria para o fundo, ao longo do comprimento — o empreendimento ocupa a tela.
   function vistaInicial() {
     const asp = vista.w / vista.h;
-    if (asp >= 1.05) return enquadrar(0.98, 0, { x: 0.04, topo: 0.16, base: 0.1 });
-    return enquadrar(1.08, -Math.PI / 2 + 0.38, { x: 0.03, topo: 0.2, base: 0.12 });
+    if (asp >= 1.05) return enquadrar(0.72, -0.18, { x: 0.02, topo: 0.13, base: 0.16 });
+    return enquadrar(1.05, -Math.PI / 2 + 0.38, { x: 0.08, topo: 0.2, base: 0.16 });
   }
 
   // Enquadra o contorno do imóvel com as margens pedidas (vale para qualquer ângulo e formato de tela)
@@ -312,6 +314,28 @@ async function iniciar() {
   const POOL = MOVEL ? 70 : 140;
   const poolLotes = Array.from({ length: POOL }, () => { const el = document.createElement('span'); el.className = 'r3 r3-lote'; rot.appendChild(el); return el; });
   const tagSel = document.createElement('span'); tagSel.className = 'r3 r3-sel'; rot.appendChild(tagSel);
+  const tagsMedida = Array.from({ length: 4 }, () => { const el = document.createElement('span'); el.className = 'r3 r3-medida'; rot.appendChild(el); return el; });
+  let medidas = []; // [{ p: Vector3, texto }]
+  const fmtM = new Intl.NumberFormat('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  // Frente = lado que encosta na via; fundo = oposto; esquerda/direita de quem olha o lote a partir da via
+  function calcularMedidas(lote) {
+    const l = cena.lotes.find((x) => x.id === String(lote.id));
+    if (!l) return [];
+    const p = simplificarPoly(l.poly);
+    if (p.length !== 4) return [];
+    const lados = p.map((a, i) => { const b = p[(i + 1) % 4]; return { a, b, m: [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2] }; });
+    let iF = 0, melhor = Infinity;
+    lados.forEach((ld, i) => { const d = cena.distVia(ld.m); if (d < melhor) { melhor = d; iF = i; } });
+    const fr = lados[iF], fu = lados[(iF + 2) % 4], l1 = lados[(iF + 1) % 4], l2 = lados[(iF + 3) % 4];
+    const c = l.c;
+    const f = [c[0] - fr.m[0], c[1] - fr.m[1]]; // olhando da via para dentro do lote
+    const esq = [f[1], -f[0]];               // "esquerda" com z para baixo (sul)
+    const ladoEsq = ((l1.m[0] - fr.m[0]) * esq[0] + (l1.m[1] - fr.m[1]) * esq[1]) > 0 ? l1 : l2;
+    const ladoDir = ladoEsq === l1 ? l2 : l1;
+    const val = (v) => (Number.isFinite(v) ? `${fmtM.format(v)} m` : null);
+    return [[fr, val(lote.frente)], [fu, val(lote.fundo)], [ladoEsq, val(lote.esq)], [ladoDir, val(lote.dir)]]
+      .filter(([, t]) => t).map(([ld, t]) => ({ p: new THREE.Vector3(ld.m[0], 1, ld.m[1]), texto: t }));
+  }
 
   const vis = (el, sim) => { if (el._vis !== sim) { el.style.display = sim ? '' : 'none'; el._vis = sim; } };
   const ocupados = [];
@@ -326,8 +350,14 @@ async function iniciar() {
     // 1) lote selecionado
     if (selecionado) {
       const s = tela(new THREE.Vector3(selecionado.c[0], 4, selecionado.c[1]));
-      if (s) { tagSel.textContent = `Lote ${selecionado.id}`; pos(tagSel, s.x, s.y); vis(tagSel, true); livreEm(s.x, s.y - 14, 42, 16); } else vis(tagSel, false);
+      if (s) { tagSel.textContent = `Lote ${selecionado.id}`; pos(tagSel, s.x, s.y); vis(tagSel, true); livreEm(s.x, s.y - 34, 42, 16); } else vis(tagSel, false);
     } else vis(tagSel, false);
+    // 1b) medidas do lote selecionado (de perto)
+    tagsMedida.forEach((el, i) => {
+      const md = medidas[i];
+      const s2 = md && dAlvo < 900 ? tela(md.p) : null;
+      if (s2) { if (el.textContent !== md.texto) el.textContent = md.texto; pos(el, s2.x, s2.y); vis(el, true); livreEm(s2.x, s2.y, 34, 10); } else vis(el, false);
+    });
     // 2) marcadores (presos dentro da tela e longe da coluna de botões)
     for (const m of marcadores) {
       const s = tela(m.p);
@@ -347,24 +377,30 @@ async function iniciar() {
       const ok = s && livreEm(s.x, s.y, 48, 11);
       vis(it.el, !!ok); if (ok) pos(it.el, s.x, s.y);
     }
-    // 4) avenidas e ruas
-    for (const v of placas) {
-      let ok = false, s = null;
-      const d = cam.distanceTo(v.p);
-      const limite = v.tipo === 'avenida' ? 7000 : v.tipo === 'rua' ? 1500 : 6000;
-      if (d < limite && (v.principal || dAlvo < 900)) {
-        s = tela(v.p);
-        if (s) ok = livreEm(s.x, s.y, v.texto.length * 3.6 + 10, 11);
-      }
-      vis(v.el, ok); if (ok) pos(v.el, s.x, s.y);
-    }
-    // 5) glebas
+    // 4) glebas (prioridade: são a referência de quem procura o lote)
     const mostrarGlebas = dAlvo < 5200;
     for (const g of glebas) {
       let ok = false, s = null;
-      if (mostrarGlebas && cam.distanceTo(g.p) < 5500) { s = tela(g.p); if (s) ok = livreEm(s.x, s.y, 14, 14); }
+      if (mostrarGlebas && cam.distanceTo(g.p) < 5500) { s = tela(g.p); if (s) ok = livreEm(s.x, s.y, 13, 12); }
       vis(g.el, ok); if (ok) pos(g.el, s.x, s.y);
     }
+    // 5) placas: avenidas saem para fora do miolo (Pau Ferro para cima, Umbuzeiro para baixo) até achar espaço; depois ruas
+    const placa = (v) => {
+      let ok = false, s = null, dy = 0;
+      const d = cam.distanceTo(v.p);
+      const limite = v.tipo === 'rua' ? 6000 : 8000;
+      if (d < limite && (v.tipo !== 'rua' || v.principal || dAlvo < 900)) {
+        s = tela(v.p);
+        if (s) {
+          const w = v.texto.length * 3.6 + 10;
+          const tent = v.tipo === 'avenida' ? (v.texto.startsWith('←') ? [0, 22, 40, 58] : [0, -22, -40, -58]) : [0, -14, 14];
+          for (const t of tent) { if (livreEm(s.x, s.y + t, w, 11)) { ok = true; dy = t; break; } }
+        }
+      }
+      vis(v.el, ok); if (ok) pos(v.el, s.x, s.y + dy);
+    };
+    for (const v of placas) if (v.tipo !== 'rua') placa(v);
+    for (const v of placas) if (v.tipo === 'rua') placa(v);
     // 6) números dos lotes (só de perto)
     let usados = 0;
     if (dAlvo < 760) {
@@ -390,6 +426,22 @@ async function iniciar() {
     for (let i = usados; i < POOL; i++) vis(poolLotes[i], false);
   }
 
+  // ---------------------------------------------------------------- Escala gráfica (metros no centro da tela)
+  const escala = document.createElement('div'); escala.className = 'escala3d'; escala.innerHTML = '<span class="escala3d__barra"></span><span class="escala3d__texto"></span>';
+  quadro.appendChild(escala);
+  const eBarra = escala.firstChild, eTexto = escala.lastChild;
+  const REDONDOS = [5, 10, 20, 25, 50, 100, 200, 250, 500, 1000, 2000, 2500, 5000];
+  function atualizarEscala() {
+    const a = chaoSobTela(vista.w / 2 - 60, vista.h * 0.55), b = chaoSobTela(vista.w / 2 + 60, vista.h * 0.55);
+    if (!a || !b) { escala.style.visibility = 'hidden'; return; }
+    const mpp = a.distanceTo(b) / 120;
+    const alvoM = mpp * 110;
+    let m = REDONDOS[0]; for (const v of REDONDOS) if (v <= alvoM) m = v;
+    eBarra.style.width = `${Math.round(m / mpp)}px`;
+    eTexto.textContent = m >= 1000 ? `${(m / 1000).toLocaleString('pt-BR')} km` : `${m} m`;
+    escala.style.visibility = '';
+  }
+
   // ---------------------------------------------------------------- Bússola e alternância 3D / vista de cima
   const controles = quadro.querySelector('.controles');
   const bNorte = document.createElement('button');
@@ -398,7 +450,18 @@ async function iniciar() {
   const bCima = document.createElement('button');
   bCima.className = 'ctrl ctrl--texto'; bCima.type = 'button'; bCima.title = 'Alternar entre 3D e vista de cima'; bCima.setAttribute('aria-label', 'Alternar entre vista 3D e vista de cima');
   bCima.textContent = '2D';
-  if (controles) { controles.appendChild(bCima); controles.appendChild(bNorte); }
+  const bEntorno = document.createElement('button');
+  bEntorno.className = 'ctrl ctrl--entorno'; bEntorno.type = 'button'; bEntorno.title = 'Mostrar a paisagem em volta (entorno)';
+  bEntorno.setAttribute('aria-pressed', 'false'); bEntorno.setAttribute('aria-label', 'Mostrar ou esconder a paisagem em volta do chacreamento');
+  bEntorno.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M2 19l6-9 4 5 3-4 7 8z" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"/><circle cx="17" cy="6" r="2.2" fill="none" stroke="currentColor" stroke-width="1.8"/></svg>';
+  bEntorno.addEventListener('click', () => {
+    const entorno = cena.modo !== 'entorno';
+    cena.definirModo(entorno ? 'entorno' : 'maquete', renderer);
+    bEntorno.setAttribute('aria-pressed', String(entorno));
+    quadro.classList.toggle('is-entorno', entorno);
+    pedir();
+  });
+  if (controles) { controles.appendChild(bCima); controles.appendChild(bEntorno); controles.appendChild(bNorte); }
   const svgN = bNorte.querySelector('svg');
   function atualizarBussola() {
     const { azim, polar } = estadoAtual();
@@ -460,6 +523,7 @@ async function iniciar() {
   const motor = {
     destacar(lote) {
       selecionado = lote ? { id: String(lote.id), c: lote.centro || lote.c } : null;
+      medidas = lote ? calcularMedidas(lote) : [];
       if (selecionado) cena.mostrarDestaque(selecionado.id); else cena.esconderDestaque();
       pedir();
     },
@@ -494,7 +558,7 @@ async function iniciar() {
   quadroAnim(performance.now());
   console.info(`[mapa 3D] ${cena.lotes.length} lotes · ${cena.arvoresQtd} árvores · ${renderer.info.render.calls} chamadas · ${renderer.info.render.triangles.toLocaleString('pt-BR')} triângulos`);
   ponte.registrar(motor);
-  window.__mapa3d = { renderer, scene, camera, controls, cena, motor, voar, estadoAtual, enquadrar }; // inspeção pelo console
+  window.__mapa3d = { renderer, scene, camera, controls, cena, motor, voar, estadoAtual, enquadrar, desenhar }; // inspeção pelo console
 }
 
 iniciar().catch((e) => { console.error(e); falhar(e); });

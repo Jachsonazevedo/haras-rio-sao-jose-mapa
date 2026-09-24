@@ -7,7 +7,7 @@
    com sombras reais nas vistas de perto, e enviada ao servidor local.
    ===================================================================== */
 import * as THREE from 'three';
-import { construirCena, centroide, enquadrarPontos } from './cena3d.js';
+import { construirCena, centroide, enquadrarPontos } from './cena3d.js?v=20260924c';
 
 const $ = (s) => document.querySelector(s);
 const log = (t) => { $('#log').textContent += t + '\n'; };
@@ -39,7 +39,7 @@ $('#palco').appendChild(renderer.domElement);
   g.setAttribute('color', new THREE.Float32BufferAttribute(cols, 3));
   ceu.add(new THREE.Mesh(g, new THREE.MeshBasicMaterial({ vertexColors: true, side: THREE.BackSide })));
   scene.environment = pmrem.fromScene(ceu, 0.02).texture;
-  cena.hemi.intensity = 0.75;
+  cena.definirModo('entorno', renderer); // imagens de "Como vai ficar": paisagem com céu e morros
 }
 
 const camera = new THREE.PerspectiveCamera(38, 16 / 9, 1, 90000);
@@ -91,7 +91,7 @@ async function renderizar(pr, { escala = 2, previa = false } = {}) {
     const a = [camera.position.x, camera.position.z], t = [v.alvo.x, v.alvo.z];
     cena.clareira(a, [a[0] + (t[0] - a[0]) * 0.7, a[1] + (t[1] - a[1]) * 0.7], Math.min(34, Math.max(12, v.dist * 0.22)));
   }
-  scene.fog.near = Math.max(900, v.dist * 1.6); scene.fog.far = Math.max(7000, v.dist * 7);
+  if (scene.fog) { scene.fog.near = Math.max(900, v.dist * 1.6); scene.fog.far = Math.max(7000, v.dist * 7); }
   cena.ligarSombrasReais(renderer, !!pr.sombras && !previa, v.alvo, pr.sombras || 200);
   cena.sombrasBlob.visible = !(pr.sombras && !previa);
   renderer.compile(scene, camera);
@@ -168,7 +168,8 @@ async function gerarPlanta() {
   const W = 2400, HM = 960, HL = 372, H = HM + HL; // mapa + faixa de legenda
   const k = 1.5;                                     // supersampling
   // quase de cima (o imóvel é uma faixa longa: 3,5 km × 1 km) — cabe inteiro com pouco entorno
-  const pr = { w: W, h: HM, cam: () => enquadrar(cena.polyImovel, 0.42, 0, { x: 0.02, topo: 0.17, base: 0.05 }) };
+  const pr = { w: W, h: HM, cam: () => enquadrar(cena.polyImovel, 0.5, -0.1, { x: 0.035, topo: 0.17, base: 0.07 }) };
+  cena.definirModo('maquete', renderer);           // planta-guia no visual de maquete (mesmo do mapa interativo)
   const { canvas } = await renderizar(pr, { escala: k });
   const out = document.createElement('canvas'); out.width = W; out.height = H;
   const g = out.getContext('2d');
@@ -181,7 +182,7 @@ async function gerarPlanta() {
   g.beginPath(); g.rect(0, 0, W, HM);
   cena.polyImovel.forEach((q, i) => { const s2 = P(new THREE.Vector3(q[0], 0, q[1])); if (i) g.lineTo(s2.x, s2.y); else g.moveTo(s2.x, s2.y); });
   g.closePath();
-  g.fillStyle = 'rgba(251,248,239,.38)'; g.fill('evenodd');
+  g.fillStyle = 'rgba(251,248,239,0)'; g.fill('evenodd');
   g.restore();
 
   // colisão simples entre rótulos (caixas em px)
@@ -229,7 +230,10 @@ async function gerarPlanta() {
       pilula(g, s2.x + dx, s2.y, a.texto, { fundo: '#FDFAF2', cor: '#6A3C25', borda: '#C9B58C', fonte, padX: 10, alt: 26, raio: 5 });
       ocupar(s2.x + dx, s2.y, w, 26);
     } else if (a.tipo === 'destino') {
-      pilula(g, s2.x, Math.max(24, s2.y + 6), a.texto, { fundo: '#2F5C8F', cor: '#fff', fonte: '700 16px Inter, sans-serif', padX: 12, alt: 30, raio: 6 });
+      const fonte = '700 16px Inter, sans-serif', w = medir(a.texto, fonte, 12);
+      const dy = [-34, -62, -90, 34].find((t) => livre(s2.x, s2.y + t, w, 30)) ?? -34;
+      pilula(g, s2.x, Math.max(24, s2.y + dy), a.texto, { fundo: '#2F5C8F', cor: '#fff', fonte, padX: 12, alt: 30, raio: 6 });
+      ocupar(s2.x, s2.y + dy, w, 30);
     }
   }
 
@@ -250,6 +254,7 @@ async function gerarPlanta() {
     g.fillStyle = '#183827'; g.font = '700 16px Inter'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText('N', x, y - r - 12);
   }
 
+  cena.definirModo('entorno', renderer);
   // detalhe da área de lazer (segunda renderização)
   const prD = { w: 900, h: 560, sombras: 150, cam: () => enquadrar(Object.values(itens).concat([[itens.salao[0] + 20, itens.salao[1] - 20]]), 0.95, 0.25, { x: 0.06, topo: 0.12, base: 0.08 }) };
   const det = await renderizar(prD, { escala: 2 });

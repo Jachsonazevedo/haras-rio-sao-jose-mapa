@@ -23,9 +23,9 @@ import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 export const PALETA = {
   // cores de status legíveis, mas com a textura da grama por baixo (aspecto de terreno, não de planilha)
   lote: {
-    disponivel: '#5DB56B',
-    vendido: '#CD6B52',
-    reservado: '#5087C6',
+    disponivel: '#48B063',
+    vendido: '#C94A36',
+    reservado: '#4A84CC',
     reserva_tecnica: '#8FA0B2',
   },
   loteApagado: '#D2CCAE',
@@ -37,7 +37,7 @@ export const PALETA = {
   gramado: '#8AB65A',
   jardim: '#97BF62',
   cascalho: '#CF9A6E',
-  cascalhoBorda: '#B07F58',
+  cascalhoBorda: '#BE9068',
   terra: '#C7AE84',
   agua: '#3F9FC0',
   margem: '#D9C79A',
@@ -152,6 +152,106 @@ function suavizarVia(pts) {
       const a = Math.hypot(p[i][0] - p[i - 1][0], p[i][1] - p[i - 1][1]);
       const b = Math.hypot(p[i + 1][0] - p[i][0], p[i + 1][1] - p[i][1]);
       if (a < 22 && b < 22) { p.splice(i, 1); mudou = true; break; }
+    }
+  }
+  return p;
+}
+
+// Casca convexa (Andrew) — base da maquete
+function cascaConvexa(pts) {
+  const P = pts.map((q) => [q[0], q[1]]).sort((a, b) => a[0] - b[0] || a[1] - b[1]);
+  const cruz = (o, a, b) => (a[0] - o[0]) * (b[1] - o[1]) - (a[1] - o[1]) * (b[0] - o[0]);
+  const baixo = [], cima = [];
+  for (const p of P) { while (baixo.length >= 2 && cruz(baixo[baixo.length - 2], baixo[baixo.length - 1], p) <= 0) baixo.pop(); baixo.push(p); }
+  for (let i = P.length - 1; i >= 0; i--) { const p = P[i]; while (cima.length >= 2 && cruz(cima[cima.length - 2], cima[cima.length - 1], p) <= 0) cima.pop(); cima.push(p); }
+  cima.pop(); baixo.pop();
+  return baixo.concat(cima); // anti-horário no plano x/y matemático
+}
+
+// Afasta um polígono convexo de m metros, com cantos arredondados
+function afastarConvexo(poly, m, passoAng = 0.18) {
+  const n = poly.length, out = [];
+  const normal = (a, b) => { const dx = b[0] - a[0], dy = b[1] - a[1], L = Math.hypot(dx, dy) || 1; return [dy / L, -dx / L]; };
+  // garante normais para fora (confere com o centroide)
+  const c = [poly.reduce((s, q) => s + q[0], 0) / n, poly.reduce((s, q) => s + q[1], 0) / n];
+  let sinal = 1;
+  { const n0 = normal(poly[0], poly[1]); const mid = [(poly[0][0] + poly[1][0]) / 2, (poly[0][1] + poly[1][1]) / 2]; if ((mid[0] - c[0]) * n0[0] + (mid[1] - c[1]) * n0[1] < 0) sinal = -1; }
+  for (let i = 0; i < n; i++) {
+    const a = poly[(i - 1 + n) % n], b = poly[i], d = poly[(i + 1) % n];
+    const n1 = normal(a, b).map((v) => v * sinal), n2 = normal(b, d).map((v) => v * sinal);
+    let a1 = Math.atan2(n1[1], n1[0]), a2 = Math.atan2(n2[1], n2[0]);
+    let da = a2 - a1; while (da > Math.PI) da -= 2 * Math.PI; while (da < -Math.PI) da += 2 * Math.PI;
+    const passos = Math.max(1, Math.ceil(Math.abs(da) / passoAng));
+    for (let k = 0; k <= passos; k++) { const t = a1 + da * (k / passos); out.push([b[0] + Math.cos(t) * m, b[1] + Math.sin(t) * m]); }
+  }
+  return out;
+}
+
+// Afasta um polígono qualquer (simples) de m metros: arco nos cantos convexos, meia-esquadria limitada nos côncavos
+function afastarPoligono(poly, m, passoAng = 0.2) {
+  const n = poly.length;
+  let area = 0; for (let i = 0, j = n - 1; i < n; j = i++) area += poly[j][0] * poly[i][1] - poly[i][0] * poly[j][1];
+  const orient = area > 0 ? 1 : -1;
+  const normalFora = (a, b) => { const dx = b[0] - a[0], dy = b[1] - a[1], L = Math.hypot(dx, dy) || 1; return [orient * dy / L, -orient * dx / L]; };
+  const out = [];
+  for (let i = 0; i < n; i++) {
+    const a = poly[(i - 1 + n) % n], b = poly[i], d = poly[(i + 1) % n];
+    const n1 = normalFora(a, b), n2 = normalFora(b, d);
+    const cruz = (b[0] - a[0]) * (d[1] - b[1]) - (b[1] - a[1]) * (d[0] - b[0]);
+    const convexo = cruz * orient > 0;
+    if (convexo) {
+      const a1 = Math.atan2(n1[1], n1[0]); let da = Math.atan2(n2[1], n2[0]) - a1;
+      while (da > Math.PI) da -= 2 * Math.PI; while (da < -Math.PI) da += 2 * Math.PI;
+      const passos = Math.max(1, Math.ceil(Math.abs(da) / passoAng));
+      for (let k = 0; k <= passos; k++) { const t = a1 + da * (k / passos); out.push([b[0] + Math.cos(t) * m, b[1] + Math.sin(t) * m]); }
+    } else {
+      const bx = n1[0] + n2[0], by = n1[1] + n2[1], L = Math.hypot(bx, by) || 1;
+      const cosMeio = Math.max(0.35, (n1[0] * bx + n1[1] * by) / L);
+      out.push([b[0] + bx / L * m / cosMeio, b[1] + by / L * m / cosMeio]);
+    }
+  }
+  return out;
+}
+
+// Recuo para dentro (meia-esquadria limitada): usado no contorno colorido de cada lote
+function recuar(poly, d) {
+  const n = poly.length;
+  let area = 0; for (let i = 0, j = n - 1; i < n; j = i++) area += poly[j][0] * poly[i][1] - poly[i][0] * poly[j][1];
+  const o = area > 0 ? 1 : -1;
+  const nd = (a, b) => { const dx = b[0] - a[0], dy = b[1] - a[1], L = Math.hypot(dx, dy) || 1; return [-o * dy / L, o * dx / L]; }; // normal para dentro
+  return poly.map((b, i) => {
+    const a = poly[(i - 1 + n) % n], c = poly[(i + 1) % n];
+    const n1 = nd(a, b), n2 = nd(b, c);
+    const bx = n1[0] + n2[0], by = n1[1] + n2[1], L = Math.hypot(bx, by) || 1;
+    const cosMeio = Math.max(0.4, (n1[0] * bx + n1[1] * by) / L);
+    return [b[0] + bx / L * d / cosMeio, b[1] + by / L * d / cosMeio];
+  });
+}
+
+// Corta uma polilinha no ponto em que ela sai do polígono: [parte de dentro, parte de fora]
+function cortarNaSaida(pts, poly) {
+  if (pts.length < 2) return [pts, []];
+  for (let i = 1; i < pts.length; i++) {
+    if (!dentro(pts[i], poly)) {
+      let a = pts[i - 1], b = pts[i];
+      for (let k = 0; k < 30; k++) { const m = [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2]; if (dentro(m, poly)) a = m; else b = m; }
+      return [pts.slice(0, i).concat([a]), [a].concat(pts.slice(i))];
+    }
+  }
+  return [pts, []];
+}
+
+// Remove vértices quase alinhados (a planta às vezes traz um ponto no meio de um lado reto)
+export function simplificarPoly(poly, graus = 9) {
+  let p = poly.slice();
+  let mudou = true;
+  while (mudou && p.length > 3) {
+    mudou = false;
+    for (let i = 0; i < p.length; i++) {
+      const a = p[(i - 1 + p.length) % p.length], b = p[i], c = p[(i + 1) % p.length];
+      const v1 = [b[0] - a[0], b[1] - a[1]], v2 = [c[0] - b[0], c[1] - b[1]];
+      const ang = Math.abs(Math.atan2(v1[0] * v2[1] - v1[1] * v2[0], v1[0] * v2[0] + v1[1] * v2[1])) * 180 / Math.PI;
+      if (ang < graus || Math.hypot(...v1) < 1.5) { p.splice(i, 1); mudou = true; break; }
     }
   }
   return p;
@@ -432,6 +532,12 @@ export function construirCena(dados, op = {}) {
   }
 
   const pertoDeVia = (p, folga) => segVias.some((s) => distSeg(p, s.a, s.b) < s.w / 2 + folga);
+  const distVia = (p) => segVias.reduce((m, s) => Math.min(m, distSeg(p, s.a, s.b)), Infinity);
+
+  // ---- Maquete: base = contorno do imóvel + faixa de 65 m de gramado (cantos arredondados); a estrada é cortada na borda
+  const base = afastarPoligono(simplificarPoly(polyImovel, 4), 65);
+  const naBase = (x, z) => dentro([x, z], base);
+  const [estradaBase, estradaFora] = cortarNaSaida(estrada, base);
 
   // ---- Grade espacial dos lotes (clique e plantio)
   const lotes = [];
@@ -471,8 +577,11 @@ export function construirCena(dados, op = {}) {
   ceuGeo.setAttribute('color', new THREE.Float32BufferAttribute(ceuCol, 3));
   const ceu = new THREE.Mesh(ceuGeo, new THREE.MeshBasicMaterial({ vertexColors: true, side: THREE.BackSide, fog: false, depthWrite: false }));
   ceu.renderOrder = -10; ceu.frustumCulled = false;
-  scene.add(ceu);
-  scene.fog = new THREE.Fog(ceuCores.horiz.getHex(), 4000, 16000);
+  const entorno = new THREE.Group(); entorno.name = 'entorno'; scene.add(entorno);
+  const maquete = new THREE.Group(); maquete.name = 'maquete'; scene.add(maquete);
+  entorno.add(ceu);
+  const neblina = new THREE.Fog(ceuCores.horiz.getHex(), 4000, 16000);
+  scene.fog = neblina;
 
   const hemi = new THREE.HemisphereLight('#E4EEFF', '#7A6848', 1.25);
   scene.add(hemi);
@@ -521,7 +630,58 @@ export function construirCena(dados, op = {}) {
   const matChaoFora = new THREE.MeshLambertMaterial({ vertexColors: true, map: T.grama });
   const chaoFora = new THREE.Mesh(chao, matChaoFora);
   chaoFora.renderOrder = 0; chaoFora.receiveShadow = true; chaoFora.frustumCulled = false;
-  scene.add(chaoFora);
+  entorno.add(chaoFora);
+
+  // ---- Maquete: topo da base (pasto em volta), laterais em terra e sombra sobre o "papel"
+  const ALT_BASE = 24;
+  {
+    const topo = planos(new THREE.Mesh(malhaPoligonos([base], { uv: 20 }).geom, matPlano({ color: '#B9C47F', map: T.grama })), 0.5);
+    maquete.add(topo);
+    // laterais: faixa de grama no alto e camadas de terra descendo
+    const pos = [], nor = [], col = [];
+    const cG = new THREE.Color('#86A553'), cT1 = new THREE.Color('#B48B62'), cT2 = new THREE.Color('#8A6546'), cT3 = new THREE.Color('#6A4C35');
+    const cx = base.reduce((a, q) => a + q[0], 0) / base.length, cz = base.reduce((a, q) => a + q[1], 0) / base.length;
+    const faixas = [[0, cG], [-1.4, cG], [-1.45, cT1], [-ALT_BASE * 0.55, cT2], [-ALT_BASE, cT3]];
+    for (let i = 0; i < base.length; i++) {
+      const a = base[i], b = base[(i + 1) % base.length];
+      let nx = b[1] - a[1], nz2 = -(b[0] - a[0]); const L = Math.hypot(nx, nz2) || 1; nx /= L; nz2 /= L;
+      const mx = (a[0] + b[0]) / 2 - cx, mz = (a[1] + b[1]) / 2 - cz;
+      const fora = mx * nx + mz * nz2 >= 0;
+      const [p1, p2] = fora ? [a, b] : [b, a]; // sentido que deixa a face voltada para fora (normal = (dz, 0, -dx))
+      if (!fora) { nx = -nx; nz2 = -nz2; }
+      for (let k = 0; k < faixas.length - 1; k++) {
+        const [y0, c0] = faixas[k], [y1, c1] = faixas[k + 1];
+        const v = [[p1, y0, c0], [p2, y0, c0], [p2, y1, c1], [p1, y0, c0], [p2, y1, c1], [p1, y1, c1]];
+        for (const [q, y, c] of v) { pos.push(q[0], y, q[1]); nor.push(nx, 0, nz2); col.push(c.r, c.g, c.b); }
+      }
+    }
+    const gl = new THREE.BufferGeometry();
+    gl.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+    gl.setAttribute('normal', new THREE.Float32BufferAttribute(nor, 3));
+    gl.setAttribute('color', new THREE.Float32BufferAttribute(col, 3));
+    const laterais = new THREE.Mesh(gl, new THREE.MeshLambertMaterial({ vertexColors: true }));
+    laterais.renderOrder = 20; laterais.frustumCulled = false;
+    maquete.add(laterais);
+    // "papel" e sombra da maquete (mancha desfocada no formato da base, deslocada para longe do sol)
+    const xs = base.map((q) => q[0]), zs = base.map((q) => q[1]);
+    const x0 = Math.min(...xs) - 400, x1 = Math.max(...xs) + 400, z0 = Math.min(...zs) - 400, z1 = Math.max(...zs) + 400;
+    const papel = new THREE.Mesh(new THREE.PlaneGeometry(60000, 60000).rotateX(-Math.PI / 2).translate(centro.x, -ALT_BASE - 0.6, centro.z),
+      new THREE.MeshBasicMaterial({ color: '#EFE9DA', fog: false, depthWrite: false }));
+    papel.renderOrder = -3; papel.frustumCulled = false;
+    maquete.add(papel);
+    const W = 1024, H = Math.round(W * (z1 - z0) / (x1 - x0));
+    const cv = document.createElement('canvas'); cv.width = W; cv.height = H;
+    const g2 = cv.getContext('2d');
+    g2.filter = 'blur(22px)';
+    g2.fillStyle = 'rgba(60,45,25,.55)';
+    g2.beginPath(); base.forEach((q, i) => { const X = (q[0] - x0) / (x1 - x0) * W, Y = (q[1] - z0) / (z1 - z0) * H; if (i) g2.lineTo(X, Y); else g2.moveTo(X, Y); }); g2.closePath(); g2.fill();
+    const texS = new THREE.CanvasTexture(cv); texS.colorSpace = THREE.SRGBColorSpace;
+    const off = new THREE.Vector3(-dirSol.x, 0, -dirSol.z).normalize().multiplyScalar(ALT_BASE * 2.2);
+    const sombraBase = new THREE.Mesh(new THREE.PlaneGeometry(x1 - x0, z1 - z0).rotateX(-Math.PI / 2).translate((x0 + x1) / 2 + off.x, -ALT_BASE - 0.5, (z0 + z1) / 2 + off.z),
+      new THREE.MeshBasicMaterial({ map: texS, transparent: true, depthWrite: false, fog: false }));
+    sombraBase.renderOrder = -2; sombraBase.frustumCulled = false;
+    maquete.add(sombraBase);
+  }
 
   // ================================================================ 3) Chão do imóvel e áreas
   const grupoPlano = new THREE.Group(); grupoPlano.name = 'planos'; scene.add(grupoPlano);
@@ -546,12 +706,18 @@ export function construirCena(dados, op = {}) {
     // "cotovelo" arredondado nas pontas e nas quinas
     for (const q of v.pts) { geoBorda.push(disco(q[0], q[1], (w + 3.2) / 2, 0, 20)); geoPista.push(disco(q[0], q[1], w / 2, 0, 20)); }
   }
-  if (estrada.length > 1) {
-    geoBorda.push(fita(estrada, 11, { vRep: 14 }));
-    geoPista.push(fita(estrada, 8, { vRep: 14 }));
-    for (const q of estrada) { geoBorda.push(disco(q[0], q[1], 5.5, 0, 20)); geoPista.push(disco(q[0], q[1], 4, 0, 20)); }
+  if (estradaBase.length > 1) {
+    geoBorda.push(fita(estradaBase, 11, { vRep: 14 }));
+    geoPista.push(fita(estradaBase, 8, { vRep: 14 }));
+    for (const q of estradaBase.slice(0, -1)) { geoBorda.push(disco(q[0], q[1], 5.5, 0, 20)); geoPista.push(disco(q[0], q[1], 4, 0, 20)); }
   }
   const soPlano = (g) => { const n = g.index ? g.toNonIndexed() : g; for (const k of Object.keys(n.attributes)) if (!['position', 'normal', 'uv'].includes(k)) n.deleteAttribute(k); return n; };
+  if (estradaFora.length > 1) {
+    const gb = [fita(estradaFora, 11, { vRep: 14 })], gp = [fita(estradaFora, 8, { vRep: 14 })];
+    for (const q of estradaFora) { gb.push(disco(q[0], q[1], 5.5, 0, 20)); gp.push(disco(q[0], q[1], 4, 0, 20)); }
+    entorno.add(planos(new THREE.Mesh(mergeGeometries(gb.map(soPlano)), matViaBorda), 3));
+    entorno.add(planos(new THREE.Mesh(mergeGeometries(gp.map(soPlano)), matVia), 4));
+  }
   grupoPlano.add(planos(new THREE.Mesh(mergeGeometries(geoBorda.map(soPlano)), matViaBorda), 3));
   grupoPlano.add(planos(new THREE.Mesh(mergeGeometries(geoPista.map(soPlano)), matVia), 4));
 
@@ -567,14 +733,38 @@ export function construirCena(dados, op = {}) {
     c.setHSL(hsl.h, hsl.s, hsl.l * (0.94 + r() * 0.1)); // leve variação: aspecto natural, não "planilha"
     return c;
   });
+  // (a) terreno natural de cada lote: pasto verde, capim e pasto seco (varia de lote para lote)
+  const pastos = ['#A7BE68', '#B5BD74', '#9DB862', '#C0BD7C', '#AFC16F'];
+  const malhaNat = malhaPoligonos(lotes.map((l) => l.poly), { uv: 13, cores: lotes.map(() => pastos[Math.floor(r() * pastos.length)]) });
+  grupoPlano.add(planos(new THREE.Mesh(malhaNat.geom, matPlano({ vertexColors: true, map: texGrama })), 5.8));
+  // (b) véu da situação: forte de longe (leitura de mapa), suave de perto (aparece o terreno)
   const malhaLotes = malhaPoligonos(lotes.map((l) => l.poly), { uv: 16, cores: loteCores.map((c) => '#' + c.getHexString()) });
-  const matLotes = matPlano({ vertexColors: true, map: texGrama });
+  const matLotes = matPlano({ vertexColors: true, map: texGrama, transparent: true, opacity: 0.9 });
   const loteMesh = planos(new THREE.Mesh(malhaLotes.geom, matLotes), 6);
   loteMesh.name = 'lotes';
   grupoPlano.add(loteMesh);
+  // (c) contorno colorido por dentro de cada lote (1,6 m), sempre nítido
+  const contornos = [], faixaCont = new Map();
+  let vtx = 0;
+  lotes.forEach((l, k) => {
+    const pp = simplificarPoly(l.poly, 3);
+    if (pp.length < 3) return;
+    const g = fita(recuar(pp, 1.1), 1.6, { fechar: true });
+    const n = g.attributes.position.count;
+    const cor2 = loteCores[k];
+    const cols = new Float32Array(n * 3); for (let i = 0; i < n; i++) { cols[i * 3] = cor2.r; cols[i * 3 + 1] = cor2.g; cols[i * 3 + 2] = cor2.b; }
+    g.setAttribute('color', new THREE.BufferAttribute(cols, 3));
+    const gn = g.toNonIndexed();
+    faixaCont.set(l.id, { inicio: vtx, qtd: gn.attributes.position.count });
+    vtx += gn.attributes.position.count;
+    contornos.push(gn);
+  });
+  const geoCont = mergeGeometries(contornos);
+  const contMesh = planos(new THREE.Mesh(geoCont, matPlano({ vertexColors: true })), 7.5);
+  grupoPlano.add(contMesh);
   const loteFaixa = new Map(); lotes.forEach((l, k) => loteFaixa.set(l.id, { ...malhaLotes.faixas[k], cor: loteCores[k], lote: l }));
 
-  const linhasLotes = new THREE.LineSegments(bordas(lotes.map((l) => l.poly), 0), new THREE.LineBasicMaterial({ color: PALETA.loteBorda, transparent: true, opacity: op.semStatus ? 0.5 : 0.85, depthWrite: false }));
+  const linhasLotes = new THREE.LineSegments(bordas(lotes.map((l) => l.poly), 0), new THREE.LineBasicMaterial({ color: PALETA.loteBorda, transparent: true, opacity: op.semStatus ? 0.5 : 0.7, depthWrite: false }));
   linhasLotes.renderOrder = 7; linhasLotes.frustumCulled = false;
   grupoPlano.add(linhasLotes);
   const linhasGlebas = new THREE.LineSegments(bordas(dados.glebas.map((g) => g.poly), 0), new THREE.LineBasicMaterial({ color: '#2E5A3A', transparent: true, opacity: 0.55, depthWrite: false }));
@@ -584,13 +774,21 @@ export function construirCena(dados, op = {}) {
   // Selo de cada gleba (a planta abre um círculo no número): pracinha clara com o número (rótulo HTML por cima)
   const geoSelos = [];
   for (const g of dados.glebas) if (Array.isArray(g.label)) geoSelos.push(disco(g.label[0], g.label[1], 11.5, 0, 28));
-  if (geoSelos.length && !op.semStatus) grupoPlano.add(planos(new THREE.Mesh(mergeGeometries(geoSelos.map(soPlano)), matPlano({ color: PALETA.selo, map: T.areia })), 8));
+  if (geoSelos.length && !op.semStatus) grupoPlano.add(planos(new THREE.Mesh(mergeGeometries(geoSelos.map(soPlano)), matPlano({ color: '#ABBE6B', map: texGrama })), 5.9));
 
   function pintarLote(id, c) {
     const f = loteFaixa.get(String(id)); if (!f) return;
     const at = malhaLotes.geom.attributes.color;
     for (let i = 0; i < f.qtd; i++) at.setXYZ(f.inicio + i, c.r, c.g, c.b);
     at.needsUpdate = true;
+    const fc = faixaCont.get(String(id));
+    if (fc) { const ac = geoCont.attributes.color; for (let i = 0; i < fc.qtd; i++) ac.setXYZ(fc.inicio + i, c.r, c.g, c.b); ac.needsUpdate = true; }
+  }
+  // opacidade do véu conforme a distância da câmera: 0,9 de longe → 0,32 de perto
+  function ajustarDistancia(d) {
+    const t = THREE.MathUtils.clamp((d - 220) / (1900 - 220), 0, 1);
+    matLotes.opacity = 0.32 + (0.9 - 0.32) * t;
+    linhasLotes.material.opacity = 0.35 + 0.35 * (1 - t);
   }
   function corBase(id) { const f = loteFaixa.get(String(id)); return f ? f.cor : null; }
 
@@ -698,6 +896,7 @@ export function construirCena(dados, op = {}) {
       const mato = THREE.MathUtils.smoothstep(nz(px / 420, pz / 420, 3), 0.46, 0.6);
       if (r() > mato * 0.85 + 0.02) continue;
       plantar(px, pz, 0.85 + r() * 0.35, r() < 0.5 ? 1 : 0, true);
+      arvores[arvores.length - 1].foraBase = !naBase(px, pz);
     }
   }
 
@@ -781,8 +980,10 @@ export function construirCena(dados, op = {}) {
   if (Q.piquetes) scene.add(piquetes(lotes, M));
 
   // ---- Árvores instanciadas + sombras suaves
-  const veg = vegetacao(arvores, M, T, Q.detalhe, qualidade === 'render' ? 1 : 0, dirSol);
+  const veg = vegetacao(arvores.filter((a) => !a.foraBase), M, T, Q.detalhe, qualidade === 'render' ? 1 : 0, dirSol);
   scene.add(veg.grupo);
+  const vegLonge = vegetacao(arvores.filter((a) => a.foraBase), M, T, 0, qualidade === 'render' ? 1 : 0, dirSol);
+  entorno.add(vegLonge.grupo);
 
   // ================================================================ 9) Âncoras dos rótulos (HTML sobre o canvas)
   const ancoras = { glebas: [], vias: [], marcadores: [], lotes: [], lazer: [] };
@@ -803,14 +1004,14 @@ export function construirCena(dados, op = {}) {
     } else {
       const topo = v.pts.reduce((a, b) => (b[1] < a[1] ? b : a));
       const base = v.pts.reduce((a, b) => (b[1] > a[1] ? b : a));
-      ancoras.vias.push({ texto: v.nome.toUpperCase(), tipo: 'rua', p: new THREE.Vector3(topo[0], 3, topo[1] + 24), principal: true });
+      ancoras.vias.push({ texto: v.nome.toUpperCase(), tipo: 'rua', p: new THREE.Vector3(topo[0], 3, topo[1] - 4), principal: true }); // sobre a Av. Pau Ferro, como no mapa ilustrado
       ancoras.vias.push({ texto: v.nome.toUpperCase(), tipo: 'rua', p: new THREE.Vector3(base[0], 3, base[1] - 24), principal: false });
     }
   }
-  if (estrada.length > 3) {
-    const meio = pontoAoLongo(dados.decor.estrada, 0.55);
+  if (estradaBase.length > 1) {
+    const meio = pontoAoLongo(estradaBase, 0.55);
     ancoras.vias.push({ texto: 'ESTRADA DE DUAS VENDAS', tipo: 'estrada', p: new THREE.Vector3(meio[0], 3, meio[1]), principal: true });
-    const fim = dados.decor.estrada[dados.decor.estrada.length - 1];
+    const fim = estradaBase[estradaBase.length - 1];
     ancoras.vias.push({ texto: 'POÇÕES ↑', tipo: 'destino', p: new THREE.Vector3(fim[0], 3, fim[1]), principal: true });
   }
   for (const l of lotes) ancoras.lotes.push({ id: l.id, status: l.status, p: new THREE.Vector3(l.c[0], 0.5, l.c[1]) });
@@ -825,15 +1026,63 @@ export function construirCena(dados, op = {}) {
   // ================================================================ API
   return {
     scene, sol, hemi, dirSol, centro, bb, polyImovel, texturas: T,
-    lotes, loteEm, pintarLote, corBase, coresStatus, corApagada,
+    lotes, loteEm, pintarLote, corBase, coresStatus, corApagada, ajustarDistancia,
     mostrarDestaque, esconderDestaque,
     ancoras, arvoresQtd: arvores.length,
-    sombrasBlob: veg.sombras,
-    clareira: veg.clareira, fecharClareira: veg.restaurar,
+    sombrasBlob: { set visible(v) { veg.sombras.visible = v; vegLonge.sombras.visible = v; }, get visible() { return veg.sombras.visible; } },
+    clareira: (a, b, raio) => { veg.clareira(a, b, raio); vegLonge.clareira(a, b, raio); },
+    fecharClareira: () => { veg.restaurar(); vegLonge.restaurar(); },
+    distVia, base, ALT_BASE,
+    modo: 'entorno',
+    // 'maquete': base com laterais de terra sobre fundo claro (padrão do mapa) · 'entorno': paisagem com céu e morros
+    definirModo(modo, renderer) {
+      this.modo = modo === 'maquete' ? 'maquete' : 'entorno';
+      const mq = this.modo === 'maquete';
+      maquete.visible = mq; entorno.visible = !mq;
+      scene.background = mq ? new THREE.Color('#F1ECDF') : null;
+      scene.fog = mq ? null : neblina;
+      // maquete: cores fiéis (verde/vermelho/azul vivos, como no mapa ilustrado); entorno: aspecto fotográfico
+      sol.intensity = mq ? 3.9 : 2.6;
+      hemi.intensity = mq ? 1.95 : 0.75;
+      if (renderer) {
+        renderer.toneMapping = mq ? THREE.NoToneMapping : THREE.ACESFilmicToneMapping;
+        renderer.toneMappingExposure = mq ? 1 : 0.97;
+        scene.traverse((o) => { if (o.isMesh && o.material) o.material.needsUpdate = true; });
+      }
+    },
+    // sombra real de árvores, prédios e postes sobre o terreno inteiro; calculada uma vez (a cena não se mexe)
+    sombraGlobal(renderer, ligar, tam = 4096) {
+      renderer.shadowMap.enabled = !!ligar;
+      renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+      renderer.shadowMap.autoUpdate = false;
+      sol.castShadow = !!ligar;
+      if (ligar) {
+        sol.target.position.copy(centro);
+        sol.position.copy(centro).addScaledVector(dirSol, 4000);
+        sol.updateMatrixWorld(); sol.target.updateMatrixWorld();
+        const vista = new THREE.Matrix4().lookAt(sol.position, sol.target.position, new THREE.Vector3(0, 1, 0));
+        const inv = vista.clone().invert();
+        let x0 = Infinity, x1 = -Infinity, y0 = Infinity, y1 = -Infinity;
+        for (const q of base) for (const h of [0, 30]) {
+          const v = new THREE.Vector3(q[0], h, q[1]).sub(sol.position).applyMatrix4(inv.clone().setPosition(0, 0, 0));
+          x0 = Math.min(x0, v.x); x1 = Math.max(x1, v.x); y0 = Math.min(y0, v.y); y1 = Math.max(y1, v.y);
+        }
+        const cam = sol.shadow.camera;
+        cam.left = x0 - 20; cam.right = x1 + 20; cam.bottom = y0 - 20; cam.top = y1 + 20; cam.near = 100; cam.far = 9000;
+        cam.updateProjectionMatrix();
+        sol.shadow.mapSize.set(tam, tam);
+        sol.shadow.bias = -0.0006; sol.shadow.normalBias = 0.9; sol.shadow.radius = 2;
+        if (sol.shadow.map) { sol.shadow.map.dispose(); sol.shadow.map = null; }
+        renderer.shadowMap.needsUpdate = true;
+      }
+      veg.sombras.visible = !ligar; vegLonge.sombras.visible = !ligar;
+      scene.traverse((o) => { if (o.isMesh && o.material) o.material.needsUpdate = true; });
+    },
     alturaChao: (x, z) => (dentro([x, z], polyImovel) ? 0 : Math.max(0, altFora(x, z))),
     ligarSombrasReais(renderer, ligar, alvo, raio = 250) {
       renderer.shadowMap.enabled = !!ligar;
       renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+      renderer.shadowMap.autoUpdate = true;
       sol.castShadow = !!ligar;
       if (ligar) {
         const c = alvo || centro;
@@ -866,6 +1115,8 @@ function criarMateriais(T) {
     madeiraEscura: std({ color: '#5E3F2A' }),
     vidro: std({ color: '#7FA9BE', roughness: 0.08, metalness: 0.25 }),
     pedra: std({ color: '#FFFFFF', map: T.pedra, roughness: 0.9 }),
+    pedraClara: std({ color: '#E6DABE', map: T.pedra, roughness: 0.95 }),
+    bordo: std({ color: '#6E1F24', roughness: 0.6 }),
     pilar: std({ color: '#D8CBB2' }),
     agua: std({ color: '#35B7D4', roughness: 0.04, metalness: 0.05 }),
     aguaRasa: std({ color: '#68D0E2', roughness: 0.05, metalness: 0.05 }),
@@ -926,7 +1177,7 @@ function salao(M, c, ang) {
   for (const x of [-4.6, 0, 4.6]) peca(g, caixa(2.6, 2.7, 0.12), M.vidro, x, 0.35 + 1.35, 4.52);
   for (const x of [-5, 5]) peca(g, caixa(2.2, 1.3, 0.12), M.vidro, x, 2.6, -5.56);
   for (const z of [-2.5, 2]) { peca(g, caixa(0.12, 1.3, 2), M.vidro, 7.56, 2.6, z); peca(g, caixa(0.12, 1.3, 2), M.vidro, -7.56, 2.6, z); }
-  peca(g, telhadoDuasAguas(16.4, 11.6, 2.4), M.telha, 0, 0.35 + 3.8, -0.5);
+  peca(g, telhadoQuatroAguas(17.6, 12.6, 2.6), M.telha, 0, 0.35 + 3.8, -0.5);
   // varanda com pergolado de madeira
   for (const x of [-7, -3.5, 0, 3.5, 7]) peca(g, caixa(0.25, 3, 0.25), M.madeira, x, 1.85, 6.6);
   for (const x of [-6.5, -4.5, -2.5, -0.5, 1.5, 3.5, 5.5]) peca(g, caixa(0.18, 0.22, 3.2), M.madeira, x + 0.5, 3.45, 5.9);
@@ -1023,7 +1274,8 @@ function baias(M, c, ang, r) {
   peca(g, caixa(20, 0.25, 8), M.pedra, 0, 0.125, -6);
   peca(g, caixa(17.5, 2.9, 4.2), M.paredeCreme, 0, 1.7, -6);
   for (let i = 0; i < 5; i++) peca(g, caixa(1.6, 2, 0.12), M.madeira, -7 + i * 3.5, 1.25, -3.85);
-  peca(g, telhadoDuasAguas(18.6, 7.2, 1.9), M.telha, 0, 3.15, -5.2);
+  peca(g, telhadoQuatroAguas(21, 9.2, 2.1), M.telha, 0, 3.15, -5.0);
+  for (let i = 0; i < 6; i++) peca(g, caixa(0.22, 2.9, 0.22), M.madeira, -8.75 + i * 3.5, 1.7, -1.3);
   // redondel: cerca circular de 16 m com piso de areia
   const R = 8;
   const piso = new THREE.CylinderGeometry(R, R, 0.1, 40); peca(g, piso, M.areia, 0, 0.05, 7);
@@ -1056,23 +1308,25 @@ function fazendinha(M, c, ang, r) {
 
 function portaria(M, c, ang, T) {
   const g = new THREE.Group();
-  // guarita de 15 m² (5 × 3 m) no centro, com banheiro; faixas de entrada (2) e de saída (1) ao lado
-  peca(g, caixa(6, 0.3, 4), M.pedra, 0, 0.15, 0);
-  peca(g, caixa(5, 3, 3), M.parede, 0, 1.8, 0);
-  peca(g, caixa(3.4, 1.2, 0.1), M.vidro, 0, 2.2, 1.52); peca(g, caixa(3.4, 1.2, 0.1), M.vidro, 0, 2.2, -1.52);
-  peca(g, caixa(0.1, 1.2, 1.8), M.vidro, 2.52, 2.2, 0); peca(g, caixa(0.1, 1.2, 1.8), M.vidro, -2.52, 2.2, 0);
-  // pórtico sobre as faixas: pilares de pedra e telhado de duas águas
-  for (const z of [-11, -4.2, 4.2, 11]) for (const x of [-3.5, 3.5]) peca(g, caixa(0.8, 4.6, 0.8), M.pilar, x, 2.3, z);
-  peca(g, telhadoDuasAguas(24, 8.6, 2.3), M.telha, 0, 4.6, 0).rotation.y = 0;
-  const tel = g.children[g.children.length - 1]; tel.rotation.y = Math.PI / 2; // cumeeira atravessando a via
-  // letreiro
+  // guarita de 15 m² (5 × 3 m) em bloco de pedra clara, com faixa bordô nas janelas (como o render do projeto)
+  peca(g, caixa(6.2, 0.3, 4.2), M.pedra, 0, 0.15, 0);
+  peca(g, caixa(5, 5.2, 3), M.pedraClara, 0, 2.9, 0);
+  peca(g, caixa(5.06, 0.9, 3.06), M.bordo, 0, 2.2, 0);
+  peca(g, caixa(4.4, 0.7, 3.1), M.vidro, 0, 2.2, 0);
+  // telhado grande de duas águas por cima das faixas (cumeeira ao longo da via), em pilares de madeira
+  peca(g, telhadoDuasAguas(8.4, 26, 3.4), M.telha, 0, 5.1, 0);
+  for (const z of [-12.2, 12.2]) for (const x of [-3.4, 3.4]) peca(g, caixa(0.45, 5.4, 0.45), M.madeira, x, 2.7, z);
+  // letreiro na fachada da guarita voltada para quem chega (local +X)
   const tex = placaTexto('HARAS RIO SÃO JOSÉ');
-  // local +X aponta para fora (Estrada de Duas Vendas): o letreiro fica voltado para quem chega
-  const placa = new THREE.Mesh(new THREE.PlaneGeometry(9, 1.4), new THREE.MeshStandardMaterial({ map: tex, roughness: 0.8 }));
-  placa.position.set(4.35, 5.3, 0); placa.rotation.y = Math.PI / 2; placa.castShadow = false; g.add(placa);
-  // cancelas (duas entradas e uma saída)
-  for (const z of [-7.6, 7.6]) peca(g, caixa(0.12, 0.12, 5.6), M.branco, -3, 1.1, z);
-  peca(g, caixa(0.12, 0.12, 5.6), M.terracota, 3, 1.1, 0);
+  const placa = new THREE.Mesh(new THREE.PlaneGeometry(4.4, 0.75), new THREE.MeshStandardMaterial({ map: tex, roughness: 0.8 }));
+  placa.position.set(2.53, 4.2, 0); placa.rotation.y = Math.PI / 2; placa.castShadow = false; g.add(placa);
+  // portões de grade preta: duas entradas e uma saída
+  const grade = (z0, z1, x) => {
+    const L = Math.abs(z1 - z0), zc = (z0 + z1) / 2;
+    peca(g, caixa(0.08, 0.08, L), M.ferro, x, 2.0, zc); peca(g, caixa(0.08, 0.08, L), M.ferro, x, 0.25, zc);
+    for (let z = Math.min(z0, z1); z <= Math.max(z0, z1) + 0.01; z += 0.35) peca(g, caixa(0.05, 1.8, 0.05), M.ferro, x, 1.1, z);
+  };
+  grade(-11.8, -8.2, 3); grade(-7.8, -4.4, 3); grade(4.4, 11.8, 3);
   const n = noLugar(g, c, ang);
   n.userData.naoFundir = [placa];
   return n;
@@ -1084,7 +1338,7 @@ function canteiros(M, c, ang, r) {
   const moita = new THREE.SphereGeometry(0.55, 7, 5);
   const flores = [M.flor1, M.flor2, M.flor3];
   // quatro canteiros de 9 x 2,6 m, dos dois lados das faixas, antes e depois do pórtico
-  for (const [cx, cz] of [[-9, -14.5], [-9, 14.5], [10, -14.5], [10, 14.5]]) {
+  for (const [cx, cz] of [[-9, -15], [-9, 15], [10, -15], [10, 15]]) {
     const fora = Math.sign(cz); // lado de fora do canteiro (longe da via): cerca-viva
     peca(g, caixa(9.2, 0.16, 2.6), M.terra, cx, 0.08, cz);
     for (const dz of [-1.35, 1.35]) peca(g, caixa(9.4, 0.22, 0.14), M.pilar, cx, 0.11, cz + dz);
