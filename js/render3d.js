@@ -15,6 +15,7 @@ const log = (t) => { $('#log').textContent += t + '\n'; };
 const dados = await (await fetch('data/lotes.json', { cache: 'no-store' })).json();
 const cena = construirCena(dados, { qualidade: 'render', semStatus: true });
 const { scene } = cena;
+await new Promise((ok) => { window.addEventListener('haras:textura', ok, { once: true }); setTimeout(ok, 5000); }); // placa da logo
 const itens = Object.fromEntries((dados.decor.lazer || []).map((it) => [it.id, it.c]));
 const entrada = dados.meta.entrada;
 
@@ -59,21 +60,32 @@ const direcao = (de, para) => Math.atan2(para[0] - de[0], para[1] - de[1]); // a
 
 // ---------------------------------------------------------------- Vistas
 // azim = direção (a partir do alvo) em que fica a câmera: 0 = sul, -π/2 = oeste, π/2 = leste, π = norte
+const eixo = dados.decor.eixo_clube || { o: [10, 900], u: [-0.747, 0.665], v: [0.665, 0.747] };
+const azDe = (vx, vz) => Math.atan2(vx, vz);                       // azimute de uma direção (câmera fica nesse lado)
+const saida = (() => { const e = dados.decor.estrada[1]; const dx = e[0] - entrada[0], dz = e[1] - entrada[1], L = Math.hypot(dx, dz); return [dx / L, dz / L]; })();
 const PRESETS = [
   { nome: '3d-vista-geral', titulo: 'Vista geral do chacreamento', w: 1920, h: 1080,
     cam: () => enquadrar(cena.polyImovel, 1.26, -0.72, { x: 0.01, topo: 0.3, base: 0.03 }) },
-  { nome: '3d-portaria', titulo: 'Portaria e guarita', w: 1920, h: 1080, sombras: 110,
-    cam: () => ({ alvo: V(entrada[0] + 4, entrada[1]), dist: 58, polar: 1.3, azim: -2.07 }) },
-  { nome: '3d-salao-piscina', titulo: 'Salão de festas e piscina', w: 1920, h: 1080, sombras: 110,
-    cam: () => ({ alvo: meio(itens.salao, itens.piscina), dist: 70, polar: 1.1, azim: direcao(itens.salao, itens.piscina) - 1.45 }) }, // de lado: salão e piscina no mesmo quadro
-  { nome: '3d-quiosques-quadra', titulo: 'Quiosques, quadra de areia e fazendinha', w: 1920, h: 1080, sombras: 130,
-    cam: () => ({ alvo: V(128, 836), dist: 105, polar: 1.12, azim: 0.35 }) },
-  { nome: '3d-baias-redondel', titulo: 'Baias e redondel', w: 1920, h: 1080, sombras: 90,
-    cam: () => ({ alvo: V(itens.baias[0] + 2, itens.baias[1] + 4), dist: 62, polar: 1.16, azim: 0.55 }) },
+  // guarita de frente, como a perspectiva do projeto de revitalização (maio/2026)
+  { nome: '3d-portaria', titulo: 'Portaria e guarita (projeto de revitalização)', w: 1920, h: 1080, sombras: 60,
+    cam: () => ({ alvo: V(entrada[0] + saida[0] * 3, entrada[1] + saida[1] * 3), dist: 27, polar: 1.36, azim: azDe(saida[0], saida[1]) + 0.12 }) },
+  // piscina em primeiro plano e o salão ao fundo (como o render do projeto)
+  { nome: '3d-salao-piscina', titulo: 'Salão de festas e piscina', w: 1920, h: 1080, sombras: 70,
+    cam: () => ({ alvo: V(itens.piscina[0] * 0.75 + itens.salao[0] * 0.25, itens.piscina[1] * 0.75 + itens.salao[1] * 0.25), dist: 36, polar: 1.24, azim: direcao(itens.salao, itens.piscina) + 0.4 }) },
+  // quiosque de perto (como o render do projeto, sem churrasqueira)
+  { nome: '3d-quiosque', titulo: 'Quiosque', w: 1920, h: 1080, sombras: 40,
+    cam: () => ({ alvo: V(itens.quiosques[0], itens.quiosques[1]), dist: 17, polar: 1.18, azim: azDe(eixo.u[0], eixo.u[1]) + 0.75 }) },
+  // redondel com cavalos em primeiro plano e as baias ao lado (como o render do projeto)
+  { nome: '3d-baias-redondel', titulo: 'Baias e redondel', w: 1920, h: 1080, sombras: 70,
+    cam: () => ({ alvo: V(itens.baias[0] - eixo.v[0] * 5, itens.baias[1] - eixo.v[1] * 5), dist: 40, polar: 1.3, azim: azDe(-eixo.v[0], -eixo.v[1]) + 0.55 }) },
+  // o clube inteiro visto do lado do lago (como a imagem "CLUBE" da implantação, só com itens do contrato)
+  { nome: '3d-clube', titulo: 'Área de lazer: salão, piscina, quiosques, quadra de areia, baias e fazendinha', w: 1920, h: 1080, sombras: 150,
+    cam: () => ({ alvo: V(eixo.o[0] - eixo.u[0] * 8, eixo.o[1] - eixo.u[1] * 8), dist: 175, polar: 0.98, azim: azDe(eixo.u[0], eixo.u[1]) + 0.3 }) },
   { nome: '3d-avenida', titulo: 'Avenida Pau Ferro, rede elétrica e lotes demarcados', w: 1920, h: 1080, sombras: 260,
     cam: () => ({ alvo: V(1150, 132), dist: 190, polar: 1.3, azim: -1.62 }) },
-  { nome: '3d-lago', titulo: 'Lago natural e área verde', w: 1920, h: 1080, sombras: 160,
-    cam: () => { const c = centroide(dados.areas.find((a) => a.tipo === 'lago').poly); return { alvo: V(c[0] + 10, c[1] - 10), dist: 150, polar: 1.18, azim: 2.5 }; } },
+  // lago em primeiro plano, com o clube ao fundo
+  { nome: '3d-lago', titulo: 'Lago natural e área de lazer', w: 1920, h: 1080, sombras: 170,
+    cam: () => { const c = centroide(dados.areas.find((a) => a.tipo === 'lago').poly); return { alvo: V(c[0] - eixo.u[0] * 45, c[1] - eixo.u[1] * 45), dist: 150, polar: 1.2, azim: azDe(eixo.u[0], eixo.u[1]) - 0.35 }; } },
   { nome: '3d-reserva', titulo: 'Área de preservação ambiental', w: 1920, h: 1080,
     cam: () => ({ alvo: V(2700, 470), dist: 1050, polar: 1.18, azim: -1.25 }) },
 ];

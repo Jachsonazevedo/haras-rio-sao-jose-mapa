@@ -334,6 +334,20 @@ function criarTexturas() {
       for (let x = (y / 16) % 2 ? 8 : 0; x < s; x += 16) { g.fillStyle = 'rgba(255,220,180,.10)'; g.fillRect(x + 2, y + 2, 10, 9); }
     }
   });
+  T.paver = textura(128, (g, s) => {
+    g.fillStyle = '#CFC6B6'; g.fillRect(0, 0, s, s);
+    for (let y = 0; y < s; y += 16) for (let x = ((y / 16) % 2) * 16; x < s + 32; x += 32) {
+      g.fillStyle = ['#C9BFAE', '#D6CDBE', '#BFB5A4', '#D1C8B8'][(x + y) % 4 === 0 ? 0 : Math.floor(r() * 4)];
+      g.fillRect(x - 32 + 1, y + 1, 30, 14);
+    }
+  });
+  T.paver.repeat.set(26, 32);
+  T.azulejo = textura(128, (g, s) => {
+    g.fillStyle = '#7FD0E6'; g.fillRect(0, 0, s, s);
+    g.strokeStyle = 'rgba(255,255,255,.55)'; g.lineWidth = 2;
+    for (let i = 0; i <= 8; i++) { g.beginPath(); g.moveTo(0, i * s / 8); g.lineTo(s, i * s / 8); g.stroke(); g.beginPath(); g.moveTo(i * s / 8, 0); g.lineTo(i * s / 8, s); g.stroke(); }
+  });
+  T.azulejo.repeat.set(5, 5);
   T.madeira = textura(128, (g, s) => {
     g.fillStyle = '#9A6A43'; g.fillRect(0, 0, s, s);
     for (let i = 0; i < 90; i++) { g.strokeStyle = `rgba(60,35,20,${0.08 + r() * 0.12})`; g.beginPath(); const y = r() * s; g.moveTo(0, y); g.bezierCurveTo(s * 0.3, y + 3, s * 0.6, y - 3, s, y); g.stroke(); }
@@ -826,6 +840,22 @@ export function construirCena(dados, op = {}) {
   const pegadas = Object.entries(itens).map(([k, c]) => ({ c, r: RAIO_ITEM[k] || 14 }));
   if (entrada) pegadas.push({ c: entrada, r: 22 });
   const ocupado = (x, z) => pegadas.some((g) => Math.hypot(g.c[0] - x, g.c[1] - z) < g.r);
+  // eixo da parte baixa da faixa (clube): u desce rumo ao lago, v atravessa (dados.decor.eixo_clube)
+  const eixoC = (dados.decor && dados.decor.eixo_clube) || { o: centroide(areas.clube || polyImovel), u: [-0.747, 0.665], v: [0.665, 0.747] };
+  const uE = eixoC.u, vE = eixoC.v, OC = eixoC.o;
+  const noClube = (s2, t2) => [OC[0] + uE[0] * s2 + vE[0] * t2, OC[1] + uE[1] * s2 + vE[1] * t2];
+  const angU = Math.atan2(-uE[1], uE[0]); // x local ao longo da faixa
+  const angV = Math.atan2(-vE[1], vE[0]); // x local atravessado (z local aponta para o lago)
+  // caminhos internos do clube: um eixo central e um ramal até cada construção
+  const caminhos = [];
+  if (Object.keys(itens).length) {
+    caminhos.push([noClube(-82, -5), noClube(-40, -4), noClube(10, -3), noClube(80, -5)]);
+    for (const c of Object.values(itens)) {
+      const s2 = (c[0] - OC[0]) * uE[0] + (c[1] - OC[1]) * uE[1];
+      caminhos.push([noClube(s2, -3.5), c]);
+    }
+    for (const cm of caminhos) for (let i = 1; i < cm.length; i++) segVias.push({ a: cm[i - 1], b: cm[i], w: 3 });
+  }
   const arvores = []; // [x, z, altura, raio, tipo(0 copa redonda | 1 guarda-chuva | 2 palmeira), corIdx]
   const livre = (x, z, folgaVia = 3) => {
     if (ocupado(x, z)) return false;
@@ -905,27 +935,27 @@ export function construirCena(dados, op = {}) {
   const M = criarMateriais(T);
   const pessoas = [];
 
-  // Eixo do gramado (borda superior da área de lazer) e da "garganta" onde ficam salão e piscina
-  const angGramado = Math.atan2(-(813.41 - 793.0), -1.68 - 100.38) + Math.PI; // ~ paralelo à borda interna
-  const angGarganta = Math.atan2(-(782.94 - 653.19), 174.48 - 218.1) + Math.PI;
-
-  // o salão abre a frente (portas de vidro e varanda) para a piscina
-  const angSalao = itens.salao && itens.piscina ? Math.atan2(itens.piscina[0] - itens.salao[0], itens.piscina[1] - itens.salao[1]) : angGarganta;
+  // clube na parte baixa da faixa (implantação do projeto): construções alinhadas ao eixo; o salão abre para a piscina
+  const angSalao = itens.salao && itens.piscina ? Math.atan2(itens.piscina[0] - itens.salao[0], itens.piscina[1] - itens.salao[1]) : angU;
   if (itens.salao) humanizado.add(salao(M, itens.salao, angSalao));
-  if (itens.piscina) humanizado.add(piscina(M, itens.piscina, angGarganta, r, pessoas));
-  if (itens.quiosques) humanizado.add(quiosques(M, itens.quiosques, angGramado, pessoas, r));
-  if (itens.banheiros) humanizado.add(banheiros(M, itens.banheiros, angGramado));
-  if (itens.quadra) humanizado.add(quadra(M, itens.quadra, angGramado, pessoas));
-  if (itens.baias) humanizado.add(baias(M, itens.baias, angGramado, r));
-  if (itens.fazendinha) humanizado.add(fazendinha(M, itens.fazendinha, angGramado, r));
-  // caminho de pedrisco ligando os itens do clube
-  const ordem = ['salao', 'piscina', 'quiosques', 'quadra', 'fazendinha', 'banheiros', 'baias'].filter((k) => itens[k]).map((k) => itens[k]);
-  if (ordem.length > 1) {
-    const cam = planos(new THREE.Mesh(fita(ordem, 2.6, { vRep: 6 }), matPlano({ color: '#E3D4AE', map: T.areia })), 5);
-    grupoPlano.add(cam);
+  if (itens.piscina) humanizado.add(piscina(M, itens.piscina, angV, r, pessoas));
+  if (itens.quiosques) humanizado.add(quiosques(M, itens.quiosques, angV, pessoas, r));
+  if (itens.banheiros) humanizado.add(banheiros(M, itens.banheiros, angU));
+  if (itens.quadra) humanizado.add(quadra(M, itens.quadra, angU, pessoas));
+  if (itens.baias) humanizado.add(baias(M, itens.baias, angU, r));
+  if (itens.fazendinha) humanizado.add(fazendinha(M, itens.fazendinha, angU, r));
+  // caminhos de pedrisco (eixo + ramais)
+  if (caminhos.length) {
+    const gc = caminhos.map((cm, i) => fita(cm, i ? 2.2 : 3.2, { vRep: 6 }));
+    for (const cm of caminhos) for (const q of cm) gc.push(disco(q[0], q[1], 1.6, 0, 14));
+    grupoPlano.add(planos(new THREE.Mesh(mergeGeometries(gc.map((g) => { const n = g.index ? g.toNonIndexed() : g; for (const k of Object.keys(n.attributes)) if (!['position', 'normal', 'uv'].includes(k)) n.deleteAttribute(k); return n; })), matPlano({ color: '#E6D7B2', map: T.areia })), 5));
   }
-  // pessoas espalhadas pelo gramado
-  for (let i = 0; i < 10 && itens.quiosques; i++) pessoas.push([itens.quiosques[0] - 30 + r() * 60, itens.quiosques[1] + 10 + r() * 30]);
+  // pessoas espalhadas pelo gramado do clube
+  for (let i = 0, k = 0; i < 12 && k < 200 && areas.clube; k++) {
+    const q = noClube(-40 + r() * 110, -40 + r() * 80);
+    if (!dentro(q, areas.clube) || ocupado(q[0], q[1]) || (areas.lago && dentro(q, areas.lago))) continue;
+    pessoas.push(q); i++;
+  }
 
   // Portaria (guarita 15 m², duas entradas e uma saída) na entrada
   if (entrada) {
@@ -934,17 +964,12 @@ export function construirCena(dados, op = {}) {
     humanizado.add(portaria(M, entrada, angEntrada, T));
     humanizado.add(carro(M, [entrada[0] + 30, entrada[1] - 2], 0, '#F4F4F2'));
     humanizado.add(carro(M, [entrada[0] - 38, entrada[1] - 26], angEntrada, '#9FA7AE'));
-    pessoas.push([entrada[0] + 6, entrada[1] + 8], [entrada[0] + 7.5, entrada[1] + 8.5]);
-    // palmeiras e canteiros na portaria
-    // palmeiras nas laterais do pórtico (no referencial da portaria: x ao longo da via, z atravessado)
-    const cE = Math.cos(angEntrada), sE = Math.sin(angEntrada);
-    for (const [lx, lz, h] of [[-5, -21, 9], [-5, 21, 9.5], [13, -21, 8.5], [13, 21, 9]]) arvores.push([entrada[0] + lx * cE + lz * sE, entrada[1] - lx * sE + lz * cE, h, 3, 2, 0]);
-    humanizado.add(canteiros(M, entrada, angEntrada, r));
+    pessoas.push([entrada[0] + 6, entrada[1] + 9], [entrada[0] + 7.5, entrada[1] + 9.5]);
   }
   // palmeiras em volta da piscina
   if (itens.piscina) {
     const [px, pz] = itens.piscina;
-    for (const [dx, dz] of [[-16, -9], [15, 9], [-14, 11], [17, -8]]) arvores.push([px + dx, pz + dz, 8 + r() * 2, 3, 2, 0]);
+    for (const [lx, lz] of [[-15, -9], [15, -9], [-15, 9.5], [16, 9]]) arvores.push([px + lx * vE[0] + lz * uE[0], pz + lx * vE[1] + lz * uE[1], 7.5 + r() * 2, 3, 2, 0]);
   }
   // árvores de sombra no gramado e em volta do lago
   if (areas.clube) {
@@ -959,7 +984,8 @@ export function construirCena(dados, op = {}) {
     const cl = centroide(areas.lago);
     for (let i = 0; i < 26; i++) {
       const a = r() * Math.PI * 2, d = 48 + r() * 22;
-      plantar(cl[0] + Math.cos(a) * d, cl[1] + Math.sin(a) * d, 1 + r() * 0.25, 0);
+      const x = cl[0] + Math.cos(a) * d, z = cl[1] + Math.sin(a) * d;
+      if (!ocupado(x, z) && !pertoDeVia([x, z], 3)) plantar(x, z, 1 + r() * 0.25, 0);
     }
   }
   // pessoas: poucas, só para dar escala (sem nomes nem rostos)
@@ -1114,8 +1140,22 @@ function criarMateriais(T) {
     madeira: std({ color: '#FFFFFF', map: madeira }),
     madeiraEscura: std({ color: '#5E3F2A' }),
     vidro: std({ color: '#7FA9BE', roughness: 0.08, metalness: 0.25 }),
-    pedra: std({ color: '#FFFFFF', map: T.pedra, roughness: 0.9 }),
+    pedra: std({ color: '#E2D5BD', map: T.pedra, roughness: 0.9 }),
     pedraClara: std({ color: '#E6DABE', map: T.pedra, roughness: 0.95 }),
+    areiaSuave: std({ color: '#E4D2B0', roughness: 0.9 }),
+    brancoGelo: std({ color: '#EFEAE0', roughness: 0.85 }),
+    imbuia: std({ color: '#5A3A24', roughness: 0.7 }),
+    pretoFosco: std({ color: '#1C1C1C', roughness: 0.6, metalness: 0.3 }),
+    paver: std({ color: '#CFC3B0', map: T.paver, roughness: 0.95 }),
+    cimento: std({ color: '#CBC2B2', roughness: 0.95 }),
+    granito: std({ color: '#2B2A28', roughness: 0.35, metalness: 0.1 }),
+    azulejo: std({ color: '#FFFFFF', map: T.azulejo, roughness: 0.4, side: THREE.BackSide }),
+    aguaClara: new THREE.MeshStandardMaterial({ color: '#2FB2D6', roughness: 0.04, metalness: 0.05, transparent: true, opacity: 0.58, depthWrite: false }),
+    bronze: std({ color: '#4A3A2E', roughness: 0.5, metalness: 0.4 }),
+    tecido: std({ color: '#E9E0CF', roughness: 0.95 }),
+    boia: std({ color: '#2F5FD0', roughness: 0.5 }),
+    agave: std({ color: '#5F8F6A', roughness: 0.8 }),
+    folhagem: std({ color: '#3E7F3A', roughness: 0.85 }),
     bordo: std({ color: '#6E1F24', roughness: 0.6 }),
     pilar: std({ color: '#D8CBB2' }),
     agua: std({ color: '#35B7D4', roughness: 0.04, metalness: 0.05 }),
@@ -1129,9 +1169,9 @@ function criarMateriais(T) {
     terracota: std({ color: '#A74726' }),
     lona: std({ color: '#F3E7C9' }),
     lonaVerde: std({ color: '#2F6B4A' }),
-    cavalo1: std({ color: '#6B3E22' }),
+    cavalo1: std({ color: '#9A5B34' }),
     cavalo2: std({ color: '#2E2118' }),
-    cavalo3: std({ color: '#E8E1D4' }),
+    cavalo3: std({ color: '#C79A6B' }),
     galinha: std({ color: '#FBF7EE' }),
     cabra: std({ color: '#C9A77C' }),
     pneu: std({ color: '#1E1F21', roughness: 0.9 }),
@@ -1161,6 +1201,17 @@ function telhadoDuasAguas(L, W, H) {
   g.translate(0, 0, -L / 2); g.rotateY(Math.PI / 2);
   return g;
 }
+// Telhado de duas águas aberto (empena vazada, como no projeto da guarita e nos quiosques): cumeeira ao longo de x
+function telhadoAberto(g, M, x, y, z, L, W, H) {
+  const meia = W / 2, rampa = Math.hypot(meia, H), a = Math.atan2(H, meia);
+  for (const lado of [-1, 1]) {
+    peca(g, caixa(L, 0.16, rampa), M.telha, x, y + H / 2 + 0.08, z + lado * meia / 2, 0, lado * a);
+    peca(g, caixa(L, 0.06, rampa), M.imbuia, x, y + H / 2 - 0.04, z + lado * meia / 2, 0, lado * a); // forro de madeira
+    for (const ex of [-L / 2 + 0.1, L / 2 - 0.1]) peca(g, caixa(0.14, 0.24, rampa), M.imbuia, x + ex, y + H / 2, z + lado * meia / 2, 0, lado * a); // caibros das empenas
+  }
+  peca(g, caixa(L + 0.2, 0.2, 0.2), M.imbuia, x, y + H + 0.05, z);   // cumeeira
+  for (const ex of [-L / 2 + 0.1, L / 2 - 0.1]) peca(g, caixa(0.14, 0.18, W), M.imbuia, x + ex, y + 0.1, z); // linha (tirante)
+}
 function telhadoQuatroAguas(L, W, H) {
   const g = new THREE.ConeGeometry(Math.SQRT1_2, 1, 4, 1); g.rotateY(Math.PI / 4);
   g.translate(0, 0.5, 0); g.scale(L, H, W);
@@ -1172,7 +1223,7 @@ function noLugar(grupo, c, ang) { grupo.position.set(c[0], 0, c[1]); grupo.rotat
 function salao(M, c, ang) {
   const g = new THREE.Group();
   peca(g, caixa(19, 0.35, 14), M.pedra, 0, 0.175, 0);
-  peca(g, caixa(15, 3.8, 10), M.parede, 0, 0.35 + 1.9, -0.5);
+  peca(g, caixa(15, 3.8, 10), M.areiaSuave, 0, 0.35 + 1.9, -0.5);
   // portas de vidro na frente (voltada para a piscina) e janelas laterais
   for (const x of [-4.6, 0, 4.6]) peca(g, caixa(2.6, 2.7, 0.12), M.vidro, x, 0.35 + 1.35, 4.52);
   for (const x of [-5, 5]) peca(g, caixa(2.2, 1.3, 0.12), M.vidro, x, 2.6, -5.56);
@@ -1187,8 +1238,10 @@ function salao(M, c, ang) {
 
 function espreguicadeira(g, M, x, z, ry) {
   const e = new THREE.Group();
-  peca(e, caixa(0.7, 0.25, 1.4), M.branco, 0, 0.3, 0.2);
-  peca(e, caixa(0.7, 0.08, 0.7), M.branco, 0, 0.62, -0.62, 0, -0.9);
+  for (const dx of [-0.34, 0.34]) peca(e, caixa(0.05, 0.05, 1.5), M.bronze, dx, 0.34, 0.15);
+  for (const [dx, dz] of [[-0.34, 0.85], [0.34, 0.85], [-0.34, -0.55], [0.34, -0.55]]) peca(e, caixa(0.05, 0.34, 0.05), M.bronze, dx, 0.17, dz);
+  peca(e, caixa(0.66, 0.06, 1.4), M.tecido, 0, 0.38, 0.2);
+  peca(e, caixa(0.66, 0.06, 0.75), M.tecido, 0, 0.66, -0.62, 0, -0.85);
   e.position.set(x, 0.25, z); e.rotation.y = ry; g.add(e);
 }
 function guardaSol(g, M, x, z, mat) {
@@ -1197,30 +1250,57 @@ function guardaSol(g, M, x, z, mat) {
 }
 
 function piscina(M, c, ang, r, pessoas) {
+  // 120 m² (adulto 16 × 6 m + infantil 6 × 4 m), rebaixada: borda de pedra com o recorte, azulejo e água translúcida
   const g = new THREE.Group();
-  peca(g, caixa(26, 0.25, 15), M.pedra, 0, 0.125, 0);
-  // piscina adulto 16 × 6 m + infantil 6 × 4 m (≈ 120 m²) com borda branca
-  peca(g, caixa(16.6, 0.1, 6.6), M.borda, -2, 0.27, -1.5);
-  peca(g, caixa(16, 0.1, 6), M.agua, -2, 0.3, -1.5);
-  peca(g, caixa(6.6, 0.1, 4.6), M.borda, 9, 0.27, -0.5);
-  peca(g, caixa(6, 0.1, 4), M.aguaRasa, 9, 0.3, -0.5);
-  for (let i = 0; i < 6; i++) espreguicadeira(g, M, -9 + i * 2.6, 4.6, Math.PI);
-  guardaSol(g, M, -7.7, 4.8, M.lona); guardaSol(g, M, -2.5, 4.8, M.lonaVerde); guardaSol(g, M, 2.7, 4.8, M.lona);
+  // a forma é desenhada em (x, -z): depois de girar para o chão, o y da forma vira -z
+  const F = (x, z) => [x, -z];
+  const forma = new THREE.Shape();
+  forma.moveTo(...F(-13, -7.5)); forma.lineTo(...F(13, -7.5)); forma.lineTo(...F(13, 7.5)); forma.lineTo(...F(-13, 7.5)); forma.lineTo(...F(-13, -7.5));
+  const furo = new THREE.Path();
+  furo.moveTo(...F(-10, -4.5)); furo.lineTo(...F(-10, 1.5)); furo.lineTo(...F(12, 1.5)); furo.lineTo(...F(12, -2.5)); furo.lineTo(...F(6, -2.5)); furo.lineTo(...F(6, -4.5)); furo.lineTo(...F(-10, -4.5));
+  forma.holes.push(furo);
+  const borda = new THREE.ExtrudeGeometry(forma, { depth: 0.25, bevelEnabled: false });
+  borda.rotateX(-Math.PI / 2); // extrusão para cima
+  peca(g, borda, M.pedra, 0, 0, 0);
+  // bacias (caixa vista por dentro): adulto e infantil
+  peca(g, caixa(16, 1.6, 6), M.azulejo, -2, 0.25 - 0.8, -1.5);
+  peca(g, caixa(6, 0.8, 4), M.azulejo, 9, 0.25 - 0.4, -0.5);
+  // água
+  const agua1 = peca(g, caixa(16, 0.02, 6), M.aguaClara, -2, 0.17, -1.5); agua1.castShadow = false;
+  const agua2 = peca(g, caixa(6, 0.02, 4), M.aguaClara, 9, 0.17, -0.5); agua2.castShadow = false;
+  // boias e espreguiçadeiras (estrutura bronze, tecido claro) no lado do lago; guarda-sóis brancos
+  peca(g, caixa(1.8, 0.14, 0.7), M.boia, -5, 0.2, -2.2, 0.3); peca(g, caixa(1.8, 0.14, 0.7), M.boia, -2.5, 0.2, -0.8, -0.2);
+  for (let i = 0; i < 7; i++) espreguicadeira(g, M, -10.5 + i * 2.8, 4.8, Math.PI);
+  guardaSol(g, M, -8.9, 5.2, M.lona); guardaSol(g, M, -3.3, 5.2, M.lona); guardaSol(g, M, 2.3, 5.2, M.lona);
   const n = noLugar(g, c, ang);
-  // banhistas
   const cs = Math.cos(ang), sn = Math.sin(ang);
   const loc = (x, z) => [c[0] + x * cs + z * sn, c[1] - x * sn + z * cs];
-  pessoas.push(loc(-6, -2), loc(0, -1), loc(9, -0.5), loc(-9, 3.4), loc(4.5, 5.5), loc(-3.5, 6));
+  pessoas.push(loc(-6, -2), loc(0, -1), loc(9, -0.5), loc(-9.5, 3.8), loc(4.5, 5.8), loc(-3.5, 6.2));
   return n;
 }
 
+function cadeira(g, M, x, z, ry) {
+  const c = new THREE.Group();
+  peca(c, caixa(0.46, 0.05, 0.46), M.madeira, 0, 0.46, 0);
+  peca(c, caixa(0.46, 0.5, 0.05), M.madeira, 0, 0.72, -0.21);
+  for (const [dx, dz] of [[-0.19, -0.19], [0.19, -0.19], [-0.19, 0.19], [0.19, 0.19]]) peca(c, caixa(0.04, 0.46, 0.04), M.madeira, dx, 0.23, dz);
+  c.position.set(x, 0, z); c.rotation.y = ry; g.add(c);
+}
 function quiosque(g, M, x, z) {
-  peca(g, caixa(5, 0.25, 5), M.pedra, x, 0.125, z);
-  for (const [dx, dz] of [[-2, -2], [2, -2], [-2, 2], [2, 2]]) peca(g, caixa(0.22, 2.7, 0.22), M.madeira, x + dx, 1.6, z + dz);
-  peca(g, telhadoQuatroAguas(6.2, 6.2, 1.9), M.telha, x, 2.95, z);
-  peca(g, caixa(1.8, 0.1, 0.9), M.madeira, x, 0.95, z);
-  peca(g, caixa(1.8, 0.08, 0.35), M.madeira, x, 0.55, z - 0.9);
-  peca(g, caixa(1.8, 0.08, 0.35), M.madeira, x, 0.55, z + 0.9);
+  // como no render do projeto: telhado de duas águas em madeira, parede de pedra aparente e bancada, mesas com cadeiras
+  // (sem churrasqueira: não consta do contrato v4)
+  peca(g, caixa(6.6, 0.2, 5.4), M.cimento, x, 0.1, z);
+  for (const [dx, dz] of [[-3.1, -2.5], [3.1, -2.5], [-3.1, 2.5], [3.1, 2.5]]) peca(g, caixa(0.22, 2.9, 0.22), M.madeira, x + dx, 1.55, z + dz);
+  peca(g, caixa(0.45, 2.9, 2.6), M.pedraClara, x - 2.8, 1.55, z);            // parede de pedra
+  peca(g, caixa(0.7, 0.9, 2.4), M.pedraClara, x - 2.25, 0.65, z);            // bancada
+  peca(g, caixa(0.76, 0.05, 2.5), M.granito, x - 2.25, 1.12, z);
+  telhadoAberto(g, M, x, 2.95, z, 7.4, 6.4, 1.8);
+  for (const dz of [-1.3, 1.3]) {
+    peca(g, caixa(0.9, 0.05, 0.9), M.madeira, x + 0.6, 0.78, z + dz);
+    peca(g, new THREE.CylinderGeometry(0.06, 0.06, 0.76, 6), M.madeira, x + 0.6, 0.39, z + dz);
+    cadeira(g, M, x + 0.6, z + dz - 0.7, 0); cadeira(g, M, x + 0.6, z + dz + 0.7, Math.PI);
+    cadeira(g, M, x - 0.1, z + dz, Math.PI / 2); cadeira(g, M, x + 1.3, z + dz, -Math.PI / 2);
+  }
 }
 function quiosques(M, c, ang, pessoas, r) {
   const g = new THREE.Group();
@@ -1260,11 +1340,17 @@ function quadra(M, c, ang, pessoas) {
 
 function cavalo(g, M, mat, x, z, ry) {
   const h = new THREE.Group();
-  peca(h, caixa(1.9, 0.75, 0.62), mat, 0, 1.35, 0);
-  peca(h, caixa(0.5, 0.95, 0.4), mat, 0.95, 1.85, 0, 0, 0, -0.55);
-  peca(h, caixa(0.7, 0.32, 0.34), mat, 1.35, 2.25, 0, 0, 0, -0.35);
-  for (const [dx, dz] of [[-0.7, -0.22], [-0.7, 0.22], [0.7, -0.22], [0.7, 0.22]]) peca(h, new THREE.CylinderGeometry(0.08, 0.07, 1.05, 5), mat, dx, 0.5, dz);
-  peca(h, caixa(0.14, 0.7, 0.12), M.cavalo2, -1.05, 1.1, 0, 0, 0, 0.3);
+  const corpo = new THREE.CapsuleGeometry(0.36, 1.2, 4, 12); corpo.rotateZ(Math.PI / 2);
+  peca(h, corpo, mat, 0, 1.38, 0);
+  const pescoco = new THREE.CapsuleGeometry(0.2, 0.7, 4, 10); peca(h, pescoco, mat, 0.82, 1.82, 0, 0, 0, -0.62);
+  const cabeca = new THREE.CapsuleGeometry(0.14, 0.42, 4, 10); peca(h, cabeca, mat, 1.2, 2.1, 0, 0, 0, -1.25);
+  for (const dz of [-0.08, 0.08]) peca(h, new THREE.ConeGeometry(0.04, 0.14, 5), mat, 1.02, 2.38, dz);
+  for (const [dx, dz] of [[-0.62, -0.17], [-0.62, 0.17], [0.6, -0.17], [0.6, 0.17]]) {
+    peca(h, new THREE.CylinderGeometry(0.075, 0.06, 1.05, 7), mat, dx, 0.55, dz);
+    peca(h, new THREE.CylinderGeometry(0.07, 0.08, 0.08, 7), M.cavalo2, dx, 0.04, dz);
+  }
+  peca(h, new THREE.CylinderGeometry(0.04, 0.11, 0.8, 6), M.cavalo2, -1.02, 1.12, 0, 0, 0, 0.45);
+  peca(h, caixa(0.5, 0.18, 0.06), M.cavalo2, 0.9, 2.0, 0, 0, 0, -0.62); // crina
   h.position.set(x, 0, z); h.rotation.y = ry; g.add(h);
 }
 
@@ -1281,9 +1367,10 @@ function baias(M, c, ang, r) {
   const piso = new THREE.CylinderGeometry(R, R, 0.1, 40); peca(g, piso, M.areia, 0, 0.05, 7);
   for (let i = 0; i < 32; i++) { const a = (i / 32) * Math.PI * 2; peca(g, new THREE.CylinderGeometry(0.09, 0.1, 1.7, 5), M.madeira, Math.cos(a) * R, 0.85, 7 + Math.sin(a) * R); }
   for (const y of [0.6, 1.05, 1.5]) { const t = new THREE.TorusGeometry(R, 0.05, 4, 48); t.rotateX(Math.PI / 2); peca(g, t, M.madeira, 0, y, 7); }
-  cavalo(g, M, M.cavalo1, 1.5, 7.5, 0.6);
-  cavalo(g, M, M.cavalo3, -12, 1.5, 2.1);
-  cavalo(g, M, M.cavalo2, 12, 0.5, -0.4);
+  // três cavalos soltos no redondel (como no render do projeto)
+  cavalo(g, M, M.cavalo1, 1.8, 8.2, 0.6);
+  cavalo(g, M, M.cavalo3, -3.2, 5.4, 2.4);
+  cavalo(g, M, M.cavalo2, -1.0, 10.6, -0.9);
   return noLugar(g, c, ang);
 }
 
@@ -1307,29 +1394,66 @@ function fazendinha(M, c, ang, r) {
 }
 
 function portaria(M, c, ang, T) {
+  // Projeto de revitalização da guarita e acessos (maio/2026): guarita 4,00 × 6,40 m em "areia suave", pilares e muros
+  // em "branco gelo", madeira imbuia, portões pretos de 3,50 m, telhado cerâmico colonial, canteiro redondo com
+  // luminárias de piso e a NOVA LOGO na fachada. Frente de 26,60 m = 7,80 + 13,20 (coberto) + 5,60.
+  // Referencial: x ao longo da via (+x = lado de fora, de quem chega), z atravessado.
   const g = new THREE.Group();
-  // guarita de 15 m² (5 × 3 m) em bloco de pedra clara, com faixa bordô nas janelas (como o render do projeto)
-  peca(g, caixa(6.2, 0.3, 4.2), M.pedra, 0, 0.15, 0);
-  peca(g, caixa(5, 5.2, 3), M.pedraClara, 0, 2.9, 0);
-  peca(g, caixa(5.06, 0.9, 3.06), M.bordo, 0, 2.2, 0);
-  peca(g, caixa(4.4, 0.7, 3.1), M.vidro, 0, 2.2, 0);
-  // telhado grande de duas águas por cima das faixas (cumeeira ao longo da via), em pilares de madeira
-  peca(g, telhadoDuasAguas(8.4, 26, 3.4), M.telha, 0, 5.1, 0);
-  for (const z of [-12.2, 12.2]) for (const x of [-3.4, 3.4]) peca(g, caixa(0.45, 5.4, 0.45), M.madeira, x, 2.7, z);
-  // letreiro na fachada da guarita voltada para quem chega (local +X)
-  const tex = placaTexto('HARAS RIO SÃO JOSÉ');
-  const placa = new THREE.Mesh(new THREE.PlaneGeometry(4.4, 0.75), new THREE.MeshStandardMaterial({ map: tex, roughness: 0.8 }));
-  placa.position.set(2.53, 4.2, 0); placa.rotation.y = Math.PI / 2; placa.castShadow = false; g.add(placa);
-  // portões de grade preta: duas entradas e uma saída
-  const grade = (z0, z1, x) => {
+  peca(g, caixa(22, 0.06, 28), M.paver, 3, 0.03, -1);                 // piso intertravado da praça de acesso
+  peca(g, caixa(6.4, 3.3, 4.0), M.areiaSuave, 0, 1.68, 0);             // guarita
+  for (const z of [-1.62, 1.62]) { peca(g, caixa(0.1, 0.5, 0.42), M.vidro, 3.21, 2.05, z); peca(g, caixa(0.12, 0.62, 0.54), M.imbuia, 3.2, 2.05, z); }
+  for (const x of [-1.6, 1.6]) peca(g, caixa(1.2, 1.0, 0.1), M.vidro, x, 2.1, 2.01);
+  peca(g, caixa(0.12, 0.2, 0.2), M.pretoFosco, 3.25, 3.0, 0);          // arandela acima da logo
+  // telhado de duas águas (cumeeira ao longo da via) cobrindo guarita e portões — 13,20 m atravessado
+  telhadoAberto(g, M, 0, 3.3, 0, 8.6, 14.4, 2.4);
+  for (const z of [-7.1, 7.1]) peca(g, caixa(8.6, 0.28, 0.12), M.imbuia, 0, 3.3, z); // testeiras
+  for (const x of [-3.9, 3.9]) for (const z of [-6.6, 6.6]) peca(g, caixa(0.45, 3.3, 0.45), M.brancoGelo, x, 1.65, z);
+  // portões metálicos pretos (3,50 × 2,20 m): entrada e saída de veículos
+  const portao = (z0, z1, x) => {
     const L = Math.abs(z1 - z0), zc = (z0 + z1) / 2;
-    peca(g, caixa(0.08, 0.08, L), M.ferro, x, 2.0, zc); peca(g, caixa(0.08, 0.08, L), M.ferro, x, 0.25, zc);
-    for (let z = Math.min(z0, z1); z <= Math.max(z0, z1) + 0.01; z += 0.35) peca(g, caixa(0.05, 1.8, 0.05), M.ferro, x, 1.1, z);
+    peca(g, caixa(0.07, 0.07, L), M.pretoFosco, x, 2.2, zc); peca(g, caixa(0.07, 0.07, L), M.pretoFosco, x, 0.22, zc);
+    for (let z = Math.min(z0, z1); z <= Math.max(z0, z1) + 0.01; z += 0.14) peca(g, caixa(0.04, 2.0, 0.04), M.pretoFosco, x, 1.2, z);
   };
-  grade(-11.8, -8.2, 3); grade(-7.8, -4.4, 3); grade(4.4, 11.8, 3);
+  portao(-6.2, -2.4, 3.6); portao(2.4, 6.2, 3.6);
+  // muros laterais em branco gelo (7,80 m e 5,60 m), com pilares e rufo
+  const muro = (z0, z1) => {
+    const L = Math.abs(z1 - z0), zc = (z0 + z1) / 2;
+    peca(g, caixa(0.28, 2.2, L), M.brancoGelo, 3.6, 1.1, zc);
+    peca(g, caixa(0.4, 0.08, L), M.brancoGelo, 3.6, 2.24, zc);
+    peca(g, caixa(0.42, 2.45, 0.42), M.brancoGelo, 3.6, 1.22, z1);
+    // canteiro em frente ao muro: agaves e folhagens
+    peca(g, caixa(1.0, 0.18, L - 0.6), M.terra, 4.4, 0.09, zc);
+    for (let z = Math.min(z0, z1) + 0.6; z < Math.max(z0, z1) - 0.4; z += 0.9) planta(g, M, 4.4, z, (z * 7) % 3);
+  };
+  muro(-6.85, -14.65); muro(6.85, 12.45);
+  // canteiro redondo diante da guarita, com luminárias de piso
+  const R = 2.8;
+  const meiofio = new THREE.TorusGeometry(R, 0.12, 6, 40); meiofio.rotateX(Math.PI / 2);
+  peca(g, meiofio, M.brancoGelo, 6.6, 0.14, 0);
+  const terra = new THREE.CylinderGeometry(R, R, 0.2, 40); peca(g, terra, M.terra, 6.6, 0.1, 0);
+  for (let i = 0; i < 9; i++) { const a = (i / 9) * Math.PI * 2; planta(g, M, 6.6 + Math.cos(a) * 1.8, Math.sin(a) * 1.8, i % 3); }
+  planta(g, M, 6.6, 0, 0, 1.6);
+  for (let i = 0; i < 6; i++) { const a = (i / 6) * Math.PI * 2 + 0.3; peca(g, new THREE.CylinderGeometry(0.06, 0.06, 0.45, 8), M.pretoFosco, 6.6 + Math.cos(a) * (R + 0.4), 0.23, Math.sin(a) * (R + 0.4)); }
+  // placa com a nova logo (dourado sobre verde), na fachada voltada para quem chega
+  const texLogo = new THREE.TextureLoader().load('assets/logo-placa.jpg', () => { if (typeof window !== 'undefined') window.dispatchEvent(new Event('haras:textura')); });
+  texLogo.colorSpace = THREE.SRGBColorSpace; texLogo.anisotropy = 8;
+  const placa = new THREE.Mesh(new THREE.PlaneGeometry(2.7, 1.8), new THREE.MeshStandardMaterial({ map: texLogo, roughness: 0.6 }));
+  placa.position.set(3.215, 2.15, 0); placa.rotation.y = Math.PI / 2; placa.castShadow = false; g.add(placa);
   const n = noLugar(g, c, ang);
   n.userData.naoFundir = [placa];
   return n;
+}
+
+// agave (0), lírio-da-paz/moreia (1) ou ráfis (2), em tamanho de paisagismo
+function planta(g, M, x, z, tipo = 0, esc = 1) {
+  if (tipo === 0) {
+    const f = new THREE.ConeGeometry(0.09, 0.9, 4); f.translate(0, 0.45, 0);
+    for (let k = 0; k < 7; k++) { const m = peca(g, f, M.agave, x, 0.15, z, (k / 7) * Math.PI * 2, 0, 0.6 + (k % 2) * 0.25); m.scale.setScalar(esc); }
+  } else if (tipo === 1) {
+    const m = peca(g, new THREE.SphereGeometry(0.42, 8, 6), M.folhagem, x, 0.4, z); m.scale.set(esc, 0.8 * esc, esc);
+  } else {
+    for (let k = 0; k < 5; k++) { const m = peca(g, new THREE.ConeGeometry(0.16, 1.4, 5), M.folhagem, x + Math.cos(k) * 0.15, 0.85, z + Math.sin(k) * 0.15, k, 0.15, 0.2); m.scale.setScalar(esc); }
+  }
 }
 
 function canteiros(M, c, ang, r) {
@@ -1542,8 +1666,18 @@ function vegetacao(arvores, M, T, detalhe, detalheLonge, dirSol) {
   const palmas = arvores.filter((a) => a[4] === 2);
   if (palmas.length) {
     const tp = new THREE.CylinderGeometry(0.16, 0.24, 1, 6); tp.translate(0, 0.5, 0);
-    const folha = new THREE.ConeGeometry(0.45, 4.2, 4, 1); folha.translate(0, 2.1, 0); folha.rotateZ(-1.25); folha.scale(1, 1, 0.28);
-    const N = 11;
+    // folha curva: faixa afilada ao longo de x, com nervura central e caimento parabólico
+    const folha = (() => {
+      const seg = 10, L = 4.2, pos = [], idx = [];
+      for (let i = 0; i <= seg; i++) {
+        const t = i / seg, x = t * L, w = 0.55 * Math.sin(Math.PI * Math.min(1, t * 1.15)) + 0.05, y = 0.9 * t - 1.6 * t * t;
+        pos.push(x, y, -w, x, y + 0.12 * (1 - t), 0, x, y, w);
+      }
+      for (let i = 0; i < seg; i++) { const a = i * 3; idx.push(a, a + 3, a + 1, a + 1, a + 3, a + 4, a + 1, a + 4, a + 2, a + 2, a + 4, a + 5); }
+      const gf = new THREE.BufferGeometry(); gf.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3)); gf.setIndex(idx); gf.computeVertexNormals();
+      return gf;
+    })();
+    const N = 13;
     const iT = new THREE.InstancedMesh(tp, matTronco, palmas.length);
     const iF = new THREE.InstancedMesh(folha, new THREE.MeshStandardMaterial({ color: '#4A8436', roughness: 0.9, side: THREE.DoubleSide }), palmas.length * N);
     const eixoZ = new THREE.Vector3(0, 0, 1), inc = new THREE.Quaternion();
@@ -1552,7 +1686,7 @@ function vegetacao(arvores, M, T, detalhe, detalheLonge, dirSol) {
       p.set(x, 0, z); s.set(1, h, 1); q.identity(); m4.compose(p, q, s); iT.setMatrixAt(i, m4);
       for (let k = 0; k < N; k++) {
         q.setFromAxisAngle(up, (k / N) * Math.PI * 2 + rr() * 0.4);
-        inc.setFromAxisAngle(eixoZ, (rr() - 0.5) * 0.35 - (k % 2) * 0.18);
+        inc.setFromAxisAngle(eixoZ, 0.25 + (rr() - 0.5) * 0.35 - (k % 2) * 0.3);
         q.multiply(inc);
         p.set(x, h - 0.15, z); s.set(1, 0.85 + rr() * 0.3, 1); m4.compose(p, q, s); iF.setMatrixAt(i * N + k, m4);
       }

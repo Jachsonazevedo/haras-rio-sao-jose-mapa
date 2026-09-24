@@ -123,6 +123,7 @@ async function iniciar() {
     if (continuar) pedir();
   }
   controls.addEventListener('change', () => { pedir(); });
+  window.addEventListener('haras:textura', () => pedir()); // placa da logo carregada
   controls.addEventListener('start', () => { vista.anim = null; vista.mexeu = true; quadro.classList.add('is-mexendo'); });
   controls.addEventListener('end', () => { quadro.classList.remove('is-mexendo'); });
 
