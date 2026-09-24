@@ -1,2 +1,14 @@
-# Reserva estratégica ainda não definida pelo Jachson (15/09/2026): arquivo vazio = nenhum lote reservado.
-# Quando definir, um número de lote por linha (ex.: 001) e rodar scripts/gerar_dados.py.
+# Reserva estratégica — cadastrada pelo Jachson no ACADE em 24/09/2026 (Relatório de Lotes, tipo "Reserva técnica").
+# Um número de lote por linha; depois rodar scripts/gerar_dados.py.
+138
+236
+237
+638
+639
+640
+641
+642
+643
+644
+645
+648
