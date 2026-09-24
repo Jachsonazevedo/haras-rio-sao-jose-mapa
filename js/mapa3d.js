@@ -14,7 +14,7 @@
    ===================================================================== */
 import * as THREE from 'three';
 import { MapControls } from 'three/addons/controls/MapControls.js';
-import { construirCena, enquadrarPontos, simplificarPoly } from './cena3d.js?v=20260924d';
+import { construirCena, enquadrarPontos, simplificarPoly } from './cena3d.js?v=20260924e';
 
 const ponte = window.HarasMapa;
 const quadro = document.getElementById('mapa-quadro');
@@ -179,7 +179,8 @@ async function iniciar() {
   function vistaInicial() {
     const asp = vista.w / vista.h;
     if (asp >= 1.05) return enquadrar(0.72, -0.18, { x: 0.02, topo: 0.13, base: 0.16 });
-    return enquadrar(1.05, -Math.PI / 2 + 0.38, { x: 0.08, topo: 0.2, base: 0.16 });
+    // tela em pé (celular): a faixa comprida fica na vertical e a câmera mais alta, para o terreno ocupar a tela
+    return enquadrar(0.62, -Math.PI / 2 - 0.04, { x: 0.06, topo: 0.12, base: 0.1 });
   }
 
   // Enquadra o contorno do imóvel com as margens pedidas (vale para qualquer ângulo e formato de tela)

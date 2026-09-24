@@ -18,7 +18,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
-  <link rel="stylesheet" href="css/styles.css?v=20260924d">
+  <link rel="stylesheet" href="css/styles.css?v=20260924e">
 
   <!-- Planta 3D: Three.js (r160) pelo CDN jsDelivr, sem build. Sem WebGL, ou com ?2d=1, fica o mapa SVG. -->
   <link rel="modulepreload" href="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.min.js" crossorigin>
@@ -88,7 +88,7 @@
             <p class="secao__sobre">Planta humanizada em 3D · disponibilidade atualizada</p>
             <h2 class="secao__titulo" id="mapa-titulo">Escolha a sua unidade</h2>
           </div>
-          <p class="mapa-secao__dica">Arraste para passear pelo Haras, gire com dois dedos (ou o botão direito do mouse) e aproxime para ver cada lote: verde disponível, vermelho vendido, azul reservado. Toque em um lote para ver área e medidas, ou busque pelo número.</p>
+          <p class="mapa-secao__dica"><span class="so-pc">Arraste para passear pelo Haras, gire com o botão direito do mouse e aproxime para ver cada lote: verde disponível, vermelho vendido, azul reservado. Clique em um lote para ver área e medidas, ou busque pelo número.</span><span class="so-cel">Arraste com um dedo, aproxime com dois e toque no lote para ver área e medidas. Verde disponível · vermelho vendido · azul reservado.</span></p>
         </div>
 
           <!-- ---------- Quadro do mapa ---------- -->
@@ -326,10 +326,10 @@
         <h2 class="secao__titulo" id="video-titulo">Veja do alto</h2>
         <p class="secao__texto">Sobrevoo em 360° do chacreamento, para você se localizar antes de escolher a sua unidade.</p>
         <div class="video__quadro" id="video-quadro">
-          <video id="video-360" class="video__player" controls playsinline preload="metadata" poster="assets/video-360-poster.jpg"
+          <video id="video-360" class="video__player" controls playsinline preload="metadata" poster="assets/video-360-poster.jpg?v=20260924e"
                  aria-label="Vídeo 360° do Haras Rio São José, visto do alto">
-            <source src="assets/video-360-1080.mp4" type="video/mp4">
-            Seu navegador não reproduz vídeo. <a href="assets/video-360-1080.mp4">Baixe o vídeo 360°</a>.
+            <source src="assets/video-360-1080.mp4?v=20260924e" type="video/mp4">
+            Seu navegador não reproduz vídeo. <a href="assets/video-360-1080.mp4?v=20260924e">Baixe o vídeo 360°</a>.
           </video>
           <button class="video__play" id="video-play" type="button" aria-label="Assistir ao vídeo 360°">
             <span class="video__icone" aria-hidden="true">
@@ -339,6 +339,13 @@
           </button>
         </div>
         <p class="video__nota">Imagens ilustrativas. A infraestrutura e as áreas comuns entregues são as descritas no contrato.</p>
+        <div class="cta-whats">
+          <a class="btn btn--whats btn--enorme" id="video-whats" href="https://wa.me/5511991468192?text=Ol%C3%A1!%20Vi%20o%20v%C3%ADdeo%20do%20Haras%20Rio%20S%C3%A3o%20Jos%C3%A9%20e%20quero%20falar%20com%20o%20comercial." target="_blank" rel="noopener noreferrer">
+            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="currentColor" d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2Zm0 1.8a8.2 8.2 0 1 1-4.2 15.3l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 0 1 12 3.8Zm-3.3 4.4c-.2 0-.5 0-.7.3-.3.3-1 1-1 2.4s1 2.8 1.2 3c.1.2 2 3.2 5 4.4 2.5 1 3 .8 3.5.7.5 0 1.7-.7 2-1.4.2-.7.2-1.2.1-1.4l-.5-.3-1.9-.9c-.3-.1-.5-.2-.7.2l-.9 1.1c-.2.2-.3.2-.6.1a6.8 6.8 0 0 1-3.4-3c-.2-.4 0-.5.2-.7l.4-.5.3-.5c.1-.2 0-.4 0-.5l-.9-2.1c-.2-.5-.4-.5-.6-.5h-.5Z"/></svg>
+            <span class="cta-whats__textos"><span class="cta-whats__titulo">Falar com o comercial</span><span class="cta-whats__num">WhatsApp (11) 99146-8192</span></span>
+          </a>
+          <p class="cta-whats__apoio">Tire dúvidas, confira a unidade que você escolheu e receba a simulação de pagamento.</p>
+        </div>
       </div>
     </section>
 
@@ -355,22 +362,6 @@
           <figure class="card-foto"><img src="assets/fotos/aerea-3.jpg" alt="Vista aérea das glebas e ruas" loading="lazy" onerror="this.closest('figure').remove()"><figcaption>Glebas e ruas vistas do alto</figcaption></figure>
           <figure class="card-foto"><img src="assets/fotos/aerea-4.jpg" alt="Vista aérea com a área de preservação ao fundo" loading="lazy" onerror="this.closest('figure').remove()"><figcaption>Área de preservação ao fundo</figcaption></figure>
           <figure class="card-foto"><img src="assets/fotos/aerea-5.jpg" alt="Vista geral do imóvel" loading="lazy" onerror="this.closest('figure').remove()"><figcaption>Vista geral do imóvel</figcaption></figure>
-        </div>
-
-        <div class="subgaleria" id="bloco-projeto">
-          <h3 class="subgaleria__titulo">Como vai ficar</h3>
-          <p class="secao__texto">Imagens em 3D das áreas comuns e da infraestrutura previstas no contrato. Imagens ilustrativas: o que será entregue é exatamente o descrito no contrato.</p>
-          <div class="galeria galeria--projeto" id="galeria-projeto">
-            <figure class="card-foto card-foto--projeto"><span class="tarja">Imagem ilustrativa</span><a href="assets/fotos/3d/3d-vista-geral.jpg" target="_blank" rel="noopener"><img src="assets/fotos/3d/3d-vista-geral-960.jpg" srcset="assets/fotos/3d/3d-vista-geral-960.jpg 960w, assets/fotos/3d/3d-vista-geral.jpg 1920w" sizes="(min-width: 900px) 33vw, 100vw" alt="Vista geral do chacreamento, com as glebas, as avenidas e a área de preservação ao fundo" loading="lazy" width="960" height="540" onerror="this.closest('figure').remove()"></a><figcaption>Vista geral do chacreamento</figcaption></figure>
-            <figure class="card-foto card-foto--projeto"><span class="tarja">Imagem ilustrativa</span><a href="assets/fotos/3d/3d-portaria.jpg" target="_blank" rel="noopener"><img src="assets/fotos/3d/3d-portaria-960.jpg" srcset="assets/fotos/3d/3d-portaria-960.jpg 960w, assets/fotos/3d/3d-portaria.jpg 1920w" sizes="(min-width: 900px) 33vw, 100vw" alt="Portaria com guarita e pórtico na entrada pela Estrada de Duas Vendas" loading="lazy" width="960" height="540" onerror="this.closest('figure').remove()"></a><figcaption>Portaria e guarita</figcaption></figure>
-            <figure class="card-foto card-foto--projeto"><span class="tarja">Imagem ilustrativa</span><a href="assets/fotos/3d/3d-salao-piscina.jpg" target="_blank" rel="noopener"><img src="assets/fotos/3d/3d-salao-piscina-960.jpg" srcset="assets/fotos/3d/3d-salao-piscina-960.jpg 960w, assets/fotos/3d/3d-salao-piscina.jpg 1920w" sizes="(min-width: 900px) 33vw, 100vw" alt="Salão de festas com varanda e piscina com áreas adulto e infantil" loading="lazy" width="960" height="540" onerror="this.closest('figure').remove()"></a><figcaption>Salão de festas e piscina</figcaption></figure>
-            <figure class="card-foto card-foto--projeto"><span class="tarja">Imagem ilustrativa</span><a href="assets/fotos/3d/3d-clube.jpg" target="_blank" rel="noopener"><img src="assets/fotos/3d/3d-clube-960.jpg" srcset="assets/fotos/3d/3d-clube-960.jpg 960w, assets/fotos/3d/3d-clube.jpg 1920w" sizes="(min-width: 900px) 33vw, 100vw" alt="Área de lazer vista do alto: salão, piscina, quiosques, quadra de areia, banheiros, baias e fazendinha" loading="lazy" width="960" height="540" onerror="this.closest('figure').remove()"></a><figcaption>Área de lazer: salão, piscina, quiosques, quadra de areia, baias e fazendinha</figcaption></figure>
-            <figure class="card-foto card-foto--projeto"><span class="tarja">Imagem ilustrativa</span><a href="assets/fotos/3d/3d-quiosque.jpg" target="_blank" rel="noopener"><img src="assets/fotos/3d/3d-quiosque-960.jpg" srcset="assets/fotos/3d/3d-quiosque-960.jpg 960w, assets/fotos/3d/3d-quiosque.jpg 1920w" sizes="(min-width: 900px) 33vw, 100vw" alt="Quiosque aberto em madeira com bancada e mesas, no gramado da área de lazer" loading="lazy" width="960" height="540" onerror="this.closest('figure').remove()"></a><figcaption>Quiosque</figcaption></figure>
-            <figure class="card-foto card-foto--projeto"><span class="tarja">Imagem ilustrativa</span><a href="assets/fotos/3d/3d-baias-redondel.jpg" target="_blank" rel="noopener"><img src="assets/fotos/3d/3d-baias-redondel-960.jpg" srcset="assets/fotos/3d/3d-baias-redondel-960.jpg 960w, assets/fotos/3d/3d-baias-redondel.jpg 1920w" sizes="(min-width: 900px) 33vw, 100vw" alt="Cinco baias e redondel" loading="lazy" width="960" height="540" onerror="this.closest('figure').remove()"></a><figcaption>Baias e redondel</figcaption></figure>
-            <figure class="card-foto card-foto--projeto"><span class="tarja">Imagem ilustrativa</span><a href="assets/fotos/3d/3d-avenida.jpg" target="_blank" rel="noopener"><img src="assets/fotos/3d/3d-avenida-960.jpg" srcset="assets/fotos/3d/3d-avenida-960.jpg 960w, assets/fotos/3d/3d-avenida.jpg 1920w" sizes="(min-width: 900px) 33vw, 100vw" alt="Avenida cascalhada com a rede elétrica instalada e os lotes demarcados" loading="lazy" width="960" height="540" onerror="this.closest('figure').remove()"></a><figcaption>Avenida, rede elétrica e lotes demarcados</figcaption></figure>
-            <figure class="card-foto card-foto--projeto"><span class="tarja">Imagem ilustrativa</span><a href="assets/fotos/3d/3d-lago.jpg" target="_blank" rel="noopener"><img src="assets/fotos/3d/3d-lago-960.jpg" srcset="assets/fotos/3d/3d-lago-960.jpg 960w, assets/fotos/3d/3d-lago.jpg 1920w" sizes="(min-width: 900px) 33vw, 100vw" alt="Lago natural cercado de árvores, na ponta da área de lazer" loading="lazy" width="960" height="540" onerror="this.closest('figure').remove()"></a><figcaption>Lago natural</figcaption></figure>
-            <figure class="card-foto card-foto--projeto"><span class="tarja">Imagem ilustrativa</span><a href="assets/fotos/3d/3d-reserva.jpg" target="_blank" rel="noopener"><img src="assets/fotos/3d/3d-reserva-960.jpg" srcset="assets/fotos/3d/3d-reserva-960.jpg 960w, assets/fotos/3d/3d-reserva.jpg 1920w" sizes="(min-width: 900px) 33vw, 100vw" alt="Área de preservação ambiental (Reserva Legal e APP) ao lado das últimas glebas" loading="lazy" width="960" height="540" onerror="this.closest('figure').remove()"></a><figcaption>Área de preservação ambiental</figcaption></figure>
-          </div>
         </div>
       </div>
     </section>
@@ -395,6 +386,11 @@
     </section>
   </main>
 
+  <!-- Botão flutuante do WhatsApp (celular) -->
+  <a class="whats-flutuante" id="whats-flutuante" href="https://wa.me/5511991468192?text=Ol%C3%A1!%20Quero%20falar%20com%20o%20comercial%20sobre%20as%20unidades%20do%20Haras%20Rio%20S%C3%A3o%20Jos%C3%A9." target="_blank" rel="noopener noreferrer" aria-label="Falar com o comercial pelo WhatsApp">
+    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="currentColor" d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2Zm0 1.8a8.2 8.2 0 1 1-4.2 15.3l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 0 1 12 3.8Zm-3.3 4.4c-.2 0-.5 0-.7.3-.3.3-1 1-1 2.4s1 2.8 1.2 3c.1.2 2 3.2 5 4.4 2.5 1 3 .8 3.5.7.5 0 1.7-.7 2-1.4.2-.7.2-1.2.1-1.4l-.5-.3-1.9-.9c-.3-.1-.5-.2-.7.2l-.9 1.1c-.2.2-.3.2-.6.1a6.8 6.8 0 0 1-3.4-3c-.2-.4 0-.5.2-.7l.4-.5.3-.5c.1-.2 0-.4 0-.5l-.9-2.1c-.2-.5-.4-.5-.6-.5h-.5Z"/></svg>
+  </a>
+
   <!-- ===================== RODAPÉ ===================== -->
   <footer class="rodape">
     <div class="rodape__inner">
@@ -405,7 +401,7 @@
     </div>
   </footer>
 
-  <script src="js/app.js?v=20260924d" defer></script>
-  <script type="module" src="js/mapa3d.js?v=20260924d" onerror="window.dispatchEvent(new CustomEvent('haras:3d-falhou'))"></script>
+  <script src="js/app.js?v=20260924e" defer></script>
+  <script type="module" src="js/mapa3d.js?v=20260924e" onerror="window.dispatchEvent(new CustomEvent('haras:3d-falhou'))"></script>
 </body>
 </html>

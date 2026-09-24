@@ -1230,15 +1230,31 @@
     if (!v || !b || !quadro) return;
     if (window.innerWidth <= 720) {
       const s = v.querySelector('source');
-      if (s) { s.src = 'assets/video-360-720.mp4'; v.load(); }
+      if (s) { s.src = 'assets/video-360-720.mp4?v=20260924e'; v.load(); }
     }
     b.addEventListener('click', () => { quadro.classList.add('is-tocando'); v.play().catch(() => {}); });
     v.addEventListener('play', () => quadro.classList.add('is-tocando'));
     v.addEventListener('ended', () => quadro.classList.remove('is-tocando'));
   }
 
+  // Botão flutuante do WhatsApp (celular): some quando o mapa (tem os próprios controles e o painel do lote), o botão grande ou o "Como chegar" estão na tela
+  function ligarWhatsFlutuante() {
+    const f = document.getElementById('whats-flutuante');
+    if (!f || !('IntersectionObserver' in window)) return;
+    const vistos = new Set();
+    const painel = document.getElementById('painel');
+    const atualizar = () => f.classList.toggle('is-oculto', vistos.size > 0 || !!(painel && painel.classList.contains('is-aberto')));
+    const io = new IntersectionObserver((ents) => {
+      for (const e of ents) { if (e.isIntersecting) vistos.add(e.target); else vistos.delete(e.target); }
+      atualizar();
+    });
+    ['video-whats', 'como-chegar', 'mapa-quadro'].forEach((id) => { const alvo = document.getElementById(id); if (alvo) io.observe(alvo); });
+    if (painel) new MutationObserver(atualizar).observe(painel, { attributes: true, attributeFilter: ['class'] });
+  }
+
   function iniciar() {
     ligarVideo();
+    ligarWhatsFlutuante();
     medirTopo();
     // Destaque do lote selecionado com espessura constante em px
     el.halo.setAttribute('vector-effect', 'non-scaling-stroke');

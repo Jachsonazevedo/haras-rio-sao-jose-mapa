@@ -806,3 +806,39 @@ button.r3-marca:hover { background: #fff; border-color: var(--dourado-forte); }
 .ctrl[aria-pressed="true"] { background: var(--verde); color: var(--marfim); }
 @media (max-width: 600px) { .escala3d { bottom: auto; top: 64px; right: auto; left: 12px; } }
 .r3-sel { margin-top: -34px; }
+
+/* =====================================================================
+   Vendas — botão grande do WhatsApp sob o vídeo + botão flutuante no celular
+   ===================================================================== */
+:root { --whats: #1FA855; --whats-forte: #178C46; }
+.btn--whats { background: var(--whats); color: #fff; box-shadow: 0 10px 28px rgba(23, 140, 70, .35); }
+.btn--whats:hover { background: var(--whats-forte); transform: translateY(-1px); }
+.btn--enorme { min-height: 72px; padding: 12px 34px; gap: 16px; font-size: 1.1rem; border-radius: 18px; }
+.btn--enorme svg { width: 34px; height: 34px; }
+.cta-whats { margin-top: 22px; display: flex; flex-direction: column; align-items: center; gap: 10px; text-align: center; }
+.cta-whats .btn { width: 100%; max-width: 520px; }
+.cta-whats__textos { display: flex; flex-direction: column; align-items: flex-start; line-height: 1.2; text-align: left; }
+.cta-whats__titulo { font-size: 1.25rem; font-weight: 700; letter-spacing: .01em; }
+.cta-whats__num { font-size: .92rem; font-weight: 500; opacity: .92; }
+.cta-whats__apoio { margin: 0; max-width: 520px; font-size: .9rem; color: var(--texto-suave); }
+
+.whats-flutuante {
+  position: fixed; right: 16px; bottom: calc(16px + env(safe-area-inset-bottom, 0px)); z-index: 60;
+  width: 60px; height: 60px; border-radius: 50%; display: none; place-items: center;
+  background: var(--whats); color: #fff; box-shadow: 0 8px 24px rgba(0, 0, 0, .28); text-decoration: none;
+  transition: transform .2s, opacity .2s;
+}
+.whats-flutuante svg { width: 32px; height: 32px; }
+.whats-flutuante.is-oculto { opacity: 0; transform: scale(.6); pointer-events: none; }
+@media (max-width: 720px) {
+  .whats-flutuante { display: grid; }
+  .btn--enorme { padding: 12px 20px; }
+  .cta-whats__titulo { font-size: 1.15rem; }
+}
+
+.so-cel { display: none; }
+@media (max-width: 720px) {
+  .so-pc { display: none; }
+  .so-cel { display: inline; }
+  .rodape { padding-bottom: 96px; }
+}
