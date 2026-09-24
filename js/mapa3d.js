@@ -14,7 +14,7 @@
    ===================================================================== */
 import * as THREE from 'three';
 import { MapControls } from 'three/addons/controls/MapControls.js';
-import { construirCena, enquadrarPontos, simplificarPoly } from './cena3d.js?v=20260924e';
+import { construirCena, enquadrarPontos, simplificarPoly } from './cena3d.js?v=20260924f';
 
 const ponte = window.HarasMapa;
 const quadro = document.getElementById('mapa-quadro');
@@ -179,8 +179,8 @@ async function iniciar() {
   function vistaInicial() {
     const asp = vista.w / vista.h;
     if (asp >= 1.05) return enquadrar(0.72, -0.18, { x: 0.02, topo: 0.13, base: 0.16 });
-    // tela em pé (celular): a faixa comprida fica na vertical e a câmera mais alta, para o terreno ocupar a tela
-    return enquadrar(0.62, -Math.PI / 2 - 0.04, { x: 0.06, topo: 0.12, base: 0.1 });
+    // tela em pé (celular): faixa na horizontal, como no computador, com a câmera mais alta (fica mais fácil tocar nos lotes)
+    return enquadrar(0.36, -0.12, { x: 0.02, topo: 0.2, base: 0.22 });
   }
 
   // Enquadra o contorno do imóvel com as margens pedidas (vale para qualquer ângulo e formato de tela)
@@ -463,7 +463,35 @@ async function iniciar() {
     quadro.classList.toggle('is-entorno', entorno);
     pedir();
   });
-  if (controles) { controles.appendChild(bCima); controles.appendChild(bEntorno); controles.appendChild(bNorte); }
+  // Girar 90° e tela cheia (os dois pensados para o celular)
+  const bGirar = document.createElement('button');
+  bGirar.className = 'ctrl ctrl--girar'; bGirar.type = 'button'; bGirar.title = 'Girar o mapa'; bGirar.setAttribute('aria-label', 'Girar o mapa 90 graus');
+  bGirar.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M20 12a8 8 0 1 1-2.34-5.66" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/><path d="M20 4v5h-5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  bGirar.addEventListener('click', () => { const e = estadoAtual(); vista.mexeu = true; voar({ alvo: controls.target.clone(), dist: e.dist, polar: e.polar, azim: e.azim + Math.PI / 2 }, 650); });
+  const bCheia = document.createElement('button');
+  bCheia.className = 'ctrl ctrl--cheia'; bCheia.type = 'button'; bCheia.title = 'Tela cheia';
+  const ICO_ABRIR = '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M9 4H4v5M15 4h5v5M20 15v5h-5M4 15v5h5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 4l6 6M20 4l-6 6M20 20l-6-6M4 20l6-6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>';
+  const ICO_FECHAR = '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>';
+  function marcarCheia(sim) {
+    quadro.classList.toggle('is-cheia', sim);
+    document.documentElement.classList.toggle('mapa-cheia', sim);
+    bCheia.innerHTML = sim ? ICO_FECHAR : ICO_ABRIR;
+    bCheia.setAttribute('aria-label', sim ? 'Sair da tela cheia' : 'Abrir o mapa em tela cheia');
+    bCheia.setAttribute('aria-pressed', String(sim));
+  }
+  marcarCheia(false);
+  bCheia.addEventListener('click', async () => {
+    const sim = !quadro.classList.contains('is-cheia');
+    marcarCheia(sim);
+    try {
+      if (sim && quadro.requestFullscreen && !document.fullscreenElement) {
+        await quadro.requestFullscreen({ navigationUI: 'hide' });
+        if (MOVEL && screen.orientation && screen.orientation.lock) screen.orientation.lock('landscape').catch(() => {});
+      } else if (!sim && document.fullscreenElement) await document.exitFullscreen();
+    } catch (_) { /* sem API de tela cheia (iPhone): fica a versão por CSS */ }
+  });
+  document.addEventListener('fullscreenchange', () => { if (!document.fullscreenElement && quadro.classList.contains('is-cheia')) marcarCheia(false); });
+  if (controles) { controles.appendChild(bGirar); controles.appendChild(bCheia); controles.appendChild(bCima); controles.appendChild(bEntorno); controles.appendChild(bNorte); }
   const svgN = bNorte.querySelector('svg');
   function atualizarBussola() {
     const { azim, polar } = estadoAtual();
@@ -481,18 +509,44 @@ async function iniciar() {
 
   // ---------------------------------------------------------------- Clique, toque e mouse
   let baixo = null;
-  canvas.addEventListener('pointerdown', (e) => { baixo = { x: e.clientX, y: e.clientY, t: performance.now(), b: e.button }; });
+  canvas.addEventListener('pointerdown', (e) => { baixo = { x: e.clientX, y: e.clientY, t: performance.now(), b: e.button, toque: e.pointerType !== 'mouse' }; });
+  // metros por pixel no centro da tela (câmera de 40°): diz se um lote (20–25 m de frente) dá para tocar
+  const metrosPorPixel = () => (2 * estadoAtual().dist * Math.tan(THREE.MathUtils.degToRad(camera.fov / 2))) / Math.max(1, vista.h);
   canvas.addEventListener('pointerup', (e) => {
     if (!baixo) return;
     const moveu = Math.hypot(e.clientX - baixo.x, e.clientY - baixo.y) > 6;
-    const botao = baixo.b; baixo = null;
+    const botao = baixo.b, toque = baixo.toque; baixo = null;
     if (moveu || botao !== 0) return;
     const r = canvas.getBoundingClientRect();
     const q = chaoSobTela(e.clientX - r.left, e.clientY - r.top);
+    // no dedo, de longe cada lote tem 2–3 px: o primeiro toque aproxima naquele ponto (lote com ~40 px); o seguinte abre o lote
+    if (toque && q && metrosPorPixel() > 1.2 && dentroDoImovel(q.x, q.z)) {
+      vista.mexeu = true;
+      const est = estadoAtual();
+      const dist = THREE.MathUtils.clamp((0.6 * vista.h) / (2 * Math.tan(THREE.MathUtils.degToRad(camera.fov / 2))), controls.minDistance, est.dist);
+      voar({ alvo: new THREE.Vector3(q.x, 0, q.z), dist, polar: Math.min(est.polar, 0.7), azim: est.azim }, 700);
+      avisoToque();
+      return;
+    }
     const l = q ? cena.loteEm(q.x, q.z) : null;
-    if (l) ponte.selecionarLote(l.id, { centralizar: true, zoom: false });
+    // de longe o lote é pequeno na tela: o toque já aproxima nele (e o painel mostra área e medidas)
+    if (l) ponte.selecionarLote(l.id, { centralizar: true, zoom: estadoAtual().dist > (MOVEL ? 650 : 1400) });
     else ponte.limpar();
   });
+  function dentroDoImovel(x, z) {
+    const P = cena.polyImovel; let d = false;
+    for (let i = 0, j = P.length - 1; i < P.length; j = i++) {
+      const [xi, zi] = P[i], [xj, zj] = P[j];
+      if ((zi > z) !== (zj > z) && x < ((xj - xi) * (z - zi)) / (zj - zi) + xi) d = !d;
+    }
+    return d;
+  }
+  // Aviso curto depois do toque que aproxima
+  let avisoEl = null, avisoT = 0;
+  function avisoToque() {
+    if (!avisoEl) { avisoEl = document.createElement('div'); avisoEl.className = 'aviso-toque'; avisoEl.setAttribute('role', 'status'); avisoEl.textContent = 'Agora toque no lote para ver área e medidas'; quadro.appendChild(avisoEl); }
+    avisoEl.classList.add('is-visivel'); clearTimeout(avisoT); avisoT = setTimeout(() => avisoEl.classList.remove('is-visivel'), 2600);
+  }
   canvas.addEventListener('dblclick', (e) => {
     const r = canvas.getBoundingClientRect();
     const q = chaoSobTela(e.clientX - r.left, e.clientY - r.top);

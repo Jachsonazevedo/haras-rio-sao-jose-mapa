@@ -18,7 +18,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
-  <link rel="stylesheet" href="css/styles.css?v=20260924e">
+  <link rel="stylesheet" href="css/styles.css?v=20260924f">
 
   <!-- Planta 3D: Three.js (r160) pelo CDN jsDelivr, sem build. Sem WebGL, ou com ?2d=1, fica o mapa SVG. -->
   <link rel="modulepreload" href="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.min.js" crossorigin>
@@ -88,7 +88,7 @@
             <p class="secao__sobre">Planta humanizada em 3D · disponibilidade atualizada</p>
             <h2 class="secao__titulo" id="mapa-titulo">Escolha a sua unidade</h2>
           </div>
-          <p class="mapa-secao__dica"><span class="so-pc">Arraste para passear pelo Haras, gire com o botão direito do mouse e aproxime para ver cada lote: verde disponível, vermelho vendido, azul reservado. Clique em um lote para ver área e medidas, ou busque pelo número.</span><span class="so-cel">Arraste com um dedo, aproxime com dois e toque no lote para ver área e medidas. Verde disponível · vermelho vendido · azul reservado.</span></p>
+          <p class="mapa-secao__dica"><span class="so-pc">Arraste para passear pelo Haras, gire com o botão direito do mouse e aproxime para ver cada lote: verde disponível, vermelho vendido, azul reservado. Clique em um lote para ver área e medidas, ou busque pelo número.</span><span class="so-cel"><strong>Toque em um lote</strong> para ver área e medidas. Arraste para mover, use + e − para ampliar, o botão de girar e a tela cheia. Verde disponível · vermelho vendido · azul reservado.</span></p>
         </div>
 
           <!-- ---------- Quadro do mapa ---------- -->
@@ -326,10 +326,10 @@
         <h2 class="secao__titulo" id="video-titulo">Veja do alto</h2>
         <p class="secao__texto">Sobrevoo em 360° do chacreamento, para você se localizar antes de escolher a sua unidade.</p>
         <div class="video__quadro" id="video-quadro">
-          <video id="video-360" class="video__player" controls playsinline preload="metadata" poster="assets/video-360-poster.jpg?v=20260924e"
+          <video id="video-360" class="video__player" controls playsinline preload="metadata" poster="assets/video-360-poster.jpg?v=20260924f"
                  aria-label="Vídeo 360° do Haras Rio São José, visto do alto">
-            <source src="assets/video-360-1080.mp4?v=20260924e" type="video/mp4">
-            Seu navegador não reproduz vídeo. <a href="assets/video-360-1080.mp4?v=20260924e">Baixe o vídeo 360°</a>.
+            <source src="assets/video-360-1080.mp4?v=20260924f" type="video/mp4">
+            Seu navegador não reproduz vídeo. <a href="assets/video-360-1080.mp4?v=20260924f">Baixe o vídeo 360°</a>.
           </video>
           <button class="video__play" id="video-play" type="button" aria-label="Assistir ao vídeo 360°">
             <span class="video__icone" aria-hidden="true">
@@ -401,7 +401,7 @@
     </div>
   </footer>
 
-  <script src="js/app.js?v=20260924e" defer></script>
-  <script type="module" src="js/mapa3d.js?v=20260924e" onerror="window.dispatchEvent(new CustomEvent('haras:3d-falhou'))"></script>
+  <script src="js/app.js?v=20260924f" defer></script>
+  <script type="module" src="js/mapa3d.js?v=20260924f" onerror="window.dispatchEvent(new CustomEvent('haras:3d-falhou'))"></script>
 </body>
 </html>

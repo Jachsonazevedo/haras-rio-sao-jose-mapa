@@ -1230,7 +1230,7 @@
     if (!v || !b || !quadro) return;
     if (window.innerWidth <= 720) {
       const s = v.querySelector('source');
-      if (s) { s.src = 'assets/video-360-720.mp4?v=20260924e'; v.load(); }
+      if (s) { s.src = 'assets/video-360-720.mp4?v=20260924f'; v.load(); }
     }
     b.addEventListener('click', () => { quadro.classList.add('is-tocando'); v.play().catch(() => {}); });
     v.addEventListener('play', () => quadro.classList.add('is-tocando'));

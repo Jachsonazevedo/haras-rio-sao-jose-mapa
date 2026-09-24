@@ -7,7 +7,7 @@
    com sombras reais nas vistas de perto, e enviada ao servidor local.
    ===================================================================== */
 import * as THREE from 'three';
-import { construirCena, centroide, enquadrarPontos } from './cena3d.js?v=20260924e';
+import { construirCena, centroide, enquadrarPontos } from './cena3d.js?v=20260924f';
 
 const $ = (s) => document.querySelector(s);
 const log = (t) => { $('#log').textContent += t + '\n'; };
