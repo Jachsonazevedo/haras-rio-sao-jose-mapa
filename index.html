@@ -4,12 +4,12 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>Mapa de unidades — Haras Rio São José</title>
-  <meta name="description" content="Mapa ilustrado e interativo das unidades do chacreamento Haras Rio São José, em Poções/BA: terrenos a partir de 2.000 m², glebas, áreas comuns, medidas e disponibilidade.">
+  <meta name="description" content="Planta humanizada em 3D e interativa das unidades do chacreamento Haras Rio São José, em Poções/BA: terrenos a partir de 2.000 m², glebas, áreas comuns, medidas e disponibilidade.">
   <meta name="theme-color" content="#183827">
   <meta property="og:title" content="Mapa de unidades — Haras Rio São José">
   <meta property="og:description" content="Terrenos a partir de 2.000 m² para a sua chácara rural, a menos de dez minutos do centro de Poções. Consulte o mapa de unidades.">
   <meta property="og:type" content="website">
-  <meta property="og:image" content="assets/video-360-poster.jpg">
+  <meta property="og:image" content="assets/fotos/3d/3d-vista-geral.jpg">
   <link rel="icon" href="assets/favicon.png">
   <link rel="apple-touch-icon" href="assets/icon-512.png">
 
@@ -19,6 +19,27 @@
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
   <link rel="stylesheet" href="css/styles.css">
+
+  <!-- Planta 3D: Three.js (r160) pelo CDN jsDelivr, sem build. Sem WebGL, ou com ?2d=1, fica o mapa SVG. -->
+  <link rel="modulepreload" href="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.min.js" crossorigin>
+  <script type="importmap">
+    { "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.min.js",
+        "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+    } }
+  </script>
+  <script>
+    (function () {
+      var ok = false;
+      try {
+        if (!/[?&]2d=1/.test(location.search)) {
+          var c = document.createElement('canvas');
+          ok = !!(window.WebGLRenderingContext && (c.getContext('webgl2') || c.getContext('webgl')));
+        }
+      } catch (e) { ok = false; }
+      window.__haras3d = ok;
+    })();
+  </script>
 </head>
 <body>
 
@@ -64,10 +85,10 @@
       <div class="secao__inner">
         <div class="mapa-secao__cabeca">
           <div>
-            <p class="secao__sobre">Mapa ilustrado · disponibilidade atualizada</p>
+            <p class="secao__sobre">Planta humanizada em 3D · disponibilidade atualizada</p>
             <h2 class="secao__titulo" id="mapa-titulo">Escolha a sua unidade</h2>
           </div>
-          <p class="mapa-secao__dica">Aproxime para ver cada lote: verde disponível, vermelho vendido, azul reservado. Toque em um lote para ver área e medidas, ou busque pelo número.</p>
+          <p class="mapa-secao__dica">Arraste para passear pelo Haras, gire com dois dedos (ou o botão direito do mouse) e aproxime para ver cada lote: verde disponível, vermelho vendido, azul reservado. Toque em um lote para ver área e medidas, ou busque pelo número.</p>
         </div>
 
           <!-- ---------- Quadro do mapa ---------- -->
@@ -277,22 +298,23 @@
         <div class="comuns-barra" id="comuns-barra" hidden>
           <span class="comuns-barra__titulo">Áreas comuns</span>
           <div class="comuns-barra__chips" id="comuns-chips"></div>
-          <a class="comuns-barra__link" href="assets/mapa-guia.png" target="_blank" rel="noopener">Baixar o mapa em imagem</a>
+          <a class="comuns-barra__link" href="assets/planta-humanizada.jpg" target="_blank" rel="noopener" download>Baixar a planta em imagem</a>
         </div>
       </div>
     </section>
 
-    <!-- ===================== MAPA-GUIA ILUSTRADO ===================== -->
+    <!-- ===================== PLANTA HUMANIZADA (mapa-guia) ===================== -->
     <section class="secao guia" id="guia" aria-labelledby="guia-titulo">
       <div class="secao__inner">
         <p class="secao__sobre">Mapa-guia</p>
-        <h2 class="secao__titulo" id="guia-titulo">Para você se situar no Haras</h2>
-        <p class="secao__texto">Portaria, Avenida Pau Ferro, Avenida Umbuzeiro, Ruas 1 a 12, área de lazer, lago e reserva ambiental, com a legenda numerada.</p>
+        <h2 class="secao__titulo" id="guia-titulo">Planta humanizada do Haras</h2>
+        <p class="secao__texto">O chacreamento inteiro visto de cima: portaria, Avenida Pau Ferro, Avenida Umbuzeiro, Ruas 1 a 12, as 57 glebas, a área de lazer em detalhe, o lago e a área de preservação ambiental.</p>
         <figure class="guia__quadro">
-          <a class="guia__link" href="assets/mapa-guia.svg" target="_blank" rel="noopener" aria-label="Abrir o mapa-guia em tela cheia">
-            <img class="guia__img" src="assets/mapa-guia.svg" alt="Mapa-guia ilustrado do Haras Rio São José: portaria e guarita, Avenida Pau Ferro, Avenida Umbuzeiro, Ruas 1 a 12, 57 glebas, área de lazer com salão de festas, piscina, quiosques, banheiros, quadra de areia, baias e redondel e fazendinha, lago e área de preservação ambiental." loading="lazy" width="2000" height="900">
+          <a class="guia__link" href="assets/planta-humanizada.jpg" target="_blank" rel="noopener" aria-label="Abrir a planta humanizada em tela cheia">
+            <img class="guia__img" src="assets/planta-humanizada-1600.jpg" srcset="assets/planta-humanizada-1600.jpg 1600w, assets/planta-humanizada.jpg 2400w" sizes="(min-width: 1100px) 1100px, 100vw"
+                 alt="Planta humanizada do Haras Rio São José: portaria na Estrada de Duas Vendas, Avenida Pau Ferro, Avenida Umbuzeiro, Ruas 1 a 12, 57 glebas numeradas, área de lazer com salão de festas, piscina, quiosques, banheiros coletivos, quadra de areia, baias e redondel e fazendinha, lago e área de preservação ambiental." loading="lazy" width="2400" height="1332">
           </a>
-          <figcaption>Ilustração baseada na planta do empreendimento, sem escala. Toque para abrir em tela cheia.</figcaption>
+          <figcaption>Imagem ilustrativa baseada na planta do empreendimento. Toque para abrir em tela cheia.</figcaption>
         </figure>
       </div>
     </section>
@@ -337,11 +359,16 @@
 
         <div class="subgaleria" id="bloco-projeto">
           <h3 class="subgaleria__titulo">Como vai ficar</h3>
-          <p class="secao__texto">Imagens de projeto das áreas comuns, ilustrativas.</p>
+          <p class="secao__texto">Imagens em 3D das áreas comuns e da infraestrutura previstas no contrato. Imagens ilustrativas: o que será entregue é exatamente o descrito no contrato.</p>
           <div class="galeria galeria--projeto" id="galeria-projeto">
-            <figure class="card-foto card-foto--projeto"><span class="tarja">Imagem ilustrativa do projeto</span><img src="assets/fotos/projeto-salao-piscina.jpg" alt="Projeto do salão de festas e da piscina" loading="lazy" onerror="this.closest('figure').remove()"><figcaption>Salão de festas, piscina e quiosques — projeto</figcaption></figure>
-            <figure class="card-foto card-foto--projeto"><span class="tarja">Imagem ilustrativa do projeto</span><img src="assets/fotos/projeto-baias-redondel.jpg" alt="Projeto das baias e do redondel" loading="lazy" onerror="this.closest('figure').remove()"><figcaption>Baias e redondel — projeto</figcaption></figure>
-            <figure class="card-foto card-foto--projeto"><span class="tarja">Imagem ilustrativa do projeto</span><img src="assets/fotos/projeto-guarita.jpg" alt="Projeto da portaria" loading="lazy" onerror="this.closest('figure').remove()"><figcaption>Portaria — projeto</figcaption></figure>
+            <figure class="card-foto card-foto--projeto"><span class="tarja">Imagem ilustrativa</span><a href="assets/fotos/3d/3d-vista-geral.jpg" target="_blank" rel="noopener"><img src="assets/fotos/3d/3d-vista-geral-960.jpg" srcset="assets/fotos/3d/3d-vista-geral-960.jpg 960w, assets/fotos/3d/3d-vista-geral.jpg 1920w" sizes="(min-width: 900px) 33vw, 100vw" alt="Vista geral do chacreamento, com as glebas, as avenidas e a área de preservação ao fundo" loading="lazy" width="960" height="540" onerror="this.closest('figure').remove()"></a><figcaption>Vista geral do chacreamento</figcaption></figure>
+            <figure class="card-foto card-foto--projeto"><span class="tarja">Imagem ilustrativa</span><a href="assets/fotos/3d/3d-portaria.jpg" target="_blank" rel="noopener"><img src="assets/fotos/3d/3d-portaria-960.jpg" srcset="assets/fotos/3d/3d-portaria-960.jpg 960w, assets/fotos/3d/3d-portaria.jpg 1920w" sizes="(min-width: 900px) 33vw, 100vw" alt="Portaria com guarita e pórtico na entrada pela Estrada de Duas Vendas" loading="lazy" width="960" height="540" onerror="this.closest('figure').remove()"></a><figcaption>Portaria e guarita</figcaption></figure>
+            <figure class="card-foto card-foto--projeto"><span class="tarja">Imagem ilustrativa</span><a href="assets/fotos/3d/3d-salao-piscina.jpg" target="_blank" rel="noopener"><img src="assets/fotos/3d/3d-salao-piscina-960.jpg" srcset="assets/fotos/3d/3d-salao-piscina-960.jpg 960w, assets/fotos/3d/3d-salao-piscina.jpg 1920w" sizes="(min-width: 900px) 33vw, 100vw" alt="Salão de festas com varanda e piscina com áreas adulto e infantil" loading="lazy" width="960" height="540" onerror="this.closest('figure').remove()"></a><figcaption>Salão de festas e piscina</figcaption></figure>
+            <figure class="card-foto card-foto--projeto"><span class="tarja">Imagem ilustrativa</span><a href="assets/fotos/3d/3d-quiosques-quadra.jpg" target="_blank" rel="noopener"><img src="assets/fotos/3d/3d-quiosques-quadra-960.jpg" srcset="assets/fotos/3d/3d-quiosques-quadra-960.jpg 960w, assets/fotos/3d/3d-quiosques-quadra.jpg 1920w" sizes="(min-width: 900px) 33vw, 100vw" alt="Quiosques, quadra de areia, fazendinha e banheiros coletivos no gramado da área de lazer" loading="lazy" width="960" height="540" onerror="this.closest('figure').remove()"></a><figcaption>Quiosques, quadra de areia e fazendinha</figcaption></figure>
+            <figure class="card-foto card-foto--projeto"><span class="tarja">Imagem ilustrativa</span><a href="assets/fotos/3d/3d-baias-redondel.jpg" target="_blank" rel="noopener"><img src="assets/fotos/3d/3d-baias-redondel-960.jpg" srcset="assets/fotos/3d/3d-baias-redondel-960.jpg 960w, assets/fotos/3d/3d-baias-redondel.jpg 1920w" sizes="(min-width: 900px) 33vw, 100vw" alt="Cinco baias e redondel" loading="lazy" width="960" height="540" onerror="this.closest('figure').remove()"></a><figcaption>Baias e redondel</figcaption></figure>
+            <figure class="card-foto card-foto--projeto"><span class="tarja">Imagem ilustrativa</span><a href="assets/fotos/3d/3d-avenida.jpg" target="_blank" rel="noopener"><img src="assets/fotos/3d/3d-avenida-960.jpg" srcset="assets/fotos/3d/3d-avenida-960.jpg 960w, assets/fotos/3d/3d-avenida.jpg 1920w" sizes="(min-width: 900px) 33vw, 100vw" alt="Avenida cascalhada com a rede elétrica instalada e os lotes demarcados" loading="lazy" width="960" height="540" onerror="this.closest('figure').remove()"></a><figcaption>Avenida, rede elétrica e lotes demarcados</figcaption></figure>
+            <figure class="card-foto card-foto--projeto"><span class="tarja">Imagem ilustrativa</span><a href="assets/fotos/3d/3d-lago.jpg" target="_blank" rel="noopener"><img src="assets/fotos/3d/3d-lago-960.jpg" srcset="assets/fotos/3d/3d-lago-960.jpg 960w, assets/fotos/3d/3d-lago.jpg 1920w" sizes="(min-width: 900px) 33vw, 100vw" alt="Lago natural cercado de árvores, na ponta da área de lazer" loading="lazy" width="960" height="540" onerror="this.closest('figure').remove()"></a><figcaption>Lago natural</figcaption></figure>
+            <figure class="card-foto card-foto--projeto"><span class="tarja">Imagem ilustrativa</span><a href="assets/fotos/3d/3d-reserva.jpg" target="_blank" rel="noopener"><img src="assets/fotos/3d/3d-reserva-960.jpg" srcset="assets/fotos/3d/3d-reserva-960.jpg 960w, assets/fotos/3d/3d-reserva.jpg 1920w" sizes="(min-width: 900px) 33vw, 100vw" alt="Área de preservação ambiental (Reserva Legal e APP) ao lado das últimas glebas" loading="lazy" width="960" height="540" onerror="this.closest('figure').remove()"></a><figcaption>Área de preservação ambiental</figcaption></figure>
           </div>
         </div>
       </div>
@@ -378,5 +405,6 @@
   </footer>
 
   <script src="js/app.js" defer></script>
+  <script type="module" src="js/mapa3d.js" onerror="window.dispatchEvent(new CustomEvent('haras:3d-falhou'))"></script>
 </body>
 </html>

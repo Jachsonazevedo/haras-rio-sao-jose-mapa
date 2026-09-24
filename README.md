@@ -36,6 +36,24 @@ O arquivo `.nojekyll` já está incluído e deve ser mantido.
 > Abrir o `index.html` direto do disco (`file://`) não funciona porque o navegador bloqueia o `fetch` do JSON.
 > Para testar com o exemplo pequeno, troque temporariamente `DATA_URL` no topo de `js/app.js` para `data/lotes.exemplo.json`.
 
+## Planta humanizada em 3D (desde 24/09/2026)
+
+O mapa interativo passou a ser uma **planta humanizada em 3D** (Three.js r160, carregado do CDN jsDelivr por *import map*, sem build).
+O mapa SVG continua no `index.html` como **reserva**: aparece sozinho se o aparelho não tiver WebGL, se o CDN falhar ou com `?2d=1` no endereço.
+
+| Arquivo | Papel |
+|---|---|
+| `js/cena3d.js` | Monta a cena a partir de `data/lotes.json`: terreno com morros ao longe, caatinga em manchas, vias de terra cascalhada, lotes (uma malha, cor por status), cerca do perímetro, rede elétrica (postes, fios e 13 transformadores), piquetes da marcação, portaria/guarita, salão, piscina, 3 quiosques, 2 banheiros, quadra de areia, 5 baias + redondel, fazendinha e lago. |
+| `js/mapa3d.js` | Mapa interativo: câmera (arrastar, girar, pinça), clique no lote, rótulos HTML (glebas, avenidas, ruas, números dos lotes de perto), bússola, botão 2D/3D, voos até o lote e às áreas comuns. Conversa com o `app.js` pela ponte `window.HarasMapa`. |
+| `render.html` + `js/render3d.js` | **Uso interno**: gera as imagens 3D de "Como vai ficar" (`assets/fotos/3d/`) e a planta humanizada (`assets/planta-humanizada.jpg`). |
+| `scripts/servidor_render.py` | Servidor local do gerador (salva os JPG). `python scripts/servidor_render.py 8766` → `http://localhost:8766/render.html`. |
+
+Regras que a cena respeita (contrato v4): vias de terra cascalhada (não asfalto), cerca **só no perímetro** (cada comprador cerca o seu lote), sem deck, sem píer, sem parque infantil, sem estacionamento, sem churrasqueira, quadra **de areia**, 5 baias. As imagens de apresentação mostram os lotes em tom neutro (sem disponibilidade, que muda todo dia) e levam a tarja "Imagem ilustrativa".
+
+Desempenho: desenho sob demanda (só quando a câmera mexe), lotes numa malha única, árvores/postes/mourões/piquetes instanciados, área de lazer fundida por material, árvores distantes com geometria simples; no celular, menos árvores e pixel ratio ≤ 1,5. Medido: ~5 ms por quadro na vista geral em desktop.
+
+Depois de mudar a Planilha Mestre, o fluxo é o mesmo de sempre (`scripts/gerar_dados.py`): a planta 3D lê o mesmo `data/lotes.json`. Só é preciso regerar as imagens 3D se mudar a planta, as áreas comuns ou o visual.
+
 ## Formato dos dados (`data/lotes.json`)
 
 O app lê um único JSON. Os campos abaixo são o contrato; os marcados como *opcional* podem faltar sem quebrar nada.

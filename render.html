@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Gerador de imagens 3D — Haras Rio São José</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:ital,wght@0,400;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet">
+  <script type="importmap">
+    { "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.min.js",
+        "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+    } }
+  </script>
+  <style>
+    body { font: 14px Inter, system-ui, sans-serif; margin: 16px; background: #FBF8EF; color: #183827; }
+    h1 { font: 700 20px "Playfair Display", Georgia, serif; margin: 0 0 8px; }
+    #palco { position: absolute; left: -99999px; top: 0; }
+    #lista { list-style: none; padding: 0; margin: 8px 0; }
+    #lista li { margin: 4px 0; }
+    button { font: 600 13px Inter, sans-serif; padding: 4px 10px; border-radius: 6px; border: 1px solid #183827; background: #fff; cursor: pointer; }
+    #previa { max-width: 100%; border-radius: 8px; margin-top: 10px; box-shadow: 0 6px 20px rgba(0,0,0,.2); }
+    #log { white-space: pre-wrap; font: 12px ui-monospace, Consolas, monospace; background: #fff; padding: 8px; border-radius: 6px; }
+  </style>
+</head>
+<body>
+  <h1>Gerador de imagens 3D (uso interno — não faz parte do site)</h1>
+  <p>Rodar com <code>python scripts/servidor_render.py 8766</code>. As fotos vão para <code>assets/fotos/3d/</code> e a planta para <code>assets/</code>.</p>
+  <p><button id="tudo" type="button">Gerar todas as imagens + planta</button> <button id="planta" type="button">Só a planta humanizada</button></p>
+  <ul id="lista"></ul>
+  <div id="palco"></div>
+  <pre id="log"></pre>
+  <img id="previa" alt="">
+  <script type="module" src="js/render3d.js"></script>
+</body>
+</html>

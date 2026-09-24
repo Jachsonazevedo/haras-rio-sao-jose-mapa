@@ -117,6 +117,28 @@
   // Vista atual: tela = mundo * k + (tx, ty)
   const vista = { k: 1, tx: 0, ty: 0, kAjuste: 1, mexeu: false };
 
+  // ---------------------------------------------------------------- Ponte com a planta 3D (js/mapa3d.js)
+  // A planta 3D é um módulo à parte (Three.js). Quando ela registra o seu "motor", o mapa SVG sai de cena
+  // e seleção, busca, filtro, zoom e áreas comuns passam a ser executados por ela. Sem WebGL (ou se o
+  // módulo não carregar), nada muda: o mapa SVG continua sendo o mapa.
+  const ponte = { motor: null };
+  window.HarasMapa = {
+    get dados() { return state.data; },
+    get pontos() { return state.pontos; },
+    selecionarLote: (id, opts) => selecionarLote(id, opts),
+    focarPonto: (id) => { const p = pontoPorId(id); if (p) focarPonto(p); },
+    limpar: () => { if (state.selecionado) fecharPainel(); if (state.pontoAtivo) fecharPopover(); },
+    reposicionar: () => posicionarPopover(),
+    registrar(motor) {
+      ponte.motor = motor;
+      document.documentElement.classList.add('tem-3d');
+      if (el.soDisponiveis.checked) motor.filtrar(true);
+      if (state.selecionado) { motor.destacar(state.selecionado); motor.focarLote(state.selecionado, { zoom: true }); }
+      mostrarEstado(null);
+    },
+  };
+  window.addEventListener('haras:3d-falhou', () => { if (!ponte.motor && state.data) mostrarEstado(null); });
+
   // ---------------------------------------------------------------- Formatação (pt-BR)
   const fmtNum = new Intl.NumberFormat('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   const fmtInt = new Intl.NumberFormat('pt-BR', { maximumFractionDigits: 0 });
@@ -589,9 +611,17 @@
   function posicionarPopover() {
     const p = state.pontoAtivo;
     if (!p || !p.c || el.popover.hidden) return;
-    const { w, h } = tamanhoSvg();
-    const sx = p.pc[0] * vista.k + vista.tx + (p.dx || 0);
-    const sy = p.pc[1] * vista.k + vista.ty;
+    let w, h, sx, sy;
+    if (ponte.motor) {
+      w = el.mapa.clientWidth; h = el.mapa.clientHeight;
+      const s = ponte.motor.projetar(p.c);
+      sx = s.x; sy = s.y;
+      el.popover.classList.toggle('is-fora', !s.visivel);
+    } else {
+      ({ w, h } = tamanhoSvg());
+      sx = p.pc[0] * vista.k + vista.tx + (p.dx || 0);
+      sy = p.pc[1] * vista.k + vista.ty;
+    }
     const pw = el.popover.offsetWidth || 280, ph = el.popover.offsetHeight || 120;
     const abaixo = sy - 40 - ph < 8 && sy + 16 + ph < h;
     el.popover.classList.toggle('is-abaixo', abaixo);
@@ -603,6 +633,14 @@
   function focarPonto(p) {
     if (!p || !p.c) return;
     if (state.selecionado) fecharPainel();
+    if (ponte.motor) {
+      ponte.motor.focarPonto(p);
+      abrirPopover(p);
+      if (!DESKTOP.matches) {
+        try { el.mapa.scrollIntoView({ behavior: MENOS_MOVIMENTO.matches ? 'auto' : 'smooth', block: 'center' }); } catch (_) { /* sem suporte */ }
+      }
+      return;
+    }
     const kLazer = (LAZER_MIN_PX + 320) / state.clubeLargM; // zoom em que os ícones da área de lazer aparecem
     const k = limitarK(Math.max(vista.k, (p.lazer || p.tipo === 'lazer') ? kLazer : vista.kAjuste * PONTO_ZOOM_FATOR));
     const alvo = pontoVisivel();
@@ -617,6 +655,7 @@
   // ---------------------------------------------------------------- Transformação (pan/zoom)
   let rafPendente = false;
   function agendar() {
+    if (ponte.motor) { ponte.motor.desenhar(); return; }
     if (rafPendente) return;
     rafPendente = true;
     requestAnimationFrame(() => { rafPendente = false; aplicarTransform(); });
@@ -913,7 +952,10 @@
 
     preencherPainel(lote);
     abrirPainel();
-    if (centralizar) centralizarLote(lote, zoom);
+    if (ponte.motor) {
+      ponte.motor.destacar(lote);
+      if (centralizar) ponte.motor.focarLote(lote, { zoom });
+    } else if (centralizar) centralizarLote(lote, zoom);
     if (url) atualizarUrl(lote.id);
     return true;
   }
@@ -974,6 +1016,7 @@
       state.selecionado = null;
     }
     el.gDestaque.style.display = 'none';
+    if (ponte.motor) ponte.motor.destacar(null);
     atualizarUrl(null);
     agendar();
   }
@@ -1103,10 +1146,13 @@
     el.svg.addEventListener('contextmenu', (e) => e.preventDefault());
 
     // Controles
-    const zoomCentro = (fator) => { const p = pontoVisivel(); zoomEm(p.x, p.y, fator); };
+    const zoomCentro = (fator) => {
+      if (ponte.motor) { ponte.motor.zoom(fator); return; }
+      const p = pontoVisivel(); zoomEm(p.x, p.y, fator);
+    };
     el.zoomMais.addEventListener('click', () => zoomCentro(1.6));
     el.zoomMenos.addEventListener('click', () => zoomCentro(1 / 1.6));
-    el.verTudo.addEventListener('click', () => verTudo(true));
+    el.verTudo.addEventListener('click', () => { if (ponte.motor) ponte.motor.verTudo(true); else verTudo(true); });
 
     // Busca
     el.busca.addEventListener('submit', (e) => { e.preventDefault(); buscar(el.buscaInput.value); });
@@ -1115,6 +1161,7 @@
     el.soDisponiveis.addEventListener('change', () => {
       el.svg.classList.toggle('so-disponiveis', el.soDisponiveis.checked);
       el.soDisponiveis.setAttribute('aria-checked', String(el.soDisponiveis.checked));
+      if (ponte.motor) ponte.motor.filtrar(el.soDisponiveis.checked);
     });
 
     // Painel do lote
@@ -1138,9 +1185,9 @@
     // Layout: altura do cabeçalho e redimensionamento do mapa
     if ('ResizeObserver' in window) {
       new ResizeObserver(medirTopo).observe(el.topo);
-      new ResizeObserver(() => { if (!state.data) return; if (!vista.mexeu) verTudo(false); else agendar(); }).observe(el.mapa);
+      new ResizeObserver(() => { if (!state.data || ponte.motor) return; if (!vista.mexeu) verTudo(false); else agendar(); }).observe(el.mapa);
     } else {
-      window.addEventListener('resize', () => { medirTopo(); if (!state.data) return; if (!vista.mexeu) verTudo(false); else agendar(); });
+      window.addEventListener('resize', () => { medirTopo(); if (!state.data || ponte.motor) return; if (!vista.mexeu) verTudo(false); else agendar(); });
     }
   }
 
@@ -1158,10 +1205,17 @@
       preencherLegenda();
       preencherHero();
       preencherRodape();
-      mostrarEstado(null);
       vista.mexeu = false;
       verTudo(false);
       abrirDeepLink();
+      // Com WebGL, a tela de carregamento espera a planta 3D (até 12 s); sem ele, o mapa SVG aparece já.
+      if (window.__haras3d && !ponte.motor) {
+        el.estadoTexto.textContent = 'Montando a planta em 3D.';
+        setTimeout(() => { if (!ponte.motor) mostrarEstado(null); }, 12000);
+      } else {
+        mostrarEstado(null);
+      }
+      window.dispatchEvent(new CustomEvent('haras:dados'));
     } catch (e) {
       console.error('[mapa] falha ao carregar', e);
       mostrarEstado('erro', e && e.message ? e.message : '');
