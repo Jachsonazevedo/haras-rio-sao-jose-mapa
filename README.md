@@ -234,3 +234,8 @@ Trilha de fundo em laço: cachoeira ao fundo, riacho, vento nas folhas, pássaro
 - Laço sem emenda: camadas periódicas em 96 s; o arquivo tem 0,5 s de margem de cada lado e o tour toca a janela 0,5–96,5 s (Web Audio, `loopStart/loopEnd`).
 - Começa no toque em "Iniciar a experiência" (ou no primeiro toque, em link direto), com o volume subindo em 3 s; botão de alto-falante no topo liga/desliga (preferência guardada no aparelho); abaixa sozinho durante o "Voo pelo Haras" (que tem som próprio) e quando a aba sai da tela. No iPhone, toca mesmo com a chave de silencioso (`navigator.audioSession`, iOS 17+).
 - Trocar o som: ajustar níveis/cantos no script → rodar → subir `?v=` de `SOM.url` em `tour/tour.js`.
+
+### Filme de abertura com música (desde 26/09/2026)
+Ao tocar em "Iniciar a experiência" roda um filme de 44,5 s (`tour/img/filme.mp4`, 12,8 MB) com trechos reais do voo (portaria → avenida → rede elétrica → rede de água → glebas → chácaras habitadas → portaria) e **toada caipira instrumental** (viola caipira em terças + violão, 80 bpm, Mi maior), **composta e sintetizada** por `scripts/gerar_musica_caipira.py` (sem direito autoral). O tour carrega por trás; botão "Pular"; no fim, o som ambiente do tour entra.
+- As frases **não estão gravadas na imagem**: ficam em `FRASES` no `tour/tour.js` (tempos casados com as tomadas de `scripts/gerar_filme.py`), por cima do vídeo, para ficarem inteiras no celular em pé.
+- Regerar: `python scripts/gerar_musica_caipira.py && python scripts/gerar_filme.py` → subir `filme.mp4?v=` no `tour/index.html`. Mudar tomadas = ajustar `TOMADAS` e os tempos de `FRASES` juntos.

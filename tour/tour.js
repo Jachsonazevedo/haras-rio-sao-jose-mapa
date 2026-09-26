@@ -360,12 +360,12 @@ function cartaoAberto(sim) {
 // ---------------------------------------------------------------- som ambiente (pássaros, água, música suave)
 // Arquivo gerado por scripts/gerar_som_ambiente.py: laço perfeito de 96 s entre 0,5 s e 96,5 s.
 const SOM = { url: 'audio/ambiente.mp3?v=1', inicio: 0.5, fim: 96.5, volume: 0.6 };
-const som = { ctx: null, ganho: null, fonte: null, buffer: null, carregando: null, ligado: true, voo: false };
+const som = { ctx: null, ganho: null, fonte: null, buffer: null, carregando: null, ligado: true, voo: false, filme: false };
 try { if (localStorage.getItem('haras-tour-som') === 'off') som.ligado = false; } catch (_) {}
 
 function volumeSom(seg = 1.5) {
   if (!som.ctx || !som.ganho) return;
-  const alvo = som.ligado && !som.voo && !document.hidden ? SOM.volume : 0;
+  const alvo = som.ligado && !som.voo && !som.filme && !document.hidden ? SOM.volume : 0;
   const g = som.ganho.gain, t = som.ctx.currentTime;
   g.cancelScheduledValues(t); g.setValueAtTime(g.value, t); g.linearRampToValueAtTime(alvo, t + seg);
 }
@@ -413,6 +413,55 @@ document.addEventListener('visibilitychange', () => {
   if (!document.hidden && som.fonte && som.ctx.state !== 'running') som.ctx.resume().catch(() => {});
   volumeSom(document.hidden ? 0.3 : 1.5);
 });
+
+// ---------------------------------------------------------------- filme de abertura (toada caipira + frases)
+// Vídeo gerado por scripts/gerar_filme.py (trechos do voo + scripts/gerar_musica_caipira.py).
+// As frases entram por cima (nítidas no celular em pé); tempos casados com as tomadas do filme.
+const FRASES = [
+  { t0: 0.8, t1: 8.2, titulo: 'Imagine uma chácara aqui.', texto: 'Sua.' },
+  { t0: 9.3, t1: 14.4, titulo: 'Um lugar de sossego e tranquilidade.', texto: 'Silêncio, ar puro e tempo para quem você ama.' },
+  { t0: 15.5, t1: 20.2, titulo: 'Rede elétrica pronta,', texto: 'aguardando a ligação da Coelba.' },
+  { t0: 21.2, t1: 25.9, titulo: 'Água de poços artesianos,', texto: 'rede em fase final de instalação.' },
+  { t0: 26.9, t1: 31.1, titulo: 'Área de lazer', texto: 'em construção.' },
+  { t0: 32.1, t1: 37.3, titulo: 'Muitas famílias já construíram suas chácaras', texto: 'e moram aqui.' },
+  { t0: 38.3, t1: 44.6, titulo: 'Agora é a sua vez.', texto: 'Haras Rio São José · Poções – BA' },
+];
+
+function abrirFilme() {
+  const caixa = $('#filme'), video = $('#filme-video'), frase = $('#filme-frase'), barra = $('#filme-progresso');
+  if (!caixa || !video) return false;
+  let atualF = -1, fechado = false;
+  caixa.hidden = false;
+  som.filme = true; volumeSom(0.3);
+  video.muted = !som.ligado;
+  const fechar = () => {
+    if (fechado) return; fechado = true;
+    caixa.classList.add('is-saindo');
+    som.filme = false; volumeSom(3);
+    setTimeout(() => { video.pause(); caixa.hidden = true; }, 950);
+  };
+  video.addEventListener('timeupdate', () => {
+    const t = video.currentTime;
+    if (video.duration) barra.style.width = `${(100 * t / video.duration).toFixed(2)}%`;
+    const k = FRASES.findIndex((f) => t >= f.t0 && t < f.t1);
+    if (k === atualF) return;
+    atualF = k;
+    frase.classList.remove('is-visivel');
+    if (k < 0) return;
+    setTimeout(() => {
+      if (atualF !== k) return;
+      frase.querySelector('strong').textContent = FRASES[k].titulo;
+      frase.querySelector('span').textContent = FRASES[k].texto;
+      void frase.offsetWidth;
+      frase.classList.add('is-visivel');
+    }, frase.textContent.trim() ? 450 : 0);
+  });
+  video.addEventListener('ended', fechar);
+  video.addEventListener('error', fechar);
+  $('#filme-pular').addEventListener('click', fechar);
+  video.play().catch(() => { video.muted = true; video.play().catch(fechar); });
+  return true;
+}
 
 // ---------------------------------------------------------------- voo guiado (vídeo com capítulos)
 function abrirVoo() {
@@ -545,7 +594,8 @@ async function carregar() {
   dados = await r.json();
   montarMiniaturas();
   ligarEventos();
-  el.iniciar.addEventListener('click', iniciarTour);
+  // pelo botão de abertura: filme com música (o tour carrega por trás) e depois o tour
+  el.iniciar.addEventListener('click', () => { iniciarTour(); abrirFilme(); });
   botaoSom();
   // link direto pula a abertura (sem toque): o som começa no primeiro toque na tela
   const primeiroToque = () => { if (som.ligado && !som.fonte) ligarSom(); };

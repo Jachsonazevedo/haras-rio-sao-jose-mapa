@@ -16,7 +16,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@photo-sphere-viewer/core@5.15.1/index.min.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@photo-sphere-viewer/markers-plugin@5.15.1/index.min.css">
-  <link rel="stylesheet" href="tour.css?v=6">
+  <link rel="stylesheet" href="tour.css?v=7">
   <script type="importmap">
     {
       "imports": {
@@ -48,8 +48,22 @@
         <a class="bt bt--vidro" href="../#mapa">Ver o mapa de unidades</a>
       </div>
       <p class="abertura__dica">Dois dedos para aproximar · um dedo para girar · toque num lote verde</p>
-      <p class="abertura__som">🎵 Com som ambiente: pássaros, água e música suave — aumente o volume</p>
+      <p class="abertura__som">🎵 Com música e sons da natureza — aumente o volume</p>
     </div>
+  </section>
+
+  <!-- ===================== FILME DE ABERTURA (com música) ===================== -->
+  <section class="filme" id="filme" aria-label="Filme de abertura" hidden>
+    <video class="filme__video" id="filme-video" playsinline preload="auto" poster="img/capa.jpg">
+      <source src="img/filme.mp4?v=1" type="video/mp4">
+    </video>
+    <div class="filme__veu" aria-hidden="true"></div>
+    <p class="filme__frase" id="filme-frase" aria-live="polite"><strong></strong><span></span></p>
+    <button class="bt bt--vidro filme__pular" id="filme-pular" type="button">
+      Pular
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 5l7 7-7 7M13 5l7 7-7 7" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </button>
+    <div class="filme__barra" aria-hidden="true"><i id="filme-progresso"></i></div>
   </section>
 
   <!-- ===================== TOUR ===================== -->
@@ -157,6 +171,6 @@
   </main>
 
   <noscript><p style="padding:24px">Ative o JavaScript para ver a experiência virtual.</p></noscript>
-  <script type="module" src="tour.js?v=8"></script>
+  <script type="module" src="tour.js?v=9"></script>
 </body>
 </html>

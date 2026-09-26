@@ -255,3 +255,28 @@ html, body { overscroll-behavior: none; }
 .ic--som[aria-pressed="false"] .som-off { display: block; }
 .ic--som[aria-pressed="true"] { background: var(--vidro); color: var(--marfim); border-color: var(--vidro-borda); }
 .abertura__som { margin: 8px 0 0; font-size: .82rem; color: rgba(253, 250, 242, .85); }
+
+/* ---------- Filme de abertura ---------- */
+.filme { position: fixed; inset: 0; z-index: 60; background: #0b1710; overflow: hidden; transition: opacity .9s ease, visibility .9s; }
+.filme.is-saindo { opacity: 0; visibility: hidden; }
+.filme__video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.filme__veu { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(10, 24, 16, .35), rgba(10, 24, 16, 0) 30%, rgba(10, 24, 16, 0) 45%, rgba(10, 24, 16, .72)); }
+.filme__frase {
+  position: absolute; left: 50%; bottom: calc(15% + var(--seguro-b)); width: min(92vw, 940px); margin: 0;
+  transform: translate(-50%, 16px); opacity: 0; text-align: center; transition: opacity .7s ease, transform .9s ease;
+}
+.filme__frase.is-visivel { opacity: 1; transform: translate(-50%, 0); }
+.filme__frase strong {
+  display: block; font-family: var(--fonte-titulo); font-weight: 700; color: #fff;
+  font-size: clamp(1.9rem, 5.2vw, 3.6rem); line-height: 1.12; text-shadow: 0 4px 26px rgba(0, 0, 0, .6);
+}
+.filme__frase span {
+  display: block; margin-top: 12px; color: var(--dourado-claro); font-weight: 500;
+  font-size: clamp(1.05rem, 2.6vw, 1.45rem); line-height: 1.4; text-shadow: 0 2px 14px rgba(0, 0, 0, .7);
+  opacity: 0; transition: opacity .8s ease .9s;
+}
+.filme__frase.is-visivel span { opacity: 1; }
+.filme__pular { position: absolute; top: calc(14px + env(safe-area-inset-top, 0px)); right: 14px; min-height: 42px; padding: 0 16px; font-size: .9rem; }
+.filme__barra { position: absolute; left: 0; right: 0; bottom: 0; height: 3px; background: rgba(253, 250, 242, .15); }
+.filme__barra i { display: block; height: 100%; width: 0; background: var(--dourado); transition: width .25s linear; }
+@media (max-width: 720px) { .filme__frase { bottom: calc(18% + var(--seguro-b)); } }
