@@ -1,15 +1,15 @@
 """Filme de abertura do tour (tour/img/filme.mp4): trechos reais do voo de drone (set/2026)
-com a toada caipira (gerar_musica_caipira.py) de trilha. As frases NÃO são gravadas na imagem —
+com o pagode de viola (gerar_musica_pagode.py) de trilha. As frases NÃO são gravadas na imagem —
 entram por cima, no próprio tour (FRASES em tour/tour.js), para ficarem nítidas no celular em pé.
 
-Uso: python scripts/gerar_musica_caipira.py && python scripts/gerar_filme.py
+Uso: python scripts/gerar_musica_pagode.py && python scripts/gerar_filme.py
 """
 import os, subprocess
 
 RAIZ = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 FF = r'D:\Programas\ffmpeg\bin\ffmpeg.exe'
 VOO = os.path.join(RAIZ, 'tour', 'img', 'voo-1080.mp4')
-MUSICA = os.path.join(os.environ.get('TEMP', '.'), 'toada_haras.wav')
+MUSICA = os.path.join(os.environ.get('TEMP', '.'), 'pagode_haras.wav')
 SAIDA = os.path.join(RAIZ, 'tour', 'img', 'filme.mp4')
 FUSAO = 0.8
 
