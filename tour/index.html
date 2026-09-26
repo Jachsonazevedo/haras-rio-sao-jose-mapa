@@ -16,7 +16,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@photo-sphere-viewer/core@5.15.1/index.min.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@photo-sphere-viewer/markers-plugin@5.15.1/index.min.css">
-  <link rel="stylesheet" href="tour.css?v=5">
+  <link rel="stylesheet" href="tour.css?v=6">
   <script type="importmap">
     {
       "imports": {
@@ -48,6 +48,7 @@
         <a class="bt bt--vidro" href="../#mapa">Ver o mapa de unidades</a>
       </div>
       <p class="abertura__dica">Dois dedos para aproximar · um dedo para girar · toque num lote verde</p>
+      <p class="abertura__som">🎵 Com som ambiente: pássaros, água e música suave — aumente o volume</p>
     </div>
   </section>
 
@@ -65,6 +66,10 @@
         <h2 class="topo__titulo" id="cena-titulo">—</h2>
       </div>
       <div class="topo__acoes">
+        <button class="ic ic--som" id="bt-som" type="button" aria-label="Desligar o som ambiente" aria-pressed="true" title="Som ambiente">
+          <svg class="som-on" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z" fill="currentColor"/><path d="M15.5 9a4.2 4.2 0 0 1 0 6M18 6.5a7.8 7.8 0 0 1 0 11" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+          <svg class="som-off" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z" fill="currentColor"/><path d="M16 9.5l5 5M21 9.5l-5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        </button>
         <button class="ic" id="bt-info" type="button" aria-label="Sobre esta cena" aria-pressed="true" title="Sobre esta cena">
           <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 11v6M12 7.5v.5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
         </button>
@@ -152,6 +157,6 @@
   </main>
 
   <noscript><p style="padding:24px">Ative o JavaScript para ver a experiência virtual.</p></noscript>
-  <script type="module" src="tour.js?v=7"></script>
+  <script type="module" src="tour.js?v=8"></script>
 </body>
 </html>

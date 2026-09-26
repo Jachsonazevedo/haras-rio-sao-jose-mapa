@@ -357,6 +357,63 @@ function cartaoAberto(sim) {
   el.info.setAttribute('aria-pressed', String(sim));
 }
 
+// ---------------------------------------------------------------- som ambiente (pássaros, água, música suave)
+// Arquivo gerado por scripts/gerar_som_ambiente.py: laço perfeito de 96 s entre 0,5 s e 96,5 s.
+const SOM = { url: 'audio/ambiente.mp3?v=1', inicio: 0.5, fim: 96.5, volume: 0.6 };
+const som = { ctx: null, ganho: null, fonte: null, buffer: null, carregando: null, ligado: true, voo: false };
+try { if (localStorage.getItem('haras-tour-som') === 'off') som.ligado = false; } catch (_) {}
+
+function volumeSom(seg = 1.5) {
+  if (!som.ctx || !som.ganho) return;
+  const alvo = som.ligado && !som.voo && !document.hidden ? SOM.volume : 0;
+  const g = som.ganho.gain, t = som.ctx.currentTime;
+  g.cancelScheduledValues(t); g.setValueAtTime(g.value, t); g.linearRampToValueAtTime(alvo, t + seg);
+}
+
+// precisa ser chamado dentro de um toque/clique (regra dos navegadores para tocar som)
+async function ligarSom() {
+  if (!som.ctx) {
+    const AC = window.AudioContext || window.webkitAudioContext; if (!AC) return;
+    try { if (navigator.audioSession) navigator.audioSession.type = 'playback'; } catch (_) {}  // iPhone: toca mesmo no modo silencioso
+    som.ctx = new AC();
+    som.ganho = som.ctx.createGain(); som.ganho.gain.value = 0; som.ganho.connect(som.ctx.destination);
+  }
+  if (som.ctx.state !== 'running') som.ctx.resume().catch(() => {});
+  if (!som.carregando) {
+    som.carregando = fetch(SOM.url).then((r) => r.arrayBuffer())
+      .then((b) => new Promise((ok, erro) => som.ctx.decodeAudioData(b, ok, erro)))
+      .then((buf) => { som.buffer = buf; });
+  }
+  try { await som.carregando; } catch (e) { console.warn('[tour] som ambiente não carregou', e); som.carregando = null; return; }
+  if (!som.fonte) {
+    const f = som.ctx.createBufferSource();
+    f.buffer = som.buffer; f.loop = true; f.loopStart = SOM.inicio; f.loopEnd = SOM.fim;
+    f.connect(som.ganho); f.start(0, SOM.inicio); som.fonte = f;
+  }
+  volumeSom(3);
+}
+
+function alternarSom() {
+  som.ligado = !som.ligado;
+  try { localStorage.setItem('haras-tour-som', som.ligado ? 'on' : 'off'); } catch (_) {}
+  botaoSom();
+  if (som.ligado) ligarSom(); else volumeSom(0.6);
+}
+
+function botaoSom() {
+  const b = $('#bt-som'); if (!b) return;
+  b.setAttribute('aria-pressed', String(som.ligado));
+  b.setAttribute('aria-label', som.ligado ? 'Desligar o som ambiente' : 'Ligar o som ambiente');
+}
+
+// o voo tem som próprio: o ambiente abaixa enquanto ele toca
+function somDoVoo(ativo) { som.voo = ativo; volumeSom(ativo ? 0.6 : 2); }
+
+document.addEventListener('visibilitychange', () => {
+  if (!document.hidden && som.fonte && som.ctx.state !== 'running') som.ctx.resume().catch(() => {});
+  volumeSom(document.hidden ? 0.3 : 1.5);
+});
+
 // ---------------------------------------------------------------- voo guiado (vídeo com capítulos)
 function abrirVoo() {
   const v = dados.voo; if (!v) return;
@@ -393,7 +450,9 @@ function abrirVoo() {
     caps[k].scrollIntoView({ block: 'nearest', inline: 'center', behavior: 'smooth' });
   };
   video.addEventListener('timeupdate', atualizar); atualizar();
+  somDoVoo(true);
   const fechar = () => {
+    somDoVoo(false);
     video.pause(); caixa.remove(); document.removeEventListener('keydown', tecla);
     if (document.fullscreenElement) document.exitFullscreen().catch(() => {});
     try { screen.orientation?.unlock?.(); } catch (_) {}
@@ -428,6 +487,7 @@ function ligarEventos() {
   el.pFechar.addEventListener('click', fecharPonto);
   el.giro.hidden = !(MOVEL && 'DeviceOrientationEvent' in window);
   el.fotos.addEventListener('click', abrirFotos);
+  $('#bt-som').addEventListener('click', alternarSom);
   $('#zoom-mais').addEventListener('click', () => { interagiu(); viewer.animate({ zoom: Math.min(100, viewer.getZoomLevel() + 20), speed: 600 }).catch?.(() => {}); });
   $('#zoom-menos').addEventListener('click', () => { interagiu(); viewer.animate({ zoom: Math.max(0, viewer.getZoomLevel() - 20), speed: 600 }).catch?.(() => {}); });
   $('#ver-tudo').addEventListener('click', verTudo);
@@ -451,6 +511,7 @@ function ligarEventos() {
 }
 
 async function iniciarTour() {
+  if (som.ligado) ligarSom();
   el.abertura.classList.add('is-saindo');
   el.tour.hidden = false;
   setTimeout(() => { const v = $('#ab-video'); if (v) v.pause(); el.abertura.hidden = true; }, 750);
@@ -467,7 +528,7 @@ async function iniciarTour() {
     plugins: [[MarkersPlugin, { markers: [] }]],
   });
   markers = viewer.getPlugin(MarkersPlugin);
-  window.__tour = { viewer, markers, tocarLote, get cena() { return dados.cenas[atual]; } };
+  window.__tour = { viewer, markers, tocarLote, som, get cena() { return dados.cenas[atual]; } };
   markers.addEventListener('select-marker', ({ marker }) => abrirPonto(marker.data));
   // toque/clique fora dos marcadores: se cair num lote (esferas 360°), abre o lote
   viewer.addEventListener('click', ({ data }) => { if (!data.rightclick) tocarLote(data.yaw, data.pitch); });
@@ -485,6 +546,11 @@ async function carregar() {
   montarMiniaturas();
   ligarEventos();
   el.iniciar.addEventListener('click', iniciarTour);
+  botaoSom();
+  // link direto pula a abertura (sem toque): o som começa no primeiro toque na tela
+  const primeiroToque = () => { if (som.ligado && !som.fonte) ligarSom(); };
+  document.addEventListener('click', primeiroToque, { once: true });
+  document.addEventListener('touchend', primeiroToque, { once: true });
   if (location.hash.length > 1) iniciarTour();   // link direto para uma cena pula a abertura
 }
 

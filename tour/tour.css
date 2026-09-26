@@ -248,3 +248,10 @@ button { font: inherit; }
 /* pinça com dois dedos = zoom do tour (não da página) */
 .tour, .tour__viewer, .psv-container, .psv-canvas-container, .psv-canvas { touch-action: none; }
 html, body { overscroll-behavior: none; }
+
+/* som ambiente */
+.ic--som .som-off { display: none; }
+.ic--som[aria-pressed="false"] .som-on { display: none; }
+.ic--som[aria-pressed="false"] .som-off { display: block; }
+.ic--som[aria-pressed="true"] { background: var(--vidro); color: var(--marfim); border-color: var(--vidro-borda); }
+.abertura__som { margin: 8px 0 0; font-size: .82rem; color: rgba(253, 250, 242, .85); }

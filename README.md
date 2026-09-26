@@ -228,3 +228,9 @@ O tour abre em **esferas 360° completas vistas do alto** (5 pontos: portaria, c
 - **Fotos reais** (botão de câmera): galeria com as fotos do drone de set/2026. **Voo pelo Haras**: vídeo com capítulos.
 - Regerar: `python scripts/servidor_render.py 8766` → `http://localhost:8766/render360.html` → console `await __r360.gerarTodas()` → `python scripts/preparar_tour.py`. Regerar sempre que a disponibilidade mudar (o verde é da data da geração).
 - Quando houver **fotos 360° reais** (modo Esfera do drone), elas entram como cenas `esfera=True` no script.
+
+### Som ambiente do tour (desde 26/09/2026)
+Trilha de fundo em laço: cachoeira ao fundo, riacho, vento nas folhas, pássaros (sabiá, bem-te-vi, trinados, rolinha, piados) e música suave (acordes + kalimba). **Tudo sintetizado** por `scripts/gerar_som_ambiente.py` (sem gravação de terceiros, sem direito autoral) → `tour/audio/ambiente.mp3` (97 s, 128 kbps, 1,5 MB).
+- Laço sem emenda: camadas periódicas em 96 s; o arquivo tem 0,5 s de margem de cada lado e o tour toca a janela 0,5–96,5 s (Web Audio, `loopStart/loopEnd`).
+- Começa no toque em "Iniciar a experiência" (ou no primeiro toque, em link direto), com o volume subindo em 3 s; botão de alto-falante no topo liga/desliga (preferência guardada no aparelho); abaixa sozinho durante o "Voo pelo Haras" (que tem som próprio) e quando a aba sai da tela. No iPhone, toca mesmo com a chave de silencioso (`navigator.audioSession`, iOS 17+).
+- Trocar o som: ajustar níveis/cantos no script → rodar → subir `?v=` de `SOM.url` em `tour/tour.js`.
