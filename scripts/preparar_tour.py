@@ -222,7 +222,7 @@ def cenas_360():
             yaw, pitch = esfera_yp(p, q["x"], q["z"])
             pts.append({"id": f"{p['id']}-ir-{q['id']}", "tipo": "cena", "cena": f"360-{q['id']}", "yaw": yaw, "pitch": pitch, "titulo": q["titulo"], "texto": ""})
         cenas.append({"id": f"360-{p['id']}", "sobre": p["sobre"], "titulo": p["titulo"], "texto": p["texto"], "esfera": True,
-                      "imagem": f"img/esfera-{p['id']}.jpg", "mini": f"img/esfera-{p['id']}-mini.jpg",
+                      "imagem": f"img/esfera-{p['id']}.jpg?v={int(os.path.getmtime(img))}", "mini": f"img/esfera-{p['id']}-mini.jpg?v={int(os.path.getmtime(img))}",   # ?v = data da esfera (contra cache quando o verde muda)
                       "camera": {"x": p["x"], "z": p["z"], "alt": p["alt"]}, "inicio": {"yaw": p["yaw0"], "pitch": p["pitch0"]},
                       "limites": None, "pontos": pts})
     return cenas

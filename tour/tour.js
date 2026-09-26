@@ -590,7 +590,7 @@ async function iniciarTour() {
 }
 
 async function carregar() {
-  const r = await fetch('cenas.json?v=4', { cache: 'no-cache' });
+  const r = await fetch('cenas.json?v=5', { cache: 'no-cache' });
   dados = await r.json();
   montarMiniaturas();
   ligarEventos();
