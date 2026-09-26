@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Gerador de esferas 360° — Haras Rio São José</title>
+  <script type="importmap">
+    { "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.min.js",
+        "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+    } }
+  </script>
+  <style>
+    body { font: 14px system-ui, sans-serif; margin: 16px; background: #FBF8EF; color: #183827; }
+    #palco { position: absolute; left: -99999px; top: 0; }
+    #log { white-space: pre-wrap; font: 12px ui-monospace, Consolas, monospace; background: #fff; padding: 8px; border-radius: 6px; }
+  </style>
+</head>
+<body>
+  <h1>Gerador de esferas 360° (uso interno — não faz parte do site)</h1>
+  <p>No console: <code>await __r360.gerarTodas()</code>. As esferas vão para <code>tour/img/esfera-*.jpg</code>.</p>
+  <div id="palco"></div>
+  <pre id="log"></pre>
+  <script type="module" src="js/render360.js"></script>
+</body>
+</html>

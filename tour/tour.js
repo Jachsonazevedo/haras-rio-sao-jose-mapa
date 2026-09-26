@@ -1,7 +1,8 @@
 // Experiência virtual — Haras Rio São José
 // Photo Sphere Viewer 5 (CDN, sem build). Cenas em cenas.json (geradas por scripts/preparar_tour.py).
-// Fotos de drone reprojetadas como recortes esféricos: o olhar fica limitado à área da foto.
-// Uma cena com "esfera": true (foto 360° 2:1) entra inteira, sem limites.
+// Cenas principais: esferas 360° vistas do alto (a maquete do Haras na geometria real da planta), giradas com o dedo.
+// Toque num lote: contorno dourado na esfera + cartão com área, medidas e WhatsApp. Fotos reais do drone na galeria.
+// Cenas sem "esfera" (recorte de foto) continuam suportadas, com o olhar limitado à área da foto.
 import { Viewer } from '@photo-sphere-viewer/core';
 import { MarkersPlugin } from '@photo-sphere-viewer/markers-plugin';
 
@@ -17,12 +18,17 @@ const el = {
   ponto: $('#ponto'), pFoto: $('#ponto-foto'), pTitulo: $('#ponto-titulo'), pTexto: $('#ponto-texto'), pIr: $('#ponto-ir'), pFechar: $('#ponto-fechar'),
   ant: $('#bt-ant'), prox: $('#bt-prox'), info: $('#bt-info'), passeio: $('#bt-passeio'), cheia: $('#bt-cheia'),
   minis: $('#miniaturas'), carregando: $('#carregando'), giro: $('#bt-giro'), dica: $('#dica-arraste'), dicaTexto: $('#dica-texto'),
+  pExtra: $('#ponto-extra'), fotos: $('#bt-fotos'),
 };
 
 const ICONE_INFO = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 10.5v6.5M12 7v.6" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></svg>';
 
+const ICONE_IR = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h13M13 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+const ICONE_FOTO = '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="6" width="18" height="13" rx="2.5" fill="none" stroke="currentColor" stroke-width="2.2"/><circle cx="12" cy="12.5" r="3.4" fill="none" stroke="currentColor" stroke-width="2.2"/><path d="M8 6l1.5-2h5L16 6" fill="none" stroke="currentColor" stroke-width="2.2"/></svg>';
+const WHATS = '5511991468192';
 let dados = null, viewer = null, markers = null, atual = -1, trocando = false;
-const passeio = { ativo: false, dir: 1, t: 0, parado: 0, raf: 0 };
+const passeio = { ativo: !MENOS_MOVIMENTO, dir: 1, t: 0, parado: 0, raf: 0 };
+let lotesDados = null, loteSel = null;
 
 // ---------------------------------------------------------------- utilidades
 const norm = (a) => { while (a > Math.PI) a -= 2 * Math.PI; while (a < -Math.PI) a += 2 * Math.PI; return a; };
@@ -77,7 +83,7 @@ function lacoPasseio(t) {
   const c = dados.cenas[atual];
   const pos = viewer.getPosition();
   const vel = 2.2 * RAD; // graus por segundo
-  if (c.esfera) { viewer.rotate({ yaw: pos.yaw + vel * dt, pitch: pos.pitch }); return; }
+  if (c.esfera) { viewer.rotate({ yaw: pos.yaw + vel * 1.4 * dt, pitch: pos.pitch }); return; }
   const L = c.limites, hH = viewer.state.hFov / 2;
   const min = (L.yawMin + hH) * RAD, max = (L.yawMax - hH) * RAD;
   let yaw = norm(pos.yaw) + passeio.dir * vel * dt;
@@ -106,7 +112,10 @@ function mostrarDica() {
   let vista = false; try { vista = localStorage.getItem('haras-tour-dica') === '1'; } catch (_) {}
   if (vista || MENOS_MOVIMENTO) return;
   const emPe = window.innerHeight > window.innerWidth;
-  el.dicaTexto.textContent = MOVEL ? (emPe ? 'Arraste para olhar em volta. Deite o celular para ver mais, ou use o botão do celular e mova o aparelho.' : 'Arraste para olhar em volta, ou use o botão do celular e mova o aparelho.') : 'Arraste para olhar em volta';
+  const cn = dados.cenas[atual];
+  el.dicaTexto.textContent = cn && cn.esfera
+    ? (MOVEL ? 'Gire com o dedo para olhar em volta. Toque num lote verde para ver área e medidas.' : 'Arraste para girar em 360°. Clique num lote verde para ver área e medidas.')
+    : (MOVEL ? (emPe ? 'Arraste para olhar em volta. Deite o celular para ver mais, ou use o botão do celular e mova o aparelho.' : 'Arraste para olhar em volta, ou use o botão do celular e mova o aparelho.') : 'Arraste para olhar em volta');
   el.dica.classList.add('is-visivel');
   dicaT = setTimeout(esconderDica, 7000);
 }
@@ -152,13 +161,74 @@ async function alternarGiro() {
 
 // ---------------------------------------------------------------- cenas
 function marcadores(c) {
-  return (c.pontos || []).map((p) => ({
-    id: p.id,
-    position: { yaw: p.yaw * RAD, pitch: p.pitch * RAD },
-    html: `<span class="hs" role="button" tabindex="0" aria-label="${esc(p.titulo)}"><span class="hs__alvo">${ICONE_INFO}</span><span class="hs__rot">${esc(p.titulo)}</span></span>`,
-    anchor: 'center left',
-    data: p,
-  }));
+  return (c.pontos || []).map((p) => {
+    const pos = { yaw: p.yaw * RAD, pitch: p.pitch * RAD };
+    if (p.tipo === 'gleba') return { id: p.id, position: pos, html: `<span class="hs-gleba">${esc(p.titulo.replace('Gleba ', ''))}</span>`, anchor: 'center center', data: p };
+    const ic = p.tipo === 'cena' ? ICONE_IR : p.foto ? ICONE_FOTO : ICONE_INFO;
+    const rot = p.tipo === 'cena' ? `Ir: ${p.titulo}` : p.titulo;
+    return {
+      id: p.id, position: pos, anchor: 'center left', data: p,
+      html: `<span class="hs${p.tipo === 'cena' ? ' hs--ir' : ''}" role="button" tabindex="0" aria-label="${esc(rot)}"><span class="hs__alvo">${ic}</span><span class="hs__rot">${esc(rot)}</span></span>`,
+    };
+  });
+}
+
+// ---------------------------------------------------------------- toque num lote (esferas 360°)
+async function carregarLotes() {
+  if (lotesDados) return lotesDados;
+  const r = await fetch('../data/lotes.json', { cache: 'no-cache' });
+  lotesDados = (await r.json()).lotes; return lotesDados;
+}
+function dentro(P, x, z) {
+  let d = false;
+  for (let i = 0, j = P.length - 1; i < P.length; j = i++) {
+    const [xi, zi] = P[i], [xj, zj] = P[j];
+    if ((zi > z) !== (zj > z) && x < ((xj - xi) * (z - zi)) / (zj - zi) + xi) d = !d;
+  }
+  return d;
+}
+function chaoDe(cam, yaw, pitch) {           // (yaw, pitch) da esfera → ponto do chão em metros da planta
+  if (pitch >= -0.002) return null;
+  const t = cam.alt / -Math.sin(pitch);
+  return [cam.x + Math.cos(pitch) * Math.sin(yaw) * t, cam.z - Math.cos(pitch) * Math.cos(yaw) * t];
+}
+function naEsfera(cam, x, z) {                // ponto do chão → [yaw, pitch] da esfera, em radianos
+  const dx = x - cam.x, dz = z - cam.z;
+  return [Math.atan2(dx, -dz), Math.atan2(-cam.alt, Math.hypot(dx, dz))];
+}
+const fmt = (n, d = 2) => Number(n).toLocaleString('pt-BR', { minimumFractionDigits: d, maximumFractionDigits: d });
+const SITUACAO = { disponivel: ['Disponível', 'sit--disp'], vendido: ['Vendido', 'sit--vend'], reservado: ['Reservado', 'sit--res'], reserva_tecnica: ['Reservado', 'sit--res'] };
+async function tocarLote(yaw, pitch) {
+  const c = dados.cenas[atual];
+  if (!c || !c.esfera || !c.camera) return false;
+  const q = chaoDe(c.camera, yaw, pitch); if (!q) return false;
+  const lotes = await carregarLotes();
+  const l = lotes.find((k) => dentro(k.poly, q[0], q[1]));
+  if (!l) return false;
+  interagiu();
+  try { markers.removeMarker('lote-sel'); } catch (_) {}
+  try {
+    markers.addMarker({ id: 'lote-sel', polygon: l.poly.map(([x, z]) => naEsfera(c.camera, x, z)),
+      svgStyle: { fill: 'rgba(230,207,156,.38)', stroke: '#E6CF9C', strokeWidth: '3px' }, data: { tipo: 'lote' } });
+  } catch (e) { console.warn('[tour] contorno do lote', e); }
+  loteSel = l;
+  const [sit, cls] = SITUACAO[l.status] || SITUACAO.reservado;
+  el.pFoto.hidden = true; el.pIr.hidden = true;
+  el.pTitulo.textContent = `Lote ${Number(l.id)} · Gleba ${Number(l.gleba)}`;
+  el.pTexto.innerHTML = `<span class="sit ${cls}">${sit}</span>`;
+  const med = [['Área', l.area ? `${fmt(l.area)} m²` : '—'], ['Frente', l.frente ? `${fmt(l.frente)} m` : '—'], ['Fundo', l.fundo ? `${fmt(l.fundo)} m` : '—'],
+    ['Lateral esq.', l.esq ? `${fmt(l.esq)} m` : '—'], ['Lateral dir.', l.dir ? `${fmt(l.dir)} m` : '—']];
+  const msg = encodeURIComponent(`Olá! Vi o lote ${Number(l.id)} (gleba ${Number(l.gleba)}) no passeio virtual do Haras Rio São José e quero saber mais.`);
+  el.pExtra.innerHTML = `<dl class="medidas">${med.map(([k, v]) => `<div><dt>${k}</dt><dd>${v}</dd></div>`).join('')}</dl>
+    <div class="ponto__acoes">
+      ${l.status === 'disponivel' ? `<a class="bt bt--whats" href="https://wa.me/${WHATS}?text=${msg}" target="_blank" rel="noopener">Quero este lote</a>` : ''}
+      <a class="bt bt--verde" href="../?lote=${encodeURIComponent(l.id)}#mapa">Ver no mapa</a>
+    </div>
+    <p class="ponto__nota">Medidas conforme memorial descritivo. Disponibilidade sujeita a confirmação.</p>`;
+  el.pExtra.hidden = false;
+  el.ponto.hidden = false;
+  if (MOVEL) cartaoAberto(false);
+  return true;
 }
 
 function mostrarCena(c, i) {
@@ -224,17 +294,37 @@ function precarregar(i) {
 
 // ---------------------------------------------------------------- ponto de interesse
 function abrirPonto(p) {
+  if (!p || p.tipo === 'gleba' || p.tipo === 'lote') return;
+  if (p.tipo === 'cena') { interagiu(); irPara(dados.cenas.findIndex((c) => c.id === p.cena)); return; }
   interagiu();
+  el.pExtra.hidden = true; el.pExtra.innerHTML = '';
   el.pTitulo.textContent = p.titulo;
   el.pTexto.textContent = p.texto;
   el.pFoto.hidden = !p.foto;
   if (p.foto) { el.pFoto.src = p.foto; el.pFoto.alt = p.titulo; }
   el.pIr.hidden = !p.cena;
+  el.pIr.textContent = 'Ver desta vista em 360°';
   el.pIr.onclick = p.cena ? () => irPara(dados.cenas.findIndex((c) => c.id === p.cena)) : null;
   el.ponto.hidden = false;
   if (MOVEL) cartaoAberto(false);
 }
-function fecharPonto() { el.ponto.hidden = true; }
+function fecharPonto() { el.ponto.hidden = true; if (loteSel) { loteSel = null; try { markers.removeMarker('lote-sel'); } catch (_) {} } }
+
+// ---------------------------------------------------------------- galeria de fotos reais do drone
+function abrirFotos() {
+  const fs = dados.fotos || []; if (!fs.length) return;
+  interagiu();
+  const caixa = document.createElement('section');
+  caixa.className = 'galeria'; caixa.setAttribute('aria-label', 'Fotos reais do drone');
+  caixa.innerHTML = `<header class="galeria__topo"><div><p>Fotos reais · drone · set/2026</p><h3>O Haras hoje</h3></div>
+      <button class="ic" type="button" aria-label="Fechar as fotos"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg></button></header>
+    <div class="galeria__faixa">${fs.map((f) => `<figure><img src="${esc(f.imagem)}" alt="${esc(f.titulo)}" loading="lazy" decoding="async"><figcaption><b>${esc(f.titulo)}</b><span>${esc(f.texto)}</span></figcaption></figure>`).join('')}</div>`;
+  document.body.appendChild(caixa);
+  const fechar = () => { caixa.remove(); document.removeEventListener('keydown', tecla); };
+  const tecla = (e) => { if (e.key === 'Escape') fechar(); };
+  caixa.querySelector('.galeria__topo .ic').addEventListener('click', fechar);
+  document.addEventListener('keydown', tecla);
+}
 function cartaoAberto(sim) {
   el.cartao.classList.toggle('is-fechado', !sim);
   el.info.setAttribute('aria-pressed', String(sim));
@@ -310,6 +400,7 @@ function ligarEventos() {
   el.cFechar.addEventListener('click', () => cartaoAberto(false));
   el.pFechar.addEventListener('click', fecharPonto);
   el.giro.hidden = !(MOVEL && 'DeviceOrientationEvent' in window);
+  el.fotos.addEventListener('click', abrirFotos);
   el.giro.addEventListener('click', alternarGiro);
   el.passeio.addEventListener('click', () => { definirPasseio(!passeio.ativo); passeio.parado = 0; });
   el.cheia.addEventListener('click', () => {
@@ -341,13 +432,16 @@ async function iniciarTour() {
     defaultYaw: (c0.inicio?.yaw || 0) * RAD, defaultPitch: (c0.inicio?.pitch || 0) * RAD,
     navbar: false,
     loadingTxt: '', loadingImg: null,
-    defaultZoomLvl: 0, maxFov: 90, minFov: 20,
+    defaultZoomLvl: 0, maxFov: 100, minFov: 20,
     mousewheelCtrlKey: false, touchmoveTwoFingers: false, moveInertia: true,
     plugins: [[MarkersPlugin, { markers: [] }]],
   });
   markers = viewer.getPlugin(MarkersPlugin);
-  window.__tour = { viewer, markers, get cena() { return dados.cenas[atual]; } };
+  window.__tour = { viewer, markers, tocarLote, get cena() { return dados.cenas[atual]; } };
   markers.addEventListener('select-marker', ({ marker }) => abrirPonto(marker.data));
+  // toque/clique fora dos marcadores: se cair num lote (esferas 360°), abre o lote
+  viewer.addEventListener('click', ({ data }) => { if (!data.rightclick) tocarLote(data.yaw, data.pitch); });
+  carregarLotes().catch(() => {});
   viewer.addEventListener('position-updated', prender);
   viewer.addEventListener('zoom-updated', prender);
   viewer.addEventListener('size-updated', () => { ajustarFovMaximo(); prender(); });
@@ -356,7 +450,7 @@ async function iniciarTour() {
 }
 
 async function carregar() {
-  const r = await fetch('cenas.json?v=2', { cache: 'no-cache' });
+  const r = await fetch('cenas.json?v=3', { cache: 'no-cache' });
   dados = await r.json();
   montarMiniaturas();
   ligarEventos();

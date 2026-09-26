@@ -1,5 +1,5 @@
 {
- "versao": 1,
+ "versao": 2,
  "whatsapp": "5511991468192",
  "voo": {
   "video": "img/voo-1080.mp4",
@@ -61,470 +61,1774 @@
  },
  "cenas": [
   {
-   "id": "portaria",
+   "id": "360-portaria",
    "sobre": "Chegada",
-   "titulo": "Portaria nova",
-   "texto": "A entrada do Haras pela Estrada de Duas Vendas: guarita revitalizada, portões novos, muros e piso concretado. É por aqui que você chega à sua chácara.",
-   "imagem": "img/portaria.jpg",
-   "mini": "img/portaria-mini.jpg",
-   "esfera": false,
-   "pano": {
-    "fullWidth": 12960,
-    "fullHeight": 6480,
-    "croppedWidth": 2718,
-    "croppedHeight": 1648,
-    "croppedX": 5121,
-    "croppedY": 2555
-   },
-   "limites": {
-    "yawMin": -36.16,
-    "yawMax": 36.16,
-    "pitchMin": -21.72,
-    "pitchMax": 15.55
+   "titulo": "Sobre a portaria",
+   "texto": "Você está no alto, sobre a entrada do Haras. Gire com o dedo para olhar em volta e para baixo: em verde, as unidades à venda. Toque num lote para ver área e medidas.",
+   "esfera": true,
+   "imagem": "img/esfera-portaria.jpg",
+   "mini": "img/esfera-portaria-mini.jpg",
+   "camera": {
+    "x": 330,
+    "z": 380,
+    "alt": 95
    },
    "inicio": {
-    "yaw": 0,
-    "pitch": -3.86
+    "yaw": 90,
+    "pitch": -24
    },
-   "fonte": "DJI_0650.JPG",
-   "inclinacao": -3.9,
+   "limites": null,
    "pontos": [
     {
-     "id": "portaria-0",
-     "yaw": 3.2,
-     "pitch": 3.08,
-     "titulo": "Guarita",
-     "texto": "Guarita da portaria, reformada em 2026, com controle de acesso de veículos e pedestres."
+     "id": "portaria-i0",
+     "tipo": "info",
+     "yaw": -62.52,
+     "pitch": -50.17,
+     "titulo": "Portaria",
+     "texto": "Portaria revitalizada na entrada, pela Estrada de Duas Vendas. Foto real de set/2026.",
+     "foto": "img/foto-portaria-alto.jpg"
+    },
+    {
+     "id": "portaria-i1",
+     "tipo": "info",
+     "yaw": -150.65,
+     "pitch": -8.66,
+     "titulo": "Área de lazer",
+     "texto": "Área de lazer prevista no contrato: salão, piscina, quiosques, quadra de areia, banheiros, baias e fazendinha.",
+     "cena": "360-lazer"
+    },
+    {
+     "id": "portaria-i2",
+     "tipo": "info",
+     "yaw": -147.84,
+     "pitch": -7.22,
+     "titulo": "Lago natural",
+     "texto": "Lago natural na ponta da área de lazer.",
+     "foto": "img/foto-lago.jpg"
+    },
+    {
+     "id": "portaria-i3",
+     "tipo": "info",
+     "yaw": 90.74,
+     "pitch": -2.2,
+     "titulo": "Área de preservação",
+     "texto": "Reserva Legal e APP, preservadas.",
+     "cena": "360-fundo"
+    },
+    {
+     "id": "portaria-ir-centro",
+     "tipo": "cena",
+     "cena": "360-centro",
+     "yaw": 92.56,
+     "pitch": -4.84,
+     "titulo": "No meio das glebas",
+     "texto": ""
+    },
+    {
+     "id": "portaria-g01",
+     "tipo": "gleba",
+     "yaw": -140.39,
+     "pitch": -22.07,
+     "titulo": "Gleba 1",
+     "texto": ""
+    },
+    {
+     "id": "portaria-g02",
+     "tipo": "gleba",
+     "yaw": 32.19,
+     "pitch": -12.61,
+     "titulo": "Gleba 2",
+     "texto": ""
+    },
+    {
+     "id": "portaria-g03",
+     "tipo": "gleba",
+     "yaw": 50.66,
+     "pitch": -9.67,
+     "titulo": "Gleba 3",
+     "texto": ""
+    },
+    {
+     "id": "portaria-g11",
+     "tipo": "gleba",
+     "yaw": 45.16,
+     "pitch": -20.48,
+     "titulo": "Gleba 11",
+     "texto": ""
+    },
+    {
+     "id": "portaria-g12",
+     "tipo": "gleba",
+     "yaw": 74.04,
+     "pitch": -27.33,
+     "titulo": "Gleba 12",
+     "texto": ""
+    },
+    {
+     "id": "portaria-g13",
+     "tipo": "gleba",
+     "yaw": 114.39,
+     "pitch": -26.45,
+     "titulo": "Gleba 13",
+     "texto": ""
+    },
+    {
+     "id": "portaria-g14",
+     "tipo": "gleba",
+     "yaw": 139.01,
+     "pitch": -17.29,
+     "titulo": "Gleba 14",
+     "texto": ""
+    },
+    {
+     "id": "portaria-g15",
+     "tipo": "gleba",
+     "yaw": -15.07,
+     "pitch": -84.17,
+     "titulo": "Gleba 15",
+     "texto": ""
+    },
+    {
+     "id": "portaria-g16",
+     "tipo": "gleba",
+     "yaw": 177.26,
+     "pitch": -19.14,
+     "titulo": "Gleba 16",
+     "texto": ""
+    },
+    {
+     "id": "portaria-g17",
+     "tipo": "gleba",
+     "yaw": -153.56,
+     "pitch": -14.29,
+     "titulo": "Gleba 17",
+     "texto": ""
+    },
+    {
+     "id": "portaria-g18",
+     "tipo": "gleba",
+     "yaw": 82.49,
+     "pitch": -14.92,
+     "titulo": "Gleba 18",
+     "texto": ""
+    },
+    {
+     "id": "portaria-g19",
+     "tipo": "gleba",
+     "yaw": 110.92,
+     "pitch": -14.24,
+     "titulo": "Gleba 19",
+     "texto": ""
+    },
+    {
+     "id": "portaria-g20",
+     "tipo": "gleba",
+     "yaw": 122.27,
+     "pitch": -11.88,
+     "titulo": "Gleba 20",
+     "texto": ""
+    },
+    {
+     "id": "portaria-g21",
+     "tipo": "gleba",
+     "yaw": 72.11,
+     "pitch": -9.62,
+     "titulo": "Gleba 21",
+     "texto": ""
+    },
+    {
+     "id": "portaria-g22",
+     "tipo": "gleba",
+     "yaw": 85.24,
+     "pitch": -10.12,
+     "titulo": "Gleba 22",
+     "texto": ""
+    },
+    {
+     "id": "portaria-g23",
+     "tipo": "gleba",
+     "yaw": 104.51,
+     "pitch": -9.9,
+     "titulo": "Gleba 23",
+     "texto": ""
     }
    ]
+  },
+  {
+   "id": "360-centro",
+   "sobre": "Vista aérea 360°",
+   "titulo": "No meio das glebas",
+   "texto": "O coração do Haras: avenidas, ruas e as glebas em volta. Em verde, as unidades à venda. Toque num lote para ver área e medidas.",
+   "esfera": true,
+   "imagem": "img/esfera-centro.jpg",
+   "mini": "img/esfera-centro-mini.jpg",
+   "camera": {
+    "x": 1450,
+    "z": 430,
+    "alt": 300
+   },
+   "inicio": {
+    "yaw": 90,
+    "pitch": -36
+   },
+   "limites": null,
+   "pontos": [
+    {
+     "id": "centro-i0",
+     "tipo": "info",
+     "yaw": -85.84,
+     "pitch": -14.11,
+     "titulo": "Portaria",
+     "texto": "Portaria revitalizada na entrada, pela Estrada de Duas Vendas. Foto real de set/2026.",
+     "foto": "img/foto-portaria-alto.jpg",
+     "cena": "360-portaria"
+    },
+    {
+     "id": "centro-i1",
+     "tipo": "info",
+     "yaw": -109.09,
+     "pitch": -11.25,
+     "titulo": "Área de lazer",
+     "texto": "Área de lazer prevista no contrato: salão, piscina, quiosques, quadra de areia, banheiros, baias e fazendinha.",
+     "cena": "360-lazer"
+    },
+    {
+     "id": "centro-i2",
+     "tipo": "info",
+     "yaw": -111.06,
+     "pitch": -10.44,
+     "titulo": "Lago natural",
+     "texto": "Lago natural na ponta da área de lazer.",
+     "foto": "img/foto-lago.jpg"
+    },
+    {
+     "id": "centro-i3",
+     "tipo": "info",
+     "yaw": 89.23,
+     "pitch": -12.5,
+     "titulo": "Área de preservação",
+     "texto": "Reserva Legal e APP, preservadas.",
+     "cena": "360-fundo"
+    },
+    {
+     "id": "centro-g01",
+     "tipo": "gleba",
+     "yaw": -95.87,
+     "pitch": -13.23,
+     "titulo": "Gleba 1",
+     "texto": ""
+    },
+    {
+     "id": "centro-g02",
+     "tipo": "gleba",
+     "yaw": -65.38,
+     "pitch": -16.97,
+     "titulo": "Gleba 2",
+     "texto": ""
+    },
+    {
+     "id": "centro-g03",
+     "tipo": "gleba",
+     "yaw": -59.63,
+     "pitch": -20.6,
+     "titulo": "Gleba 3",
+     "texto": ""
+    },
+    {
+     "id": "centro-g04",
+     "tipo": "gleba",
+     "yaw": -50.4,
+     "pitch": -25.59,
+     "titulo": "Gleba 4",
+     "texto": ""
+    },
+    {
+     "id": "centro-g05",
+     "tipo": "gleba",
+     "yaw": -34.94,
+     "pitch": -31.84,
+     "titulo": "Gleba 5",
+     "texto": ""
+    },
+    {
+     "id": "centro-g06",
+     "tipo": "gleba",
+     "yaw": -10.21,
+     "pitch": -37.01,
+     "titulo": "Gleba 6",
+     "texto": ""
+    },
+    {
+     "id": "centro-g07",
+     "tipo": "gleba",
+     "yaw": 19.33,
+     "pitch": -36.25,
+     "titulo": "Gleba 7",
+     "texto": ""
+    },
+    {
+     "id": "centro-g08",
+     "tipo": "gleba",
+     "yaw": 41.95,
+     "pitch": -30.43,
+     "titulo": "Gleba 8",
+     "texto": ""
+    },
+    {
+     "id": "centro-g09",
+     "tipo": "gleba",
+     "yaw": 56.05,
+     "pitch": -24.21,
+     "titulo": "Gleba 9",
+     "texto": ""
+    },
+    {
+     "id": "centro-g10",
+     "tipo": "gleba",
+     "yaw": 65.58,
+     "pitch": -18.81,
+     "titulo": "Gleba 10",
+     "texto": ""
+    },
+    {
+     "id": "centro-g11",
+     "tipo": "gleba",
+     "yaw": -76.29,
+     "pitch": -17.23,
+     "titulo": "Gleba 11",
+     "texto": ""
+    },
+    {
+     "id": "centro-g12",
+     "tipo": "gleba",
+     "yaw": -83.92,
+     "pitch": -17.55,
+     "titulo": "Gleba 12",
+     "texto": ""
+    },
+    {
+     "id": "centro-g13",
+     "tipo": "gleba",
+     "yaw": -91.75,
+     "pitch": -17.59,
+     "titulo": "Gleba 13",
+     "texto": ""
+    },
+    {
+     "id": "centro-g14",
+     "tipo": "gleba",
+     "yaw": -101.09,
+     "pitch": -17.75,
+     "titulo": "Gleba 14",
+     "texto": ""
+    },
+    {
+     "id": "centro-g15",
+     "tipo": "gleba",
+     "yaw": -86.97,
+     "pitch": -14.94,
+     "titulo": "Gleba 15",
+     "texto": ""
+    },
+    {
+     "id": "centro-g16",
+     "tipo": "gleba",
+     "yaw": -101.41,
+     "pitch": -14.88,
+     "titulo": "Gleba 16",
+     "texto": ""
+    },
+    {
+     "id": "centro-g18",
+     "tipo": "gleba",
+     "yaw": -82.82,
+     "pitch": -21.22,
+     "titulo": "Gleba 18",
+     "texto": ""
+    },
+    {
+     "id": "centro-g19",
+     "tipo": "gleba",
+     "yaw": -96.2,
+     "pitch": -21.16,
+     "titulo": "Gleba 19",
+     "texto": ""
+    },
+    {
+     "id": "centro-g20",
+     "tipo": "gleba",
+     "yaw": -104.51,
+     "pitch": -21.47,
+     "titulo": "Gleba 20",
+     "texto": ""
+    },
+    {
+     "id": "centro-g21",
+     "tipo": "gleba",
+     "yaw": -69.26,
+     "pitch": -25.56,
+     "titulo": "Gleba 21",
+     "texto": ""
+    },
+    {
+     "id": "centro-g22",
+     "tipo": "gleba",
+     "yaw": -80.92,
+     "pitch": -26.68,
+     "titulo": "Gleba 22",
+     "texto": ""
+    },
+    {
+     "id": "centro-g23",
+     "tipo": "gleba",
+     "yaw": -98.28,
+     "pitch": -26.59,
+     "titulo": "Gleba 23",
+     "texto": ""
+    },
+    {
+     "id": "centro-g24",
+     "tipo": "gleba",
+     "yaw": -110.15,
+     "pitch": -27.89,
+     "titulo": "Gleba 24",
+     "texto": ""
+    },
+    {
+     "id": "centro-g25",
+     "tipo": "gleba",
+     "yaw": -60.88,
+     "pitch": -31.94,
+     "titulo": "Gleba 25",
+     "texto": ""
+    },
+    {
+     "id": "centro-g26",
+     "tipo": "gleba",
+     "yaw": -79.25,
+     "pitch": -34.82,
+     "titulo": "Gleba 26",
+     "texto": ""
+    },
+    {
+     "id": "centro-g27",
+     "tipo": "gleba",
+     "yaw": -99.87,
+     "pitch": -34.69,
+     "titulo": "Gleba 27",
+     "texto": ""
+    },
+    {
+     "id": "centro-g28",
+     "tipo": "gleba",
+     "yaw": -128.91,
+     "pitch": -42.9,
+     "titulo": "Gleba 28",
+     "texto": ""
+    },
+    {
+     "id": "centro-g29",
+     "tipo": "gleba",
+     "yaw": -48.7,
+     "pitch": -42.63,
+     "titulo": "Gleba 29",
+     "texto": ""
+    },
+    {
+     "id": "centro-g30",
+     "tipo": "gleba",
+     "yaw": -76.09,
+     "pitch": -49.6,
+     "titulo": "Gleba 30",
+     "texto": ""
+    },
+    {
+     "id": "centro-g31",
+     "tipo": "gleba",
+     "yaw": -110.4,
+     "pitch": -48.23,
+     "titulo": "Gleba 31",
+     "texto": ""
+    },
+    {
+     "id": "centro-g32",
+     "tipo": "gleba",
+     "yaw": -15.22,
+     "pitch": -53.88,
+     "titulo": "Gleba 32",
+     "texto": ""
+    },
+    {
+     "id": "centro-g33",
+     "tipo": "gleba",
+     "yaw": -46.38,
+     "pitch": -74.47,
+     "titulo": "Gleba 33",
+     "texto": ""
+    },
+    {
+     "id": "centro-g34",
+     "tipo": "gleba",
+     "yaw": -152.45,
+     "pitch": -65.17,
+     "titulo": "Gleba 34",
+     "texto": ""
+    },
+    {
+     "id": "centro-g35",
+     "tipo": "gleba",
+     "yaw": 172.63,
+     "pitch": -48.94,
+     "titulo": "Gleba 35",
+     "texto": ""
+    },
+    {
+     "id": "centro-g36",
+     "tipo": "gleba",
+     "yaw": 29.75,
+     "pitch": -51.44,
+     "titulo": "Gleba 36",
+     "texto": ""
+    },
+    {
+     "id": "centro-g37",
+     "tipo": "gleba",
+     "yaw": 65.41,
+     "pitch": -67.0,
+     "titulo": "Gleba 37",
+     "texto": ""
+    },
+    {
+     "id": "centro-g38",
+     "tipo": "gleba",
+     "yaw": 138.52,
+     "pitch": -60.58,
+     "titulo": "Gleba 38",
+     "texto": ""
+    },
+    {
+     "id": "centro-g39",
+     "tipo": "gleba",
+     "yaw": 55.33,
+     "pitch": -39.93,
+     "titulo": "Gleba 39",
+     "texto": ""
+    },
+    {
+     "id": "centro-g40",
+     "tipo": "gleba",
+     "yaw": 80.26,
+     "pitch": -45.37,
+     "titulo": "Gleba 40",
+     "texto": ""
+    },
+    {
+     "id": "centro-g41",
+     "tipo": "gleba",
+     "yaw": 114.33,
+     "pitch": -43.49,
+     "titulo": "Gleba 41",
+     "texto": ""
+    },
+    {
+     "id": "centro-g42",
+     "tipo": "gleba",
+     "yaw": 128.49,
+     "pitch": -35.23,
+     "titulo": "Gleba 42",
+     "texto": ""
+    },
+    {
+     "id": "centro-g43",
+     "tipo": "gleba",
+     "yaw": 66.95,
+     "pitch": -30.38,
+     "titulo": "Gleba 43",
+     "texto": ""
+    },
+    {
+     "id": "centro-g44",
+     "tipo": "gleba",
+     "yaw": 84.33,
+     "pitch": -32.53,
+     "titulo": "Gleba 44",
+     "texto": ""
+    },
+    {
+     "id": "centro-g45",
+     "tipo": "gleba",
+     "yaw": 106.11,
+     "pitch": -31.85,
+     "titulo": "Gleba 45",
+     "texto": ""
+    },
+    {
+     "id": "centro-g46",
+     "tipo": "gleba",
+     "yaw": 116.84,
+     "pitch": -26.55,
+     "titulo": "Gleba 46",
+     "texto": ""
+    },
+    {
+     "id": "centro-g47",
+     "tipo": "gleba",
+     "yaw": 73.1,
+     "pitch": -23.94,
+     "titulo": "Gleba 47",
+     "texto": ""
+    },
+    {
+     "id": "centro-g48",
+     "tipo": "gleba",
+     "yaw": 86.19,
+     "pitch": -24.92,
+     "titulo": "Gleba 48",
+     "texto": ""
+    },
+    {
+     "id": "centro-g49",
+     "tipo": "gleba",
+     "yaw": 102.13,
+     "pitch": -24.62,
+     "titulo": "Gleba 49",
+     "texto": ""
+    },
+    {
+     "id": "centro-g50",
+     "tipo": "gleba",
+     "yaw": 110.45,
+     "pitch": -20.7,
+     "titulo": "Gleba 50",
+     "texto": ""
+    },
+    {
+     "id": "centro-g51",
+     "tipo": "gleba",
+     "yaw": 76.81,
+     "pitch": -19.53,
+     "titulo": "Gleba 51",
+     "texto": ""
+    },
+    {
+     "id": "centro-g52",
+     "tipo": "gleba",
+     "yaw": 87.26,
+     "pitch": -20.06,
+     "titulo": "Gleba 52",
+     "texto": ""
+    },
+    {
+     "id": "centro-g53",
+     "tipo": "gleba",
+     "yaw": 99.8,
+     "pitch": -19.9,
+     "titulo": "Gleba 53",
+     "texto": ""
+    },
+    {
+     "id": "centro-g54",
+     "tipo": "gleba",
+     "yaw": 82.55,
+     "pitch": -15.97,
+     "titulo": "Gleba 54",
+     "texto": ""
+    },
+    {
+     "id": "centro-g55",
+     "tipo": "gleba",
+     "yaw": 90.73,
+     "pitch": -16.11,
+     "titulo": "Gleba 55",
+     "texto": ""
+    },
+    {
+     "id": "centro-g56",
+     "tipo": "gleba",
+     "yaw": 99.26,
+     "pitch": -16.48,
+     "titulo": "Gleba 56",
+     "texto": ""
+    },
+    {
+     "id": "centro-g57",
+     "tipo": "gleba",
+     "yaw": 106.31,
+     "pitch": -16.52,
+     "titulo": "Gleba 57",
+     "texto": ""
+    }
+   ]
+  },
+  {
+   "id": "360-fundo",
+   "sobre": "Vista aérea 360°",
+   "titulo": "Perto da área de preservação",
+   "texto": "As últimas glebas, junto à área de preservação ambiental (Reserva Legal e APP).",
+   "esfera": true,
+   "imagem": "img/esfera-fundo.jpg",
+   "mini": "img/esfera-fundo-mini.jpg",
+   "camera": {
+    "x": 2550,
+    "z": 470,
+    "alt": 230
+   },
+   "inicio": {
+    "yaw": 90,
+    "pitch": -28
+   },
+   "limites": null,
+   "pontos": [
+    {
+     "id": "fundo-i0",
+     "tipo": "info",
+     "yaw": -86.84,
+     "pitch": -5.73,
+     "titulo": "Portaria",
+     "texto": "Portaria revitalizada na entrada, pela Estrada de Duas Vendas. Foto real de set/2026.",
+     "foto": "img/foto-portaria-alto.jpg",
+     "cena": "360-portaria"
+    },
+    {
+     "id": "fundo-i1",
+     "tipo": "info",
+     "yaw": -100.18,
+     "pitch": -5.12,
+     "titulo": "Área de lazer",
+     "texto": "Área de lazer prevista no contrato: salão, piscina, quiosques, quadra de areia, banheiros, baias e fazendinha.",
+     "cena": "360-lazer"
+    },
+    {
+     "id": "fundo-i2",
+     "tipo": "info",
+     "yaw": -101.76,
+     "pitch": -4.91,
+     "titulo": "Lago natural",
+     "texto": "Lago natural na ponta da área de lazer.",
+     "foto": "img/foto-lago.jpg"
+    },
+    {
+     "id": "fundo-i3",
+     "tipo": "info",
+     "yaw": 77.05,
+     "pitch": -41.51,
+     "titulo": "Área de preservação",
+     "texto": "Reserva Legal e APP, preservadas."
+    },
+    {
+     "id": "fundo-ir-centro",
+     "tipo": "cena",
+     "cena": "360-centro",
+     "yaw": -87.92,
+     "pitch": -11.8,
+     "titulo": "No meio das glebas",
+     "texto": ""
+    },
+    {
+     "id": "fundo-g06",
+     "tipo": "gleba",
+     "yaw": -69.76,
+     "pitch": -10.45,
+     "titulo": "Gleba 6",
+     "texto": ""
+    },
+    {
+     "id": "fundo-g07",
+     "tipo": "gleba",
+     "yaw": -66.17,
+     "pitch": -12.3,
+     "titulo": "Gleba 7",
+     "texto": ""
+    },
+    {
+     "id": "fundo-g08",
+     "tipo": "gleba",
+     "yaw": -61.04,
+     "pitch": -14.86,
+     "titulo": "Gleba 8",
+     "texto": ""
+    },
+    {
+     "id": "fundo-g09",
+     "tipo": "gleba",
+     "yaw": -52.94,
+     "pitch": -18.57,
+     "titulo": "Gleba 9",
+     "texto": ""
+    },
+    {
+     "id": "fundo-g10",
+     "tipo": "gleba",
+     "yaw": -36.43,
+     "pitch": -24.61,
+     "titulo": "Gleba 10",
+     "texto": ""
+    },
+    {
+     "id": "fundo-g32",
+     "tipo": "gleba",
+     "yaw": -77.75,
+     "pitch": -10.99,
+     "titulo": "Gleba 32",
+     "texto": ""
+    },
+    {
+     "id": "fundo-g33",
+     "tipo": "gleba",
+     "yaw": -85.2,
+     "pitch": -11.17,
+     "titulo": "Gleba 33",
+     "texto": ""
+    },
+    {
+     "id": "fundo-g34",
+     "tipo": "gleba",
+     "yaw": -94.08,
+     "pitch": -11.15,
+     "titulo": "Gleba 34",
+     "texto": ""
+    },
+    {
+     "id": "fundo-g35",
+     "tipo": "gleba",
+     "yaw": -101.61,
+     "pitch": -11.93,
+     "titulo": "Gleba 35",
+     "texto": ""
+    },
+    {
+     "id": "fundo-g36",
+     "tipo": "gleba",
+     "yaw": -75.84,
+     "pitch": -12.8,
+     "titulo": "Gleba 36",
+     "texto": ""
+    },
+    {
+     "id": "fundo-g37",
+     "tipo": "gleba",
+     "yaw": -84.6,
+     "pitch": -13.1,
+     "titulo": "Gleba 37",
+     "texto": ""
+    },
+    {
+     "id": "fundo-g38",
+     "tipo": "gleba",
+     "yaw": -95.02,
+     "pitch": -13.06,
+     "titulo": "Gleba 38",
+     "texto": ""
+    },
+    {
+     "id": "fundo-g39",
+     "tipo": "gleba",
+     "yaw": -73.15,
+     "pitch": -15.29,
+     "titulo": "Gleba 39",
+     "texto": ""
+    },
+    {
+     "id": "fundo-g40",
+     "tipo": "gleba",
+     "yaw": -83.64,
+     "pitch": -15.79,
+     "titulo": "Gleba 40",
+     "texto": ""
+    },
+    {
+     "id": "fundo-g41",
+     "tipo": "gleba",
+     "yaw": -96.35,
+     "pitch": -15.73,
+     "titulo": "Gleba 41",
+     "texto": ""
+    },
+    {
+     "id": "fundo-g42",
+     "tipo": "gleba",
+     "yaw": -106.3,
+     "pitch": -16.05,
+     "titulo": "Gleba 42",
+     "texto": ""
+    },
+    {
+     "id": "fundo-g43",
+     "tipo": "gleba",
+     "yaw": -69.09,
+     "pitch": -18.86,
+     "titulo": "Gleba 43",
+     "texto": ""
+    },
+    {
+     "id": "fundo-g44",
+     "tipo": "gleba",
+     "yaw": -82.21,
+     "pitch": -19.83,
+     "titulo": "Gleba 44",
+     "texto": ""
+    },
+    {
+     "id": "fundo-g45",
+     "tipo": "gleba",
+     "yaw": -98.4,
+     "pitch": -19.68,
+     "titulo": "Gleba 45",
+     "texto": ""
+    },
+    {
+     "id": "fundo-g46",
+     "tipo": "gleba",
+     "yaw": -112.27,
+     "pitch": -20.67,
+     "titulo": "Gleba 46",
+     "texto": ""
+    },
+    {
+     "id": "fundo-g47",
+     "tipo": "gleba",
+     "yaw": -62.45,
+     "pitch": -24.22,
+     "titulo": "Gleba 47",
+     "texto": ""
+    },
+    {
+     "id": "fundo-g48",
+     "tipo": "gleba",
+     "yaw": -79.69,
+     "pitch": -26.41,
+     "titulo": "Gleba 48",
+     "texto": ""
+    },
+    {
+     "id": "fundo-g49",
+     "tipo": "gleba",
+     "yaw": -101.99,
+     "pitch": -26.07,
+     "titulo": "Gleba 49",
+     "texto": ""
+    },
+    {
+     "id": "fundo-g50",
+     "tipo": "gleba",
+     "yaw": -123.68,
+     "pitch": -28.25,
+     "titulo": "Gleba 50",
+     "texto": ""
+    },
+    {
+     "id": "fundo-g51",
+     "tipo": "gleba",
+     "yaw": -49.9,
+     "pitch": -32.46,
+     "titulo": "Gleba 51",
+     "texto": ""
+    },
+    {
+     "id": "fundo-g52",
+     "tipo": "gleba",
+     "yaw": -74.18,
+     "pitch": -38.36,
+     "titulo": "Gleba 52",
+     "texto": ""
+    },
+    {
+     "id": "fundo-g53",
+     "tipo": "gleba",
+     "yaw": -109.63,
+     "pitch": -37.4,
+     "titulo": "Gleba 53",
+     "texto": ""
+    },
+    {
+     "id": "fundo-g54",
+     "tipo": "gleba",
+     "yaw": -18.89,
+     "pitch": -51.03,
+     "titulo": "Gleba 54",
+     "texto": ""
+    },
+    {
+     "id": "fundo-g55",
+     "tipo": "gleba",
+     "yaw": -66.45,
+     "pitch": -73.7,
+     "titulo": "Gleba 55",
+     "texto": ""
+    },
+    {
+     "id": "fundo-g56",
+     "tipo": "gleba",
+     "yaw": -141.1,
+     "pitch": -55.48,
+     "titulo": "Gleba 56",
+     "texto": ""
+    },
+    {
+     "id": "fundo-g57",
+     "tipo": "gleba",
+     "yaw": -152.04,
+     "pitch": -39.78,
+     "titulo": "Gleba 57",
+     "texto": ""
+    }
+   ]
+  },
+  {
+   "id": "360-lazer",
+   "sobre": "Vista aérea 360°",
+   "titulo": "Área de lazer e lago",
+   "texto": "A área de lazer prevista no contrato, na parte baixa da faixa, e o lago natural na ponta.",
+   "esfera": true,
+   "imagem": "img/esfera-lazer.jpg",
+   "mini": "img/esfera-lazer-mini.jpg",
+   "camera": {
+    "x": 90,
+    "z": 830,
+    "alt": 130
+   },
+   "inicio": {
+    "yaw": -150,
+    "pitch": -30
+   },
+   "limites": null,
+   "pontos": [
+    {
+     "id": "lazer-i0",
+     "tipo": "info",
+     "yaw": 19.23,
+     "pitch": -14.16,
+     "titulo": "Portaria",
+     "texto": "Portaria revitalizada na entrada, pela Estrada de Duas Vendas. Foto real de set/2026.",
+     "foto": "img/foto-portaria-alto.jpg",
+     "cena": "360-portaria"
+    },
+    {
+     "id": "lazer-i1",
+     "tipo": "info",
+     "yaw": -144.95,
+     "pitch": -48.7,
+     "titulo": "Área de lazer",
+     "texto": "Área de lazer prevista no contrato: salão, piscina, quiosques, quadra de areia, banheiros, baias e fazendinha."
+    },
+    {
+     "id": "lazer-i2",
+     "tipo": "info",
+     "yaw": -139.27,
+     "pitch": -28.02,
+     "titulo": "Lago natural",
+     "texto": "Lago natural na ponta da área de lazer.",
+     "foto": "img/foto-lago.jpg"
+    },
+    {
+     "id": "lazer-i3",
+     "tipo": "info",
+     "yaw": 81.24,
+     "pitch": -2.71,
+     "titulo": "Área de preservação",
+     "texto": "Reserva Legal e APP, preservadas.",
+     "cena": "360-fundo"
+    },
+    {
+     "id": "lazer-ir-centro",
+     "tipo": "cena",
+     "cena": "360-centro",
+     "yaw": 73.61,
+     "pitch": -5.24,
+     "titulo": "No meio das glebas",
+     "texto": ""
+    },
+    {
+     "id": "lazer-g01",
+     "tipo": "gleba",
+     "yaw": 18.59,
+     "pitch": -24.57,
+     "titulo": "Gleba 1",
+     "texto": ""
+    },
+    {
+     "id": "lazer-g11",
+     "tipo": "gleba",
+     "yaw": 33.74,
+     "pitch": -9.75,
+     "titulo": "Gleba 11",
+     "texto": ""
+    },
+    {
+     "id": "lazer-g12",
+     "tipo": "gleba",
+     "yaw": 39.78,
+     "pitch": -11.29,
+     "titulo": "Gleba 12",
+     "texto": ""
+    },
+    {
+     "id": "lazer-g13",
+     "tipo": "gleba",
+     "yaw": 48.11,
+     "pitch": -13.16,
+     "titulo": "Gleba 13",
+     "texto": ""
+    },
+    {
+     "id": "lazer-g14",
+     "tipo": "gleba",
+     "yaw": 63.47,
+     "pitch": -14.8,
+     "titulo": "Gleba 14",
+     "texto": ""
+    },
+    {
+     "id": "lazer-g15",
+     "tipo": "gleba",
+     "yaw": 27.34,
+     "pitch": -14.11,
+     "titulo": "Gleba 15",
+     "texto": ""
+    },
+    {
+     "id": "lazer-g16",
+     "tipo": "gleba",
+     "yaw": 55.11,
+     "pitch": -22.85,
+     "titulo": "Gleba 16",
+     "texto": ""
+    },
+    {
+     "id": "lazer-g17",
+     "tipo": "gleba",
+     "yaw": 32.5,
+     "pitch": -43.39,
+     "titulo": "Gleba 17",
+     "texto": ""
+    },
+    {
+     "id": "lazer-g18",
+     "tipo": "gleba",
+     "yaw": 50.08,
+     "pitch": -9.54,
+     "titulo": "Gleba 18",
+     "texto": ""
+    },
+    {
+     "id": "lazer-g19",
+     "tipo": "gleba",
+     "yaw": 61.78,
+     "pitch": -11.0,
+     "titulo": "Gleba 19",
+     "texto": ""
+    },
+    {
+     "id": "lazer-g20",
+     "tipo": "gleba",
+     "yaw": 71.42,
+     "pitch": -11.21,
+     "titulo": "Gleba 20",
+     "texto": ""
+    }
+   ]
+  },
+  {
+   "id": "360-alto",
+   "sobre": "Vista aérea 360°",
+   "titulo": "O Haras inteiro do alto",
+   "texto": "O chacreamento inteiro visto do alto: 57 glebas, avenidas Pau Ferro e Umbuzeiro, Ruas 1 a 12 e a área de preservação.",
+   "esfera": true,
+   "imagem": "img/esfera-alto.jpg",
+   "mini": "img/esfera-alto-mini.jpg",
+   "camera": {
+    "x": 1450,
+    "z": 520,
+    "alt": 1500
+   },
+   "inicio": {
+    "yaw": 90,
+    "pitch": -62
+   },
+   "limites": null,
+   "pontos": [
+    {
+     "id": "alto-i0",
+     "tipo": "info",
+     "yaw": -81.56,
+     "pitch": -51.26,
+     "titulo": "Portaria",
+     "texto": "Portaria revitalizada na entrada, pela Estrada de Duas Vendas. Foto real de set/2026.",
+     "foto": "img/foto-portaria-alto.jpg",
+     "cena": "360-portaria"
+    },
+    {
+     "id": "alto-i1",
+     "tipo": "info",
+     "yaw": -105.8,
+     "pitch": -45.35,
+     "titulo": "Área de lazer",
+     "texto": "Área de lazer prevista no contrato: salão, piscina, quiosques, quadra de areia, banheiros, baias e fazendinha.",
+     "cena": "360-lazer"
+    },
+    {
+     "id": "alto-i2",
+     "tipo": "info",
+     "yaw": -108.05,
+     "pitch": -43.19,
+     "titulo": "Lago natural",
+     "texto": "Lago natural na ponta da área de lazer.",
+     "foto": "img/foto-lago.jpg"
+    },
+    {
+     "id": "alto-i3",
+     "tipo": "info",
+     "yaw": 85.43,
+     "pitch": -47.85,
+     "titulo": "Área de preservação",
+     "texto": "Reserva Legal e APP, preservadas.",
+     "cena": "360-fundo"
+    },
+    {
+     "id": "alto-ir-centro",
+     "tipo": "cena",
+     "cena": "360-centro",
+     "yaw": 0.0,
+     "pitch": -86.57,
+     "titulo": "No meio das glebas",
+     "texto": ""
+    },
+    {
+     "id": "alto-g01",
+     "tipo": "gleba",
+     "yaw": -91.83,
+     "pitch": -49.75,
+     "titulo": "Gleba 1",
+     "texto": ""
+    },
+    {
+     "id": "alto-g02",
+     "tipo": "gleba",
+     "yaw": -60.8,
+     "pitch": -55.69,
+     "titulo": "Gleba 2",
+     "texto": ""
+    },
+    {
+     "id": "alto-g03",
+     "tipo": "gleba",
+     "yaw": -54.37,
+     "pitch": -60.54,
+     "titulo": "Gleba 3",
+     "texto": ""
+    },
+    {
+     "id": "alto-g04",
+     "tipo": "gleba",
+     "yaw": -44.61,
+     "pitch": -65.38,
+     "titulo": "Gleba 4",
+     "texto": ""
+    },
+    {
+     "id": "alto-g05",
+     "tipo": "gleba",
+     "yaw": -29.65,
+     "pitch": -69.56,
+     "titulo": "Gleba 5",
+     "texto": ""
+    },
+    {
+     "id": "alto-g06",
+     "tipo": "gleba",
+     "yaw": -8.33,
+     "pitch": -72.02,
+     "titulo": "Gleba 6",
+     "texto": ""
+    },
+    {
+     "id": "alto-g07",
+     "tipo": "gleba",
+     "yaw": 15.88,
+     "pitch": -71.74,
+     "titulo": "Gleba 7",
+     "texto": ""
+    },
+    {
+     "id": "alto-g08",
+     "tipo": "gleba",
+     "yaw": 36.0,
+     "pitch": -68.84,
+     "titulo": "Gleba 8",
+     "texto": ""
+    },
+    {
+     "id": "alto-g09",
+     "tipo": "gleba",
+     "yaw": 50.11,
+     "pitch": -64.31,
+     "titulo": "Gleba 9",
+     "texto": ""
+    },
+    {
+     "id": "alto-g10",
+     "tipo": "gleba",
+     "yaw": 60.47,
+     "pitch": -58.44,
+     "titulo": "Gleba 10",
+     "texto": ""
+    },
+    {
+     "id": "alto-g11",
+     "tipo": "gleba",
+     "yaw": -71.23,
+     "pitch": -56.51,
+     "titulo": "Gleba 11",
+     "texto": ""
+    },
+    {
+     "id": "alto-g12",
+     "tipo": "gleba",
+     "yaw": -78.58,
+     "pitch": -57.32,
+     "titulo": "Gleba 12",
+     "texto": ""
+    },
+    {
+     "id": "alto-g13",
+     "tipo": "gleba",
+     "yaw": -86.3,
+     "pitch": -57.7,
+     "titulo": "Gleba 13",
+     "texto": ""
+    },
+    {
+     "id": "alto-g14",
+     "tipo": "gleba",
+     "yaw": -95.61,
+     "pitch": -58.36,
+     "titulo": "Gleba 14",
+     "texto": ""
+    },
+    {
+     "id": "alto-g15",
+     "tipo": "gleba",
+     "yaw": -82.42,
+     "pitch": -52.95,
+     "titulo": "Gleba 15",
+     "texto": ""
+    },
+    {
+     "id": "alto-g16",
+     "tipo": "gleba",
+     "yaw": -96.88,
+     "pitch": -53.38,
+     "titulo": "Gleba 16",
+     "texto": ""
+    },
+    {
+     "id": "alto-g17",
+     "tipo": "gleba",
+     "yaw": -98.58,
+     "pitch": -49.07,
+     "titulo": "Gleba 17",
+     "texto": ""
+    },
+    {
+     "id": "alto-g18",
+     "tipo": "gleba",
+     "yaw": -76.32,
+     "pitch": -62.26,
+     "titulo": "Gleba 18",
+     "texto": ""
+    },
+    {
+     "id": "alto-g19",
+     "tipo": "gleba",
+     "yaw": -89.53,
+     "pitch": -62.81,
+     "titulo": "Gleba 19",
+     "texto": ""
+    },
+    {
+     "id": "alto-g20",
+     "tipo": "gleba",
+     "yaw": -97.79,
+     "pitch": -63.58,
+     "titulo": "Gleba 20",
+     "texto": ""
+    },
+    {
+     "id": "alto-g21",
+     "tipo": "gleba",
+     "yaw": -61.98,
+     "pitch": -66.11,
+     "titulo": "Gleba 21",
+     "texto": ""
+    },
+    {
+     "id": "alto-g22",
+     "tipo": "gleba",
+     "yaw": -72.65,
+     "pitch": -67.62,
+     "titulo": "Gleba 22",
+     "texto": ""
+    },
+    {
+     "id": "alto-g23",
+     "tipo": "gleba",
+     "yaw": -89.65,
+     "pitch": -68.42,
+     "titulo": "Gleba 23",
+     "texto": ""
+    },
+    {
+     "id": "alto-g24",
+     "tipo": "gleba",
+     "yaw": -101.19,
+     "pitch": -70.11,
+     "titulo": "Gleba 24",
+     "texto": ""
+    },
+    {
+     "id": "alto-g25",
+     "tipo": "gleba",
+     "yaw": -52.36,
+     "pitch": -70.51,
+     "titulo": "Gleba 25",
+     "texto": ""
+    },
+    {
+     "id": "alto-g26",
+     "tipo": "gleba",
+     "yaw": -68.09,
+     "pitch": -73.06,
+     "titulo": "Gleba 26",
+     "texto": ""
+    },
+    {
+     "id": "alto-g27",
+     "tipo": "gleba",
+     "yaw": -87.89,
+     "pitch": -74.1,
+     "titulo": "Gleba 27",
+     "texto": ""
+    },
+    {
+     "id": "alto-g28",
+     "tipo": "gleba",
+     "yaw": -114.18,
+     "pitch": -79.6,
+     "titulo": "Gleba 28",
+     "texto": ""
+    },
+    {
+     "id": "alto-g29",
+     "tipo": "gleba",
+     "yaw": -38.74,
+     "pitch": -75.38,
+     "titulo": "Gleba 29",
+     "texto": ""
+    },
+    {
+     "id": "alto-g30",
+     "tipo": "gleba",
+     "yaw": -58.59,
+     "pitch": -79.04,
+     "titulo": "Gleba 30",
+     "texto": ""
+    },
+    {
+     "id": "alto-g31",
+     "tipo": "gleba",
+     "yaw": -90.78,
+     "pitch": -80.49,
+     "titulo": "Gleba 31",
+     "texto": ""
+    },
+    {
+     "id": "alto-g32",
+     "tipo": "gleba",
+     "yaw": -10.8,
+     "pitch": -78.44,
+     "titulo": "Gleba 32",
+     "texto": ""
+    },
+    {
+     "id": "alto-g33",
+     "tipo": "gleba",
+     "yaw": -22.25,
+     "pitch": -83.93,
+     "titulo": "Gleba 33",
+     "texto": ""
+    },
+    {
+     "id": "alto-g34",
+     "tipo": "gleba",
+     "yaw": -117.25,
+     "pitch": -87.24,
+     "titulo": "Gleba 34",
+     "texto": ""
+    },
+    {
+     "id": "alto-g35",
+     "tipo": "gleba",
+     "yaw": 168.79,
+     "pitch": -83.44,
+     "titulo": "Gleba 35",
+     "texto": ""
+    },
+    {
+     "id": "alto-g36",
+     "tipo": "gleba",
+     "yaw": 21.74,
+     "pitch": -77.94,
+     "titulo": "Gleba 36",
+     "texto": ""
+    },
+    {
+     "id": "alto-g37",
+     "tipo": "gleba",
+     "yaw": 39.0,
+     "pitch": -83.01,
+     "titulo": "Gleba 37",
+     "texto": ""
+    },
+    {
+     "id": "alto-g38",
+     "tipo": "gleba",
+     "yaw": 108.15,
+     "pitch": -85.51,
+     "titulo": "Gleba 38",
+     "texto": ""
+    },
+    {
+     "id": "alto-g39",
+     "tipo": "gleba",
+     "yaw": 45.09,
+     "pitch": -74.49,
+     "titulo": "Gleba 39",
+     "texto": ""
+    },
+    {
+     "id": "alto-g40",
+     "tipo": "gleba",
+     "yaw": 64.36,
+     "pitch": -77.82,
+     "titulo": "Gleba 40",
+     "texto": ""
+    },
+    {
+     "id": "alto-g41",
+     "tipo": "gleba",
+     "yaw": 97.96,
+     "pitch": -79.02,
+     "titulo": "Gleba 41",
+     "texto": ""
+    },
+    {
+     "id": "alto-g42",
+     "tipo": "gleba",
+     "yaw": 117.68,
+     "pitch": -75.95,
+     "titulo": "Gleba 42",
+     "texto": ""
+    },
+    {
+     "id": "alto-g43",
+     "tipo": "gleba",
+     "yaw": 58.35,
+     "pitch": -69.75,
+     "titulo": "Gleba 43",
+     "texto": ""
+    },
+    {
+     "id": "alto-g44",
+     "tipo": "gleba",
+     "yaw": 73.75,
+     "pitch": -71.99,
+     "titulo": "Gleba 44",
+     "texto": ""
+    },
+    {
+     "id": "alto-g45",
+     "tipo": "gleba",
+     "yaw": 95.41,
+     "pitch": -72.74,
+     "titulo": "Gleba 45",
+     "texto": ""
+    },
+    {
+     "id": "alto-g46",
+     "tipo": "gleba",
+     "yaw": 108.68,
+     "pitch": -69.34,
+     "titulo": "Gleba 46",
+     "texto": ""
+    },
+    {
+     "id": "alto-g47",
+     "tipo": "gleba",
+     "yaw": 66.1,
+     "pitch": -64.76,
+     "titulo": "Gleba 47",
+     "texto": ""
+    },
+    {
+     "id": "alto-g48",
+     "tipo": "gleba",
+     "yaw": 78.35,
+     "pitch": -66.32,
+     "titulo": "Gleba 48",
+     "texto": ""
+    },
+    {
+     "id": "alto-g49",
+     "tipo": "gleba",
+     "yaw": 94.26,
+     "pitch": -66.83,
+     "titulo": "Gleba 49",
+     "texto": ""
+    },
+    {
+     "id": "alto-g50",
+     "tipo": "gleba",
+     "yaw": 104.14,
+     "pitch": -62.92,
+     "titulo": "Gleba 50",
+     "texto": ""
+    },
+    {
+     "id": "alto-g51",
+     "tipo": "gleba",
+     "yaw": 71.04,
+     "pitch": -59.87,
+     "titulo": "Gleba 51",
+     "texto": ""
+    },
+    {
+     "id": "alto-g52",
+     "tipo": "gleba",
+     "yaw": 81.05,
+     "pitch": -61.03,
+     "titulo": "Gleba 52",
+     "texto": ""
+    },
+    {
+     "id": "alto-g53",
+     "tipo": "gleba",
+     "yaw": 93.58,
+     "pitch": -61.39,
+     "titulo": "Gleba 53",
+     "texto": ""
+    },
+    {
+     "id": "alto-g54",
+     "tipo": "gleba",
+     "yaw": 77.73,
+     "pitch": -54.65,
+     "titulo": "Gleba 54",
+     "texto": ""
+    },
+    {
+     "id": "alto-g55",
+     "tipo": "gleba",
+     "yaw": 85.77,
+     "pitch": -55.23,
+     "titulo": "Gleba 55",
+     "texto": ""
+    },
+    {
+     "id": "alto-g56",
+     "tipo": "gleba",
+     "yaw": 94.18,
+     "pitch": -56.22,
+     "titulo": "Gleba 56",
+     "texto": ""
+    },
+    {
+     "id": "alto-g57",
+     "tipo": "gleba",
+     "yaw": 101.31,
+     "pitch": -56.58,
+     "titulo": "Gleba 57",
+     "texto": ""
+    }
+   ]
+  }
+ ],
+ "fotos": [
+  {
+   "id": "portaria",
+   "imagem": "img/foto-portaria.jpg",
+   "titulo": "Portaria nova",
+   "texto": "A entrada do Haras pela Estrada de Duas Vendas: guarita revitalizada, portões novos, muros e piso concretado. É por aqui que você chega à sua chácara.",
+   "sobre": "Chegada"
   },
   {
    "id": "portaria-alto",
-   "sobre": "Chegada",
+   "imagem": "img/foto-portaria-alto.jpg",
    "titulo": "A portaria vista do alto",
    "texto": "Guarita, portões de entrada e saída, muros laterais e o acesso concretado. Ao fundo, as primeiras chácaras do empreendimento.",
-   "imagem": "img/portaria-alto.jpg",
-   "mini": "img/portaria-alto-mini.jpg",
-   "esfera": false,
-   "pano": {
-    "fullWidth": 12960,
-    "fullHeight": 6480,
-    "croppedWidth": 3118,
-    "croppedHeight": 1648,
-    "croppedX": 4921,
-    "croppedY": 3134
-   },
-   "limites": {
-    "yawMin": -34.68,
-    "yawMax": 34.68,
-    "pitchMin": -34.0,
-    "pitchMax": 2.41
-   },
-   "inicio": {
-    "yaw": 0,
-    "pitch": -19.94
-   },
-   "fonte": "DJI_0653.JPG",
-   "inclinacao": -19.9,
-   "pontos": [
-    {
-     "id": "portaria-alto-0",
-     "yaw": -1.61,
-     "pitch": -21.12,
-     "titulo": "Guarita e portões",
-     "texto": "Portão de entrada, portão de saída e guarita no meio: o acesso ao Haras é controlado."
-    },
-    {
-     "id": "portaria-alto-1",
-     "yaw": -31.39,
-     "pitch": -13.54,
-     "titulo": "Estrada de Duas Vendas",
-     "texto": "Estrada de acesso, a menos de dez minutos do centro de Poções."
-    }
-   ]
+   "sobre": "Chegada"
   },
   {
    "id": "vista-geral",
-   "sobre": "O empreendimento",
+   "imagem": "img/foto-vista-geral.jpg",
    "titulo": "Avenidas e chácaras",
    "texto": "As avenidas cascalhadas cortam o Haras de ponta a ponta, com a rede elétrica ao lado. Várias famílias já construíram e moram nas suas chácaras.",
-   "imagem": "img/vista-geral.jpg",
-   "mini": "img/vista-geral-mini.jpg",
-   "esfera": false,
-   "pano": {
-    "fullWidth": 12960,
-    "fullHeight": 6480,
-    "croppedWidth": 3104,
-    "croppedHeight": 1647,
-    "croppedX": 4928,
-    "croppedY": 3119
-   },
-   "limites": {
-    "yawMin": -34.69,
-    "yawMax": 34.69,
-    "pitchMin": -33.68,
-    "pitchMax": 2.76
-   },
-   "inicio": {
-    "yaw": 0,
-    "pitch": -19.51
-   },
-   "fonte": "DJI_0656.JPG",
-   "inclinacao": -19.5,
-   "pontos": [
-    {
-     "id": "vista-geral-0",
-     "yaw": 2.38,
-     "pitch": -10.87,
-     "titulo": "Avenida com rede elétrica",
-     "texto": "Postes e rede elétrica ao longo das avenidas: 215 postes e 13 transformadores instalados."
-    },
-    {
-     "id": "vista-geral-1",
-     "yaw": -21.64,
-     "pitch": -7.31,
-     "titulo": "Chácaras construídas",
-     "texto": "Casas, pomares e cercas: o Haras já tem vida."
-    }
-   ]
+   "sobre": "O empreendimento"
   },
   {
    "id": "avenida-rede",
-   "sobre": "Infraestrutura",
+   "imagem": "img/foto-avenida-rede.jpg",
    "titulo": "Rede elétrica nas avenidas",
    "texto": "A rede elétrica acompanha as avenidas do Haras. Ao lado da via, a vala com a tubulação da nova rede de água.",
-   "imagem": "img/avenida-rede.jpg",
-   "mini": "img/avenida-rede-mini.jpg",
-   "esfera": false,
-   "pano": {
-    "fullWidth": 12960,
-    "fullHeight": 6480,
-    "croppedWidth": 2898,
-    "croppedHeight": 1647,
-    "croppedX": 5031,
-    "croppedY": 2862
-   },
-   "limites": {
-    "yawMin": -35.1,
-    "yawMax": 35.1,
-    "pitchMin": -28.34,
-    "pitchMax": 8.62
-   },
-   "inicio": {
-    "yaw": 0,
-    "pitch": -12.37
-   },
-   "fonte": "DJI_0694.JPG",
-   "inclinacao": -12.4,
-   "pontos": [
-    {
-     "id": "avenida-rede-0",
-     "yaw": 2.34,
-     "pitch": -3.73,
-     "titulo": "Poste e transformador",
-     "texto": "Rede elétrica instalada: 215 postes e 13 transformadores em todo o chacreamento."
-    },
-    {
-     "id": "avenida-rede-1",
-     "yaw": -11.97,
-     "pitch": -19.97,
-     "titulo": "Rede de água",
-     "texto": "Tubulação da rede-tronco de água, instalada ao longo da avenida."
-    }
-   ]
+   "sobre": "Infraestrutura"
   },
   {
    "id": "rede-agua",
-   "sobre": "Infraestrutura",
+   "imagem": "img/foto-rede-agua.jpg",
    "titulo": "Rede de água em implantação",
    "texto": "A tubulação azul é a rede-tronco de água, sendo enterrada ao longo das avenidas. O sistema tem poços, bombeamento solar e reservatórios.",
-   "imagem": "img/rede-agua.jpg",
-   "mini": "img/rede-agua-mini.jpg",
-   "esfera": false,
-   "pano": {
-    "fullWidth": 12960,
-    "fullHeight": 6480,
-    "croppedWidth": 2898,
-    "croppedHeight": 1647,
-    "croppedX": 5031,
-    "croppedY": 2862
-   },
-   "limites": {
-    "yawMin": -35.1,
-    "yawMax": 35.1,
-    "pitchMin": -28.34,
-    "pitchMax": 8.62
-   },
-   "inicio": {
-    "yaw": 0,
-    "pitch": -12.37
-   },
-   "fonte": "DJI_0669.JPG",
-   "inclinacao": -12.4,
-   "pontos": [
-    {
-     "id": "rede-agua-0",
-     "yaw": 9.64,
-     "pitch": -19.38,
-     "titulo": "Tubulação da rede-tronco",
-     "texto": "Tubos da rede de água sendo instalados nas valas, pelas avenidas principais."
-    },
-    {
-     "id": "rede-agua-1",
-     "yaw": -21.09,
-     "pitch": 3.95,
-     "titulo": "Rede elétrica",
-     "texto": "Postes da rede elétrica ao longo da avenida."
-    }
-   ]
+   "sobre": "Infraestrutura"
   },
   {
    "id": "rua-agua",
-   "sobre": "Infraestrutura",
+   "imagem": "img/foto-rua-agua.jpg",
    "titulo": "Água chegando às ruas",
    "texto": "A rede de água avança pelas ruas internas, ao lado das chácaras que já estão de pé.",
-   "imagem": "img/rua-agua.jpg",
-   "mini": "img/rua-agua-mini.jpg",
-   "esfera": false,
-   "pano": {
-    "fullWidth": 12960,
-    "fullHeight": 6480,
-    "croppedWidth": 3036,
-    "croppedHeight": 1648,
-    "croppedX": 4962,
-    "croppedY": 3040
-   },
-   "limites": {
-    "yawMin": -34.77,
-    "yawMax": 34.77,
-    "pitchMin": -32.08,
-    "pitchMax": 4.55
-   },
-   "inicio": {
-    "yaw": 0,
-    "pitch": -17.34
-   },
-   "fonte": "DJI_0667.JPG",
-   "inclinacao": -17.3,
-   "pontos": [
-    {
-     "id": "rua-agua-0",
-     "yaw": -13.34,
-     "pitch": -26.8,
-     "titulo": "Vala com a tubulação",
-     "texto": "A rede de água passa pela rua; cada comprador faz o ramal até a sua chácara."
-    },
-    {
-     "id": "rua-agua-1",
-     "yaw": 28.29,
-     "pitch": -8.23,
-     "titulo": "Chácara construída",
-     "texto": "Uma das chácaras já construídas no Haras."
-    }
-   ]
+   "sobre": "Infraestrutura"
   },
   {
    "id": "reservatorios",
-   "sobre": "Infraestrutura",
+   "imagem": "img/foto-reservatorios.jpg",
    "titulo": "Reservatórios de água",
    "texto": "Reservatórios do sistema de água do Haras em construção, ao lado da avenida. O sistema prevê poços, bombeamento solar e 140 mil litros de reservação.",
-   "imagem": "img/reservatorios.jpg",
-   "mini": "img/reservatorios-mini.jpg",
-   "esfera": false,
-   "pano": {
-    "fullWidth": 12960,
-    "fullHeight": 6480,
-    "croppedWidth": 3090,
-    "croppedHeight": 1648,
-    "croppedX": 4935,
-    "croppedY": 3103
-   },
-   "limites": {
-    "yawMin": -34.7,
-    "yawMax": 34.7,
-    "pitchMin": -33.37,
-    "pitchMax": 3.12
-   },
-   "inicio": {
-    "yaw": 0,
-    "pitch": -19.08
-   },
-   "fonte": "DJI_0677.JPG",
-   "inclinacao": -19.1,
-   "pontos": [
-    {
-     "id": "reservatorios-0",
-     "yaw": 13.44,
-     "pitch": -27.17,
-     "titulo": "Reservatório em concreto",
-     "texto": "Anel de concreto de um dos reservatórios do sistema de água, em construção."
-    },
-    {
-     "id": "reservatorios-1",
-     "yaw": 7.96,
-     "pitch": -17.74,
-     "titulo": "Caixa d'água",
-     "texto": "Caixa d'água do sistema, já no local, aguardando a instalação."
-    },
-    {
-     "id": "reservatorios-2",
-     "yaw": -24.8,
-     "pitch": -29.82,
-     "titulo": "Área do segundo reservatório",
-     "texto": "Terreno escavado para o reservatório vizinho."
-    }
-   ]
+   "sobre": "Infraestrutura"
   },
   {
    "id": "chacaras",
-   "sobre": "Vida no Haras",
+   "imagem": "img/foto-chacaras.jpg",
    "titulo": "Chácaras de quem já mora aqui",
    "texto": "Casas, pomares, coqueiros e caixas d'água: é assim que as chácaras do Haras ganham vida. A sua pode ser a próxima.",
-   "imagem": "img/chacaras.jpg",
-   "mini": "img/chacaras-mini.jpg",
-   "esfera": false,
-   "pano": {
-    "fullWidth": 12960,
-    "fullHeight": 6480,
-    "croppedWidth": 3104,
-    "croppedHeight": 1647,
-    "croppedX": 4928,
-    "croppedY": 3119
-   },
-   "limites": {
-    "yawMin": -34.69,
-    "yawMax": 34.69,
-    "pitchMin": -33.68,
-    "pitchMax": 2.76
-   },
-   "inicio": {
-    "yaw": 0,
-    "pitch": -19.51
-   },
-   "fonte": "DJI_0680.JPG",
-   "inclinacao": -19.5,
-   "pontos": [
-    {
-     "id": "chacaras-0",
-     "yaw": -30.79,
-     "pitch": -20.08,
-     "titulo": "Chácara com casa e pomar",
-     "texto": "Chácara construída, com casa, pomar e cerca."
-    },
-    {
-     "id": "chacaras-1",
-     "yaw": 29.86,
-     "pitch": -8.09,
-     "titulo": "Mais vizinhos",
-     "texto": "Casas já construídas ao longo da rua."
-    }
-   ]
+   "sobre": "Vida no Haras"
   },
   {
    "id": "glebas",
-   "sobre": "O empreendimento",
+   "imagem": "img/foto-glebas.jpg",
    "titulo": "Glebas e a serra ao fundo",
    "texto": "As glebas demarcadas se estendem até a área de preservação ambiental. Ao fundo, a serra que emoldura Poções.",
-   "imagem": "img/glebas.jpg",
-   "mini": "img/glebas-mini.jpg",
-   "esfera": false,
-   "pano": {
-    "fullWidth": 12960,
-    "fullHeight": 6480,
-    "croppedWidth": 3076,
-    "croppedHeight": 1648,
-    "croppedX": 4942,
-    "croppedY": 3087
-   },
-   "limites": {
-    "yawMin": -34.72,
-    "yawMax": 34.72,
-    "pitchMin": -33.05,
-    "pitchMax": 3.47
-   },
-   "inicio": {
-    "yaw": 0,
-    "pitch": -18.65
-   },
-   "fonte": "DJI_0687.JPG",
-   "inclinacao": -18.6,
-   "pontos": [
-    {
-     "id": "glebas-0",
-     "yaw": 9.04,
-     "pitch": -6.91,
-     "titulo": "Glebas demarcadas",
-     "texto": "Lotes a partir de 2.000 m², em 57 glebas."
-    }
-   ]
+   "sobre": "O empreendimento"
   },
   {
    "id": "cruzamento",
-   "sobre": "O empreendimento",
+   "imagem": "img/foto-cruzamento.jpg",
    "titulo": "Cruzamento das avenidas",
    "texto": "Encontro das avenidas, com a rede elétrica e a mata nativa em volta. Terrenos amplos para a sua chácara rural.",
-   "imagem": "img/cruzamento.jpg",
-   "mini": "img/cruzamento-mini.jpg",
-   "esfera": false,
-   "pano": {
-    "fullWidth": 12960,
-    "fullHeight": 6480,
-    "croppedWidth": 3022,
-    "croppedHeight": 1648,
-    "croppedX": 4969,
-    "croppedY": 3024
-   },
-   "limites": {
-    "yawMin": -34.79,
-    "yawMax": 34.79,
-    "pitchMin": -31.75,
-    "pitchMax": 4.91
-   },
-   "inicio": {
-    "yaw": 0,
-    "pitch": -16.9
-   },
-   "fonte": "DJI_0697.JPG",
-   "inclinacao": -16.9,
-   "pontos": [
-    {
-     "id": "cruzamento-0",
-     "yaw": -5.45,
-     "pitch": -11.91,
-     "titulo": "Rede elétrica",
-     "texto": "A energia chega pelas avenidas até as ruas das glebas."
-    }
-   ]
+   "sobre": "O empreendimento"
   },
   {
    "id": "lago",
-   "sobre": "Natureza",
+   "imagem": "img/foto-lago.jpg",
    "titulo": "Lago natural",
    "texto": "Um dos lagos naturais do Haras, cercado de vegetação. A área de preservação ambiental (Reserva Legal e APP) faz parte do empreendimento.",
-   "imagem": "img/lago.jpg",
-   "mini": "img/lago-mini.jpg",
-   "esfera": false,
-   "pano": {
-    "fullWidth": 12960,
-    "fullHeight": 6480,
-    "croppedWidth": 4654,
-    "croppedHeight": 1815,
-    "croppedX": 4153,
-    "croppedY": 3976
-   },
-   "limites": {
-    "yawMin": -37.35,
-    "yawMax": 37.35,
-    "pitchMin": -51.01,
-    "pitchMax": -25.13
-   },
-   "inicio": {
-    "yaw": 0,
-    "pitch": -48.0
-   },
-   "fonte": "DJI_0199.jpg",
-   "inclinacao": -48.0,
-   "pontos": []
+   "sobre": "Natureza"
   }
  ]
 }

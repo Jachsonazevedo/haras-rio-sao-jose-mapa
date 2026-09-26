@@ -207,3 +207,29 @@ button { font: inherit; }
   .topo__acoes { margin-left: auto; }
   .dica-arraste span { font-size: .84rem; }
 }
+
+/* ---------- Esferas 360°: glebas, setas, lote tocado ---------- */
+.hs-gleba { display: inline-block; min-width: 30px; padding: 3px 7px; border-radius: 999px; background: rgba(253, 250, 242, .92); color: #183827; font: 800 .74rem var(--fonte-texto); text-align: center; box-shadow: 0 2px 8px rgba(0, 0, 0, .25); pointer-events: none; }
+.hs--ir .hs__alvo { background: #fff; }
+.hs--ir .hs__rot { background: rgba(24, 56, 39, .88); }
+.sit { display: inline-block; padding: 5px 12px; border-radius: 999px; font-weight: 700; font-size: .84rem; }
+.sit--disp { background: #DDF5E4; color: #16713A; } .sit--vend { background: #F6E1DC; color: #9A3B2A; } .sit--res { background: #E1EAF6; color: #33598A; }
+.medidas { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px 14px; margin: 14px 0 0; }
+.medidas div { background: #F4F1E7; border-radius: 10px; padding: 8px 10px; }
+.medidas dt { font-size: .7rem; letter-spacing: .08em; text-transform: uppercase; color: #6B6A5E; font-weight: 600; }
+.medidas dd { margin: 2px 0 0; font-weight: 800; color: var(--verde); }
+.ponto__acoes { display: flex; gap: 10px; margin-top: 14px; flex-wrap: wrap; }
+.ponto__acoes .bt { flex: 1; min-height: 46px; }
+.ponto__nota { margin: 10px 0 0; font-size: .74rem; color: #6B6A5E; }
+
+/* ---------- Galeria de fotos reais ---------- */
+.galeria { position: fixed; inset: 0; z-index: 40; background: rgba(10, 24, 16, .97); display: flex; flex-direction: column; }
+.galeria__topo { display: flex; align-items: center; justify-content: space-between; padding: calc(14px + env(safe-area-inset-top, 0px)) 16px 10px; }
+.galeria__topo p { margin: 0; font-size: .72rem; letter-spacing: .16em; text-transform: uppercase; color: var(--dourado-claro); font-weight: 600; }
+.galeria__topo h3 { margin: 2px 0 0; font-family: var(--fonte-titulo); font-size: 1.5rem; color: #fff; }
+.galeria__faixa { flex: 1; display: flex; gap: 14px; overflow-x: auto; scroll-snap-type: x mandatory; padding: 6px 16px calc(20px + var(--seguro-b)); align-items: center; }
+.galeria__faixa figure { flex: none; width: min(88vw, 900px); margin: 0; scroll-snap-align: center; }
+.galeria__faixa img { display: block; width: 100%; aspect-ratio: 16 / 9; object-fit: cover; border-radius: 14px; box-shadow: 0 10px 30px rgba(0, 0, 0, .4); }
+.galeria__faixa figcaption { padding: 10px 4px 0; color: rgba(253, 250, 242, .9); font-size: .9rem; line-height: 1.45; }
+.galeria__faixa figcaption b { display: block; font-family: var(--fonte-titulo); font-size: 1.15rem; color: #fff; }
+@media (max-width: 720px) { .ponto { max-height: 62vh; overflow: auto; } }

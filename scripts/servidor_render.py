@@ -18,6 +18,7 @@ RAIZ = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DESTINOS = {
     "fotos": os.path.join(RAIZ, "assets", "fotos", "3d"),
     "assets": os.path.join(RAIZ, "assets"),
+    "tour": os.path.join(RAIZ, "tour", "img"),
 }
 NOME_OK = re.compile(r"^[a-z0-9][a-z0-9-]{1,60}\.(jpg|png)$")
 

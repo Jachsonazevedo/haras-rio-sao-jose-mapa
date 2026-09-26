@@ -742,7 +742,8 @@ export function construirCena(dados, op = {}) {
   // semStatus: imagens de apresentação (renders e planta-guia) não mostram disponibilidade, que muda todo dia
   const neutro = new THREE.Color('#B9C77F');
   const loteCores = lotes.map((l) => {
-    const c = (op.semStatus ? neutro : (coresStatus[l.status] || coresStatus.reservado)).clone();
+    // soDisponiveis (esferas 360° do tour): só as unidades à venda ganham cor; as demais ficam em tom de terreno
+    const c = (op.semStatus ? neutro : op.soDisponiveis ? (l.status === 'disponivel' ? new THREE.Color('#12D05A') : neutro) : (coresStatus[l.status] || coresStatus.reservado)).clone();
     const hsl = {}; c.getHSL(hsl);
     c.setHSL(hsl.h, hsl.s, hsl.l * (0.94 + r() * 0.1)); // leve variação: aspecto natural, não "planilha"
     return c;
@@ -757,6 +758,14 @@ export function construirCena(dados, op = {}) {
   const loteMesh = planos(new THREE.Mesh(malhaLotes.geom, matLotes), 6);
   loteMesh.name = 'lotes';
   grupoPlano.add(loteMesh);
+  // esferas 360° do tour: as unidades à venda ganham uma camada verde viva, sem luz (aparece de longe e com céu)
+  if (op.soDisponiveis) {
+    const disp = lotes.filter((l) => l.status === 'disponivel').map((l) => l.poly);
+    if (disp.length) {
+      const mDisp = planos(new THREE.Mesh(malhaPoligonos(disp, { y: 0.6 }).geom, matPlano({ color: '#39C96C', emissive: '#1FA650', emissiveIntensity: 0.55, depthTest: false })), 6.3);
+      mDisp.renderOrder = 6.9; mDisp.name = 'disponiveis'; grupoPlano.add(mDisp);   // sem teste de profundidade: quem chama põe árvores/prédios depois
+    }
+  }
   // (c) contorno colorido por dentro de cada lote (1,6 m), sempre nítido
   const contornos = [], faixaCont = new Map();
   let vtx = 0;

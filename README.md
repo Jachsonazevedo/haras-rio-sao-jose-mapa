@@ -221,3 +221,10 @@ Publicado em `…/haras-rio-sao-jose-mapa/tour/` e ligado ao app pelo menu ("Pas
 Como funciona: a foto do drone não é 360°, então ela vira um **recorte** da esfera e o olhar fica preso à área da foto (limites em `cenas.json`); arrastar dá a sensação de olhar em volta a partir do ponto em que o drone estava. **Quando houver fotos 360° de verdade** (modo Pano → Esfera do drone, arquivo equirretangular 2:1), basta incluir a cena no script com `esfera=True`: ela entra inteira, sem limites.
 
 Atualizar: editar `CENAS` em `scripts/preparar_tour.py` → `python scripts/preparar_tour.py` → commit/push. Regras: só itens do contrato; nada de processo; nomes de clientes nunca.
+
+### Tour 360° do alto (desde 26/09/2026, 2ª versão)
+O tour abre em **esferas 360° completas vistas do alto** (5 pontos: portaria, centro, perto da preservação, lazer/lago e vista geral), giradas com o dedo como num tour de drone. Cada esfera é a maquete do Haras (mesma geometria da planta) renderizada por `render360.html` + `js/render360.js` (cubo 6×2048 → equirretangular 6144×3072), com **só as unidades à venda em verde**. Pontos de vista em `scripts/preparar_tour.py` (`PONTOS360`) → `tour/pontos360.json`.
+- **Toque num lote**: o tour converte o toque (yaw/pitch) no ponto do chão, acha o lote em `data/lotes.json`, contorna em dourado e mostra área, medidas, "Quero este lote" (WhatsApp) e "Ver no mapa" (`../?lote=N`).
+- **Fotos reais** (botão de câmera): galeria com as fotos do drone de set/2026. **Voo pelo Haras**: vídeo com capítulos.
+- Regerar: `python scripts/servidor_render.py 8766` → `http://localhost:8766/render360.html` → console `await __r360.gerarTodas()` → `python scripts/preparar_tour.py`. Regerar sempre que a disponibilidade mudar (o verde é da data da geração).
+- Quando houver **fotos 360° reais** (modo Esfera do drone), elas entram como cenas `esfera=True` no script.
