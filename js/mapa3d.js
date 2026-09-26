@@ -14,7 +14,7 @@
    ===================================================================== */
 import * as THREE from 'three';
 import { MapControls } from 'three/addons/controls/MapControls.js';
-import { construirCena, enquadrarPontos, simplificarPoly } from './cena3d.js?v=20260924f';
+import { construirCena, enquadrarPontos, simplificarPoly } from './cena3d.js?v=20260926a';
 
 const ponte = window.HarasMapa;
 const quadro = document.getElementById('mapa-quadro');
@@ -493,9 +493,28 @@ async function iniciar() {
   document.addEventListener('fullscreenchange', () => { if (!document.fullscreenElement && quadro.classList.contains('is-cheia')) marcarCheia(false); });
   if (controles) { controles.appendChild(bGirar); controles.appendChild(bCheia); controles.appendChild(bCima); controles.appendChild(bEntorno); controles.appendChild(bNorte); }
   const svgN = bNorte.querySelector('svg');
+  // Rosa dos ventos (N, L, S, O): gira com o mapa; um toque volta o norte para cima
+  const rosa = document.createElement('button');
+  rosa.type = 'button'; rosa.className = 'rosa3d'; rosa.title = 'Norte para cima';
+  rosa.setAttribute('aria-label', 'Rosa dos ventos: toque para deixar o norte para cima');
+  rosa.innerHTML = `<svg viewBox="0 0 100 100" aria-hidden="true" focusable="false">
+    <circle cx="50" cy="50" r="47" fill="rgba(253,250,242,.94)" stroke="#183827" stroke-opacity=".25" stroke-width="1.5"/>
+    <circle cx="50" cy="50" r="30" fill="none" stroke="#183827" stroke-opacity=".18" stroke-width="1"/>
+    <path d="M50 14 L57 50 L50 44 L43 50 Z" fill="#A74726"/>
+    <path d="M50 86 L43 50 L50 56 L57 50 Z" fill="#183827" opacity=".45"/>
+    <path d="M86 50 L50 57 L56 50 L50 43 Z" fill="#183827" opacity=".3"/>
+    <path d="M14 50 L50 43 L44 50 L50 57 Z" fill="#183827" opacity=".3"/>
+    <g font-family="Inter, system-ui, sans-serif" font-weight="800" font-size="13" text-anchor="middle" dominant-baseline="central">
+      <text x="50" y="7.5" fill="#A74726">N</text><text x="93" y="50" fill="#183827">L</text>
+      <text x="50" y="93" fill="#183827">S</text><text x="7" y="50" fill="#183827">O</text>
+    </g></svg>`;
+  quadro.appendChild(rosa);
+  const svgRosa = rosa.querySelector('svg');
+  rosa.addEventListener('click', () => bNorte.click());
   function atualizarBussola() {
     const { azim, polar } = estadoAtual();
     svgN.style.transform = `rotate(${(azim * 180 / Math.PI).toFixed(1)}deg)`;
+    svgRosa.style.transform = svgN.style.transform;
     const deCima = polar < 0.18;
     if (bCima._deCima !== deCima) { bCima._deCima = deCima; bCima.textContent = deCima ? '3D' : '2D'; }
   }

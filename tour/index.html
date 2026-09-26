@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Experiência virtual — Haras Rio São José</title>
+  <meta name="description" content="Passeie pelo Haras Rio São José, em Poções (BA): portaria, avenidas, rede elétrica, água, lago e chácaras. Imagens reais de drone.">
+  <meta name="theme-color" content="#183827">
+  <meta property="og:title" content="Experiência virtual — Haras Rio São José">
+  <meta property="og:description" content="Passeie pelo chacreamento com imagens reais de drone e escolha a sua unidade.">
+  <meta property="og:image" content="img/capa.jpg">
+  <link rel="icon" href="../assets/favicon.png">
+  <link rel="apple-touch-icon" href="../assets/icon-512.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@photo-sphere-viewer/core@5.15.1/index.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@photo-sphere-viewer/markers-plugin@5.15.1/index.min.css">
+  <link rel="stylesheet" href="tour.css?v=2">
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.185.1/build/three.module.min.js",
+        "@photo-sphere-viewer/core": "https://cdn.jsdelivr.net/npm/@photo-sphere-viewer/core@5.15.1/index.module.js",
+        "@photo-sphere-viewer/markers-plugin": "https://cdn.jsdelivr.net/npm/@photo-sphere-viewer/markers-plugin@5.15.1/index.module.js"
+      }
+    }
+  </script>
+</head>
+<body>
+
+  <!-- ===================== ABERTURA ===================== -->
+  <section class="abertura" id="abertura" aria-labelledby="ab-titulo">
+    <video class="abertura__video" id="ab-video" autoplay muted loop playsinline preload="auto" poster="img/capa.jpg">
+      <source src="img/abertura.mp4" type="video/mp4">
+    </video>
+    <div class="abertura__veu" aria-hidden="true"></div>
+    <div class="abertura__conteudo">
+      <img class="abertura__logo" src="../assets/logo.png" alt="" width="84" height="84">
+      <p class="abertura__sobre">Chacreamento · Poções – BA</p>
+      <h1 class="abertura__titulo" id="ab-titulo">Experiência virtual<br><span>Haras Rio São José</span></h1>
+      <p class="abertura__texto">Passeie pelo Haras com imagens reais de drone: a portaria nova, as avenidas, a rede elétrica, a água chegando, o lago e as chácaras que já estão de pé.</p>
+      <div class="abertura__acoes">
+        <button class="bt bt--dourado bt--grande" id="ab-iniciar" type="button">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13l11-6.5z" fill="currentColor"/></svg>
+          Iniciar a experiência
+        </button>
+        <a class="bt bt--vidro" href="../#mapa">Ver o mapa de unidades</a>
+      </div>
+      <p class="abertura__dica">Arraste para olhar em volta · toque nos pontos dourados para saber mais</p>
+    </div>
+  </section>
+
+  <!-- ===================== TOUR ===================== -->
+  <main class="tour" id="tour" hidden>
+    <div class="tour__viewer" id="viewer" aria-label="Visualizador do tour virtual"></div>
+
+    <!-- Topo: marca + título da cena -->
+    <header class="topo">
+      <a class="topo__marca" href="../" aria-label="Haras Rio São José — página de unidades">
+        <img src="../assets/logo.png" alt="" width="40" height="40">
+      </a>
+      <div class="topo__cena" aria-live="polite">
+        <p class="topo__passo" id="cena-passo">Cena 1 de 1</p>
+        <h2 class="topo__titulo" id="cena-titulo">—</h2>
+      </div>
+      <div class="topo__acoes">
+        <button class="ic" id="bt-info" type="button" aria-label="Sobre esta cena" aria-pressed="true" title="Sobre esta cena">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 11v6M12 7.5v.5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
+        </button>
+        <button class="ic" id="bt-giro" type="button" aria-label="Mover o celular para olhar em volta" aria-pressed="false" title="Mover o celular" hidden>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="7" y="3" width="10" height="18" rx="2.2" fill="none" stroke="currentColor" stroke-width="2"/><path d="M3 9c-1.3 1.9-1.3 4.1 0 6M21 9c1.3 1.9 1.3 4.1 0 6" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/></svg>
+        </button>
+        <button class="ic" id="bt-passeio" type="button" aria-label="Passeio automático" aria-pressed="false" title="Passeio automático">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 12a8 8 0 1 1-2.34-5.66" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/><path d="M20 4v5h-5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <button class="ic" id="bt-cheia" type="button" aria-label="Tela cheia" title="Tela cheia">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4H4v5M15 4h5v5M20 15v5h-5M4 15v5h5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- Cartão da cena -->
+    <aside class="cartao" id="cartao" aria-labelledby="cartao-titulo">
+      <p class="cartao__sobre" id="cartao-sobre">—</p>
+      <h3 class="cartao__titulo" id="cartao-titulo">—</h3>
+      <p class="cartao__texto" id="cartao-texto">—</p>
+      <p class="cartao__selo" id="cartao-selo" hidden></p>
+      <button class="cartao__fechar" id="cartao-fechar" type="button" aria-label="Fechar">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
+      </button>
+    </aside>
+
+    <!-- Detalhe de um ponto de interesse -->
+    <div class="ponto" id="ponto" role="dialog" aria-modal="false" aria-labelledby="ponto-titulo" hidden>
+      <img class="ponto__foto" id="ponto-foto" alt="" hidden>
+      <div class="ponto__corpo">
+        <h3 class="ponto__titulo" id="ponto-titulo">—</h3>
+        <p class="ponto__texto" id="ponto-texto">—</p>
+        <button class="bt bt--verde" id="ponto-ir" type="button" hidden>Ir para esta vista</button>
+      </div>
+      <button class="ponto__fechar" id="ponto-fechar" type="button" aria-label="Fechar">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+
+    <!-- Setas -->
+    <button class="seta seta--ant" id="bt-ant" type="button" aria-label="Cena anterior">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </button>
+    <button class="seta seta--prox" id="bt-prox" type="button" aria-label="Próxima cena">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </button>
+
+    <!-- Rodapé: miniaturas + ações de venda -->
+    <footer class="base">
+      <nav class="miniaturas" id="miniaturas" aria-label="Cenas do tour"></nav>
+      <div class="base__acoes">
+        <a class="bt bt--dourado" href="../#mapa">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6l6-2 6 2 6-2v14l-6 2-6-2-6 2z M9 4v14 M15 6v14" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"/></svg>
+          <span class="so-pc">Escolher minha unidade</span><span class="so-cel">Escolher unidade</span>
+        </a>
+        <a class="bt bt--whats" id="bt-whats" href="https://wa.me/5511991468192?text=Ol%C3%A1!%20Fiz%20o%20passeio%20virtual%20do%20Haras%20Rio%20S%C3%A3o%20Jos%C3%A9%20e%20quero%20falar%20com%20o%20comercial." target="_blank" rel="noopener noreferrer">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2Zm0 1.8a8.2 8.2 0 1 1-4.2 15.3l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 0 1 12 3.8Zm-3.3 4.4c-.2 0-.5 0-.7.3-.3.3-1 1-1 2.4s1 2.8 1.2 3c.1.2 2 3.2 5 4.4 2.5 1 3 .8 3.5.7.5 0 1.7-.7 2-1.4.2-.7.2-1.2.1-1.4l-.5-.3-1.9-.9c-.3-.1-.5-.2-.7.2l-.9 1.1c-.2.2-.3.2-.6.1a6.8 6.8 0 0 1-3.4-3c-.2-.4 0-.5.2-.7l.4-.5.3-.5c.1-.2 0-.4 0-.5l-.9-2.1c-.2-.5-.4-.5-.6-.5h-.5Z"/></svg>
+          <span class="so-pc">Falar com o comercial</span><span class="so-cel">WhatsApp</span>
+        </a>
+      </div>
+    </footer>
+
+    <div class="dica-arraste" id="dica-arraste" aria-hidden="true">
+      <svg viewBox="0 0 64 64"><path d="M26 30V14a4 4 0 0 1 8 0v14l10 2.2a5 5 0 0 1 3.9 5.6L46 50H28L18 38a3.6 3.6 0 0 1 5.3-4.8z" fill="#fff" stroke="#183827" stroke-width="2.4" stroke-linejoin="round"/></svg>
+      <span id="dica-texto">Arraste para olhar em volta</span>
+    </div>
+    <div class="carregando" id="carregando" aria-hidden="true"><span></span></div>
+  </main>
+
+  <noscript><p style="padding:24px">Ative o JavaScript para ver a experiência virtual.</p></noscript>
+  <script type="module" src="tour.js?v=2"></script>
+</body>
+</html>

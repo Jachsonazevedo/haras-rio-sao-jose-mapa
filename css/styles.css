@@ -868,3 +868,14 @@ html.mapa-cheia .whats-flutuante { display: none; }
   box-shadow: 0 6px 20px rgba(0, 0, 0, .25); white-space: nowrap; pointer-events: none; opacity: 0; transition: opacity .2s, transform .2s;
 }
 .aviso-toque.is-visivel { opacity: 1; transform: translate(-50%, 0); }
+
+/* Entrada para a experiência virtual (tour/) */
+.faixa__tour { margin-top: 16px; min-height: 50px; padding: 0 22px; }
+.faixa__tour svg { width: 18px; height: 18px; }
+
+/* Rosa dos ventos do mapa 3D (N, L, S, O) */
+.rosa3d { position: absolute; z-index: 6; right: 14px; bottom: 14px; width: 74px; height: 74px; padding: 0; border: 0; background: none; cursor: pointer; filter: drop-shadow(0 4px 10px rgba(24, 56, 39, .28)); }
+.rosa3d svg { width: 100%; height: 100%; display: block; transition: transform .08s linear; }
+.painel.is-aberto ~ .rosa3d { opacity: 0; pointer-events: none; }
+@media (max-width: 720px) { .rosa3d { width: 58px; height: 58px; right: auto; bottom: auto; left: 12px; top: 112px; } }
+@media (min-width: 900px) { .mapa:has(.painel.is-aberto) .rosa3d { right: 392px; } }

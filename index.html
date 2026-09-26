@@ -18,7 +18,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
-  <link rel="stylesheet" href="css/styles.css?v=20260924f">
+  <link rel="stylesheet" href="css/styles.css?v=20260926a">
 
   <!-- Planta 3D: Three.js (r160) pelo CDN jsDelivr, sem build. Sem WebGL, ou com ?2d=1, fica o mapa SVG. -->
   <link rel="modulepreload" href="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.min.js" crossorigin>
@@ -53,6 +53,7 @@
       </span>
     </a>
     <nav class="topo__nav" aria-label="Seções">
+      <a href="tour/">Passeio virtual</a>
       <a href="#mapa">Mapa</a>
       <a href="#guia">Mapa-guia</a>
       <a href="#veja-do-alto">Vídeo 360°</a>
@@ -71,6 +72,10 @@
           <p class="faixa__sobre">Chacreamento · Poções – BA</p>
           <h1 class="faixa__titulo" id="hero-titulo">Terrenos a partir de 2.000 m² para a sua chácara rural, a menos de dez minutos do centro de Poções.</h1>
           <p class="faixa__sub">Entrada facilitada e até 140 meses para pagar.</p>
+          <a class="btn btn--dourado faixa__tour" href="tour/">
+            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M8 5.5v13l11-6.5z" fill="currentColor"/></svg>
+            Faça o passeio virtual pelo Haras
+          </a>
         </div>
         <dl class="numeros numeros--faixa" aria-label="Números do chacreamento">
           <div class="numeros__item"><dd id="h-area">—</dd><dt>de área total</dt></div>
@@ -326,10 +331,10 @@
         <h2 class="secao__titulo" id="video-titulo">Veja do alto</h2>
         <p class="secao__texto">Sobrevoo em 360° do chacreamento, para você se localizar antes de escolher a sua unidade.</p>
         <div class="video__quadro" id="video-quadro">
-          <video id="video-360" class="video__player" controls playsinline preload="metadata" poster="assets/video-360-poster.jpg?v=20260924f"
+          <video id="video-360" class="video__player" controls playsinline preload="metadata" poster="assets/video-360-poster.jpg?v=20260926a"
                  aria-label="Vídeo 360° do Haras Rio São José, visto do alto">
-            <source src="assets/video-360-1080.mp4?v=20260924f" type="video/mp4">
-            Seu navegador não reproduz vídeo. <a href="assets/video-360-1080.mp4?v=20260924f">Baixe o vídeo 360°</a>.
+            <source src="assets/video-360-1080.mp4?v=20260926a" type="video/mp4">
+            Seu navegador não reproduz vídeo. <a href="assets/video-360-1080.mp4?v=20260926a">Baixe o vídeo 360°</a>.
           </video>
           <button class="video__play" id="video-play" type="button" aria-label="Assistir ao vídeo 360°">
             <span class="video__icone" aria-hidden="true">
@@ -401,7 +406,7 @@
     </div>
   </footer>
 
-  <script src="js/app.js?v=20260924f" defer></script>
-  <script type="module" src="js/mapa3d.js?v=20260924f" onerror="window.dispatchEvent(new CustomEvent('haras:3d-falhou'))"></script>
+  <script src="js/app.js?v=20260926a" defer></script>
+  <script type="module" src="js/mapa3d.js?v=20260926a" onerror="window.dispatchEvent(new CustomEvent('haras:3d-falhou'))"></script>
 </body>
 </html>

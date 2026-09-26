@@ -1,0 +1,58 @@
+{
+ "video": "img/voo-1080.mp4",
+ "video_movel": "img/voo-720.mp4",
+ "capa": "img/voo-mini.jpg",
+ "duracao": 216,
+ "capitulos": [
+  {
+   "t": 0,
+   "titulo": "Portaria nova",
+   "texto": "A entrada revitalizada, pela Estrada de Duas Vendas."
+  },
+  {
+   "t": 30,
+   "titulo": "Avenidas e rede elétrica",
+   "texto": "Avenidas cascalhadas com a rede elétrica ao lado."
+  },
+  {
+   "t": 46,
+   "titulo": "Rede de água",
+   "texto": "A tubulação da rede-tronco sendo enterrada ao longo das avenidas."
+  },
+  {
+   "t": 64,
+   "titulo": "Pelas avenidas",
+   "texto": "O Haras de ponta a ponta, com a mata nativa em volta."
+  },
+  {
+   "t": 82,
+   "titulo": "Base de reservatório",
+   "texto": "Um dos reservatórios do sistema de água, em construção."
+  },
+  {
+   "t": 98,
+   "titulo": "Chácaras habitadas",
+   "texto": "Famílias que já construíram e moram no Haras."
+  },
+  {
+   "t": 114,
+   "titulo": "Reservatórios e caixa d'água",
+   "texto": "Bases dos reservatórios e a caixa d'água do sistema."
+  },
+  {
+   "t": 128,
+   "titulo": "Glebas e chácaras",
+   "texto": "As glebas demarcadas, lotes a partir de 2.000 m²."
+  },
+  {
+   "t": 158,
+   "titulo": "Vida no Haras",
+   "texto": "Casas, pomares e cercas: o Haras já tem vida."
+  },
+  {
+   "t": 188,
+   "titulo": "De volta à portaria",
+   "texto": "Fim do voo. Escolha a sua unidade no mapa."
+  }
+ ]
+}

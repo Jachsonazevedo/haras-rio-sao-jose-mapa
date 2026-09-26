@@ -205,3 +205,19 @@ Link direto para um lote: `https://jachsonazevedo.github.io/haras-rio-sao-jose-m
 Desde a rodada 4 o mapa interativo é desenhado em projeção oblíqua (`<g id="mundo-3d" transform="matrix(1 0 0.26 0.74 0 0)">`): a geometria real em metros fica nessa camada e recebe o relevo; rótulos, placas, árvores, ícones e marcadores ficam em camadas planas posicionadas pelo JS com a mesma projeção (`proj()` em `js/app.js`), por isso não distorcem. `scripts/decorar.py` (chamado no fim de `gerar_dados.py`) grava em `data/lotes.json` o contorno do chão (`areas[tipo=imovel]`) e o bloco `decor`: árvores (`[x, y, tipo 1-3, escala]`), a Estrada de Duas Vendas rumo ao norte (Poções), a placa "Poções" e os ícones da área de lazer (`decor.lazer`, ids de `pontos.json`), que aparecem quando o zoom deixa a área de lazer com ≥ 200 px de largura. Os lotes seguem coloridos por status em qualquer zoom.
 
 `scripts/gerar_mapa_guia.py` gera a versão estática para compartilhar (`assets/mapa-guia.svg` e `assets/mapa-guia.png`, 2000×900), com legenda numerada e detalhe ampliado da área de lazer. Rode depois de `gerar_dados.py`.
+
+## Experiência virtual (`tour/`, desde 26/09/2026)
+
+Passeio pelo Haras "na pegada" dos tours 360° de empreendimentos, feito com **material real**: fotos e vídeo de drone (DJI Mini 2) de 24–25/09/2026.
+Publicado em `…/haras-rio-sao-jose-mapa/tour/` e ligado ao app pelo menu ("Passeio virtual") e pelo botão da faixa de abertura.
+
+| Arquivo | Papel |
+|---|---|
+| `tour/index.html`, `tour/tour.css`, `tour/tour.js` | A experiência: abertura com vídeo, visualizador (Photo Sphere Viewer 5.15.1 + three 0.185.1 via import map do jsDelivr, sem build), pontos de interesse, miniaturas, setas, passeio automático, tela cheia, "Voo pelo Haras", WhatsApp e link para o mapa de unidades. |
+| `tour/cenas.json` | Cenas (texto, imagem, recorte, limites do olhar, pontos) e o voo. **Gerado** — não editar à mão. |
+| `scripts/preparar_tour.py` | Lista de cenas (foto, horizonte, textos, pontos em pixels da foto) → reprojeta cada foto para um recorte esférico na geometria da câmera (73,7° × 45,7°, inclinação pelo horizonte) e grava `tour/img/*.jpg` + `tour/cenas.json`. |
+| `tour/img/abertura.mp4`, `voo-1080.mp4`, `voo-720.mp4`, `voo.json` | Vídeo da abertura (volta na portaria) e o "Voo pelo Haras" (10 trechos do vídeo de 10 min, com capítulos). |
+
+Como funciona: a foto do drone não é 360°, então ela vira um **recorte** da esfera e o olhar fica preso à área da foto (limites em `cenas.json`); arrastar dá a sensação de olhar em volta a partir do ponto em que o drone estava. **Quando houver fotos 360° de verdade** (modo Pano → Esfera do drone, arquivo equirretangular 2:1), basta incluir a cena no script com `esfera=True`: ela entra inteira, sem limites.
+
+Atualizar: editar `CENAS` em `scripts/preparar_tour.py` → `python scripts/preparar_tour.py` → commit/push. Regras: só itens do contrato; nada de processo; nomes de clientes nunca.

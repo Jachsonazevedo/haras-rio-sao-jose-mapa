@@ -1,0 +1,370 @@
+// Experiência virtual — Haras Rio São José
+// Photo Sphere Viewer 5 (CDN, sem build). Cenas em cenas.json (geradas por scripts/preparar_tour.py).
+// Fotos de drone reprojetadas como recortes esféricos: o olhar fica limitado à área da foto.
+// Uma cena com "esfera": true (foto 360° 2:1) entra inteira, sem limites.
+import { Viewer } from '@photo-sphere-viewer/core';
+import { MarkersPlugin } from '@photo-sphere-viewer/markers-plugin';
+
+const $ = (s) => document.querySelector(s);
+const RAD = Math.PI / 180;
+const MOVEL = window.matchMedia('(max-width: 720px)').matches;
+const MENOS_MOVIMENTO = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+const el = {
+  abertura: $('#abertura'), iniciar: $('#ab-iniciar'), tour: $('#tour'), viewer: $('#viewer'),
+  passo: $('#cena-passo'), titulo: $('#cena-titulo'),
+  cartao: $('#cartao'), cSobre: $('#cartao-sobre'), cTitulo: $('#cartao-titulo'), cTexto: $('#cartao-texto'), cSelo: $('#cartao-selo'), cFechar: $('#cartao-fechar'),
+  ponto: $('#ponto'), pFoto: $('#ponto-foto'), pTitulo: $('#ponto-titulo'), pTexto: $('#ponto-texto'), pIr: $('#ponto-ir'), pFechar: $('#ponto-fechar'),
+  ant: $('#bt-ant'), prox: $('#bt-prox'), info: $('#bt-info'), passeio: $('#bt-passeio'), cheia: $('#bt-cheia'),
+  minis: $('#miniaturas'), carregando: $('#carregando'), giro: $('#bt-giro'), dica: $('#dica-arraste'), dicaTexto: $('#dica-texto'),
+};
+
+const ICONE_INFO = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 10.5v6.5M12 7v.6" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></svg>';
+
+let dados = null, viewer = null, markers = null, atual = -1, trocando = false;
+const passeio = { ativo: false, dir: 1, t: 0, parado: 0, raf: 0 };
+
+// ---------------------------------------------------------------- utilidades
+const norm = (a) => { while (a > Math.PI) a -= 2 * Math.PI; while (a < -Math.PI) a += 2 * Math.PI; return a; };
+const clamp = (v, a, b) => (a > b ? (a + b) / 2 : Math.min(b, Math.max(a, v)));
+const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+
+function cenaDoHash() {
+  const id = decodeURIComponent(location.hash.replace('#', ''));
+  const i = dados.cenas.findIndex((c) => c.id === id);
+  return i >= 0 ? i : 0;
+}
+
+// ---------------------------------------------------------------- limites do olhar (fotos parciais)
+function limites() {
+  const c = dados.cenas[atual];
+  if (!c || c.esfera || !viewer) return null;
+  return c.limites;
+}
+function ajustarFovMaximo() {
+  const L = limites();
+  if (!L) { viewer.setOptions({ maxFov: 90, minFov: 30 }); return; }
+  const altura = L.pitchMax - L.pitchMin, largura = L.yawMax - L.yawMin;
+  const porLargura = viewer.dataHelper.hFovToVFov(largura);
+  const maxV = Math.max(20, Math.min(altura, porLargura) * 0.98);
+  const z = viewer.getZoomLevel();
+  viewer.setOptions({ maxFov: maxV, minFov: Math.min(24, maxV * 0.6) });
+  // o PSV só recalcula o campo de visão quando o nível de zoom muda
+  viewer.zoom(z > 0.5 ? z - 0.5 : z + 0.5); viewer.zoom(z);
+}
+let corrigindo = false;
+function prender() {
+  const L = limites();
+  if (!L || corrigindo) return;
+  const pos = viewer.getPosition();
+  const hH = viewer.state.hFov / 2, hV = viewer.state.vFov / 2;
+  const yaw = norm(pos.yaw) / RAD, pitch = pos.pitch / RAD;
+  const y2 = clamp(yaw, L.yawMin + hH, L.yawMax - hH);
+  const p2 = clamp(pitch, L.pitchMin + hV, L.pitchMax - hV);
+  if (Math.abs(y2 - yaw) > 0.01 || Math.abs(p2 - pitch) > 0.01) {
+    corrigindo = true;
+    viewer.rotate({ yaw: y2 * RAD, pitch: p2 * RAD });
+    corrigindo = false;
+  }
+}
+
+// ---------------------------------------------------------------- passeio automático
+function lacoPasseio(t) {
+  passeio.raf = requestAnimationFrame(lacoPasseio);
+  if (!passeio.ativo || trocando || !viewer || document.hidden) { passeio.t = t; return; }
+  const dt = Math.min(0.05, (t - (passeio.t || t)) / 1000); passeio.t = t;
+  if (t < passeio.parado) return;
+  const c = dados.cenas[atual];
+  const pos = viewer.getPosition();
+  const vel = 2.2 * RAD; // graus por segundo
+  if (c.esfera) { viewer.rotate({ yaw: pos.yaw + vel * dt, pitch: pos.pitch }); return; }
+  const L = c.limites, hH = viewer.state.hFov / 2;
+  const min = (L.yawMin + hH) * RAD, max = (L.yawMax - hH) * RAD;
+  let yaw = norm(pos.yaw) + passeio.dir * vel * dt;
+  if (max - min < 2 * RAD) {
+    // foto quase do tamanho da tela: não há para onde girar; fica ~10 s e segue
+    passeio.fim = (passeio.fim || 0) + dt;
+    if (passeio.fim > 10) irPara((atual + 1) % dados.cenas.length);
+    return;
+  }
+  if (yaw >= max) { yaw = max; passeio.dir = -1; passeio.voltas = (passeio.voltas || 0) + 1; }
+  if (yaw <= min) { yaw = min; passeio.dir = 1; passeio.voltas = (passeio.voltas || 0) + 1; }
+  corrigindo = true; viewer.rotate({ yaw, pitch: pos.pitch }); corrigindo = false;
+  // depois de ida e volta (ou ~14 s numa cena estreita), segue para a próxima cena
+  if ((passeio.voltas || 0) >= 2) irPara((atual + 1) % dados.cenas.length);
+}
+function definirPasseio(sim) {
+  passeio.ativo = sim;
+  el.passeio.setAttribute('aria-pressed', String(sim));
+  el.passeio.title = sim ? 'Pausar o passeio automático' : 'Passeio automático';
+}
+function interagiu() { if (passeio.ativo) definirPasseio(false); esconderDica(); }
+
+// ---------------------------------------------------------------- dica de arrastar (primeira visita)
+let dicaT = 0;
+function mostrarDica() {
+  let vista = false; try { vista = localStorage.getItem('haras-tour-dica') === '1'; } catch (_) {}
+  if (vista || MENOS_MOVIMENTO) return;
+  const emPe = window.innerHeight > window.innerWidth;
+  el.dicaTexto.textContent = MOVEL ? (emPe ? 'Arraste para olhar em volta. Deite o celular para ver mais, ou use o botão do celular e mova o aparelho.' : 'Arraste para olhar em volta, ou use o botão do celular e mova o aparelho.') : 'Arraste para olhar em volta';
+  el.dica.classList.add('is-visivel');
+  dicaT = setTimeout(esconderDica, 7000);
+}
+function esconderDica() {
+  if (!el.dica.classList.contains('is-visivel')) return;
+  clearTimeout(dicaT); el.dica.classList.remove('is-visivel');
+  try { localStorage.setItem('haras-tour-dica', '1'); } catch (_) {}
+}
+
+// ---------------------------------------------------------------- mover o celular (giroscópio), sem sair da foto
+const giro = { ativo: false, ref: null };
+function anguloTela() { return (screen.orientation && screen.orientation.angle) || window.orientation || 0; }
+function aoOrientar(e) {
+  if (!giro.ativo || !viewer || trocando || e.alpha == null) return;
+  const ang = anguloTela();
+  const incl = ang === 90 ? -e.gamma : ang === -90 || ang === 270 ? e.gamma : e.beta;   // inclinar para frente/trás
+  if (!giro.ref) { const p = viewer.getPosition(); giro.ref = { a: e.alpha, i: incl, yaw: p.yaw, pitch: p.pitch }; return; }
+  let da = e.alpha - giro.ref.a; while (da > 180) da -= 360; while (da < -180) da += 360;
+  const alvo = { yaw: giro.ref.yaw - da * RAD, pitch: giro.ref.pitch + (incl - giro.ref.i) * RAD };
+  viewer.rotate(alvo);
+  prender();
+  // bateu na borda da foto: reancora, para voltar a mexer assim que o celular volta
+  const p = viewer.getPosition();
+  if (Math.abs(norm(p.yaw - alvo.yaw)) > 0.002 || Math.abs(p.pitch - alvo.pitch) > 0.002) giro.ref = { a: e.alpha, i: incl, yaw: p.yaw, pitch: p.pitch };
+}
+async function alternarGiro() {
+  if (!giro.ativo) {
+    try {
+      if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
+        const r = await DeviceOrientationEvent.requestPermission();   // iPhone pede autorização
+        if (r !== 'granted') return;
+      }
+    } catch (_) { return; }
+    interagiu();
+    giro.ativo = true; giro.ref = null;
+    window.addEventListener('deviceorientation', aoOrientar);
+  } else {
+    giro.ativo = false;
+    window.removeEventListener('deviceorientation', aoOrientar);
+  }
+  el.giro.setAttribute('aria-pressed', String(giro.ativo));
+}
+
+// ---------------------------------------------------------------- cenas
+function marcadores(c) {
+  return (c.pontos || []).map((p) => ({
+    id: p.id,
+    position: { yaw: p.yaw * RAD, pitch: p.pitch * RAD },
+    html: `<span class="hs" role="button" tabindex="0" aria-label="${esc(p.titulo)}"><span class="hs__alvo">${ICONE_INFO}</span><span class="hs__rot">${esc(p.titulo)}</span></span>`,
+    anchor: 'center left',
+    data: p,
+  }));
+}
+
+function mostrarCena(c, i) {
+  const n = dados.cenas.length;
+  el.passo.textContent = `${c.sobre} · ${i + 1} de ${n}`;
+  el.titulo.textContent = c.titulo;
+  el.cSobre.textContent = c.sobre;
+  el.cTitulo.textContent = c.titulo;
+  el.cTexto.textContent = c.texto;
+  el.cSelo.hidden = !!c.esfera;
+  el.cSelo.textContent = c.esfera ? '' : 'Foto real de drone · arraste para olhar em volta';
+  document.title = `${c.titulo} — Experiência virtual Haras Rio São José`;
+  el.minis.querySelectorAll('.mini[data-i]').forEach((b) => {
+    const ativa = Number(b.dataset.i) === i;
+    b.classList.toggle('is-ativa', ativa);
+    b.setAttribute('aria-current', ativa ? 'true' : 'false');
+    if (ativa) b.scrollIntoView({ block: 'nearest', inline: 'center', behavior: MENOS_MOVIMENTO ? 'auto' : 'smooth' });
+  });
+  fecharPonto();
+  history.replaceState(null, '', `#${c.id}`);
+}
+
+async function irPara(i, primeira = false) {
+  if (!dados || trocando || (i === atual && !primeira)) return;
+  const c = dados.cenas[i];
+  trocando = true; passeio.voltas = 0; passeio.fim = 0; passeio.dir = 1; giro.ref = null;
+  el.carregando.classList.add('is-ativo');
+  atual = i;
+  mostrarCena(c, i);
+  const inicio = { yaw: (c.inicio?.yaw || 0) * RAD, pitch: (c.inicio?.pitch || 0) * RAD };
+  try {
+    markers.clearMarkers();
+    // já entra com o campo de visão que cabe na foto nova (sem "pular" depois da transição)
+    ajustarFovMaximo();
+    if (!primeira) await viewer.setPanorama(c.imagem, {
+      panoData: c.esfera ? undefined : c.pano,
+      position: inicio, zoom: 0, showLoader: false,
+      transition: MENOS_MOVIMENTO ? false : { speed: 1100, rotation: false, effect: 'fade' },
+    });
+    ajustarFovMaximo();
+    viewer.zoom(0);
+    // começa pelo lado esquerdo da foto, para o passeio correr até a direita
+    if (!c.esfera && passeio.ativo) {
+      const L = c.limites; const hH = viewer.state.hFov / 2;
+      viewer.rotate({ yaw: (L.yawMin + hH) * RAD, pitch: inicio.pitch });
+    }
+    prender();
+    markers.setMarkers(marcadores(c));
+    precarregar(i + 1);
+  } catch (e) {
+    console.error('[tour] falha ao abrir a cena', c.id, e);
+  } finally {
+    trocando = false;
+    el.carregando.classList.remove('is-ativo');
+    passeio.parado = performance.now() + 1200;
+  }
+}
+
+function precarregar(i) {
+  const c = dados.cenas[i % dados.cenas.length];
+  if (c) { const im = new Image(); im.decoding = 'async'; im.src = c.imagem; }
+}
+
+// ---------------------------------------------------------------- ponto de interesse
+function abrirPonto(p) {
+  interagiu();
+  el.pTitulo.textContent = p.titulo;
+  el.pTexto.textContent = p.texto;
+  el.pFoto.hidden = !p.foto;
+  if (p.foto) { el.pFoto.src = p.foto; el.pFoto.alt = p.titulo; }
+  el.pIr.hidden = !p.cena;
+  el.pIr.onclick = p.cena ? () => irPara(dados.cenas.findIndex((c) => c.id === p.cena)) : null;
+  el.ponto.hidden = false;
+  if (MOVEL) cartaoAberto(false);
+}
+function fecharPonto() { el.ponto.hidden = true; }
+function cartaoAberto(sim) {
+  el.cartao.classList.toggle('is-fechado', !sim);
+  el.info.setAttribute('aria-pressed', String(sim));
+}
+
+// ---------------------------------------------------------------- voo guiado (vídeo com capítulos)
+function abrirVoo() {
+  const v = dados.voo; if (!v) return;
+  interagiu();
+  const caixa = document.createElement('section');
+  caixa.className = 'voo'; caixa.setAttribute('aria-label', 'Voo guiado pelo Haras');
+  caixa.innerHTML = `
+    <video class="voo__video" playsinline controls autoplay preload="auto" poster="${esc(v.capa || '')}">
+      <source src="${esc(MOVEL && v.video_movel ? v.video_movel : v.video)}" type="video/mp4">
+    </video>
+    <div class="voo__legenda" aria-live="polite"><b></b><small></small></div>
+    <nav class="voo__capitulos" aria-label="Capítulos do voo"></nav>
+    <button class="ic voo__fechar" type="button" aria-label="Fechar o voo">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>
+    </button>`;
+  document.body.appendChild(caixa);
+  // no celular o voo abre em tela cheia e deitado (Android; no iPhone o próprio player assume)
+  if (MOVEL && caixa.requestFullscreen) {
+    caixa.requestFullscreen({ navigationUI: 'hide' }).then(() => screen.orientation?.lock?.('landscape')).catch(() => {});
+  }
+  const video = caixa.querySelector('video'), leg = caixa.querySelector('.voo__legenda'), nav = caixa.querySelector('.voo__capitulos');
+  const caps = v.capitulos.map((c, i) => {
+    const b = document.createElement('button'); b.type = 'button'; b.className = 'cap'; b.textContent = c.titulo;
+    b.addEventListener('click', () => { video.currentTime = c.t + 0.05; video.play().catch(() => {}); });
+    nav.appendChild(b); return b;
+  });
+  let ativo = -1;
+  const atualizar = () => {
+    let k = 0; for (let i = 0; i < v.capitulos.length; i++) if (video.currentTime >= v.capitulos[i].t) k = i;
+    if (k === ativo) return; ativo = k;
+    const c = v.capitulos[k];
+    leg.querySelector('b').textContent = c.titulo; leg.querySelector('small').textContent = c.texto || '';
+    caps.forEach((b, i) => b.classList.toggle('is-ativo', i === k));
+    caps[k].scrollIntoView({ block: 'nearest', inline: 'center', behavior: 'smooth' });
+  };
+  video.addEventListener('timeupdate', atualizar); atualizar();
+  const fechar = () => {
+    video.pause(); caixa.remove(); document.removeEventListener('keydown', tecla);
+    if (document.fullscreenElement) document.exitFullscreen().catch(() => {});
+    try { screen.orientation?.unlock?.(); } catch (_) {}
+  };
+  const tecla = (e) => { if (e.key === 'Escape') fechar(); };
+  caixa.querySelector('.voo__fechar').addEventListener('click', fechar);
+  video.addEventListener('ended', fechar);
+  document.addEventListener('keydown', tecla);
+}
+
+// ---------------------------------------------------------------- interface
+function montarMiniaturas() {
+  if (dados.voo) {
+    const b = document.createElement('button'); b.type = 'button'; b.className = 'mini mini--voo';
+    b.innerHTML = `<img src="${esc(dados.voo.capa)}" alt="" decoding="async"><span>Voo pelo Haras</span>`;
+    b.addEventListener('click', abrirVoo); el.minis.appendChild(b);
+  }
+  dados.cenas.forEach((c, i) => {
+    const b = document.createElement('button'); b.type = 'button'; b.className = 'mini'; b.dataset.i = i;
+    b.innerHTML = `<img src="${esc(c.mini)}" alt="" decoding="async"><span>${esc(c.titulo)}</span>`;
+    b.setAttribute('aria-label', `Ir para: ${c.titulo}`);
+    b.addEventListener('click', () => { interagiu(); irPara(i); });
+    el.minis.appendChild(b);
+  });
+}
+
+function ligarEventos() {
+  el.ant.addEventListener('click', () => { interagiu(); irPara((atual - 1 + dados.cenas.length) % dados.cenas.length); });
+  el.prox.addEventListener('click', () => { interagiu(); irPara((atual + 1) % dados.cenas.length); });
+  el.info.addEventListener('click', () => { cartaoAberto(el.cartao.classList.contains('is-fechado')); if (MOVEL) fecharPonto(); });
+  el.cFechar.addEventListener('click', () => cartaoAberto(false));
+  el.pFechar.addEventListener('click', fecharPonto);
+  el.giro.hidden = !(MOVEL && 'DeviceOrientationEvent' in window);
+  el.giro.addEventListener('click', alternarGiro);
+  el.passeio.addEventListener('click', () => { definirPasseio(!passeio.ativo); passeio.parado = 0; });
+  el.cheia.addEventListener('click', () => {
+    if (document.fullscreenElement) document.exitFullscreen().catch(() => {});
+    else (document.documentElement.requestFullscreen?.({ navigationUI: 'hide' }) || Promise.resolve()).catch(() => {});
+  });
+  // qualquer toque/arraste no viewer pausa o passeio
+  el.viewer.addEventListener('pointerdown', interagiu, { passive: true });
+  el.viewer.addEventListener('wheel', interagiu, { passive: true });
+  document.addEventListener('keydown', (e) => {
+    if (e.target.closest('input, textarea')) return;
+    if (e.key === 'ArrowRight' && e.altKey) { interagiu(); irPara((atual + 1) % dados.cenas.length); }
+    if (e.key === 'ArrowLeft' && e.altKey) { interagiu(); irPara((atual - 1 + dados.cenas.length) % dados.cenas.length); }
+    if (e.key === 'Escape') fecharPonto();
+  });
+  window.addEventListener('hashchange', () => irPara(cenaDoHash()));
+  cartaoAberto(!MOVEL);
+}
+
+async function iniciarTour() {
+  el.abertura.classList.add('is-saindo');
+  el.tour.hidden = false;
+  setTimeout(() => { const v = $('#ab-video'); if (v) v.pause(); el.abertura.hidden = true; }, 750);
+  if (viewer) return;
+  const c0 = dados.cenas[cenaDoHash()];
+  viewer = new Viewer({
+    container: el.viewer,
+    panorama: c0.imagem, panoData: c0.esfera ? undefined : c0.pano,
+    defaultYaw: (c0.inicio?.yaw || 0) * RAD, defaultPitch: (c0.inicio?.pitch || 0) * RAD,
+    navbar: false,
+    loadingTxt: '', loadingImg: null,
+    defaultZoomLvl: 0, maxFov: 90, minFov: 20,
+    mousewheelCtrlKey: false, touchmoveTwoFingers: false, moveInertia: true,
+    plugins: [[MarkersPlugin, { markers: [] }]],
+  });
+  markers = viewer.getPlugin(MarkersPlugin);
+  window.__tour = { viewer, markers, get cena() { return dados.cenas[atual]; } };
+  markers.addEventListener('select-marker', ({ marker }) => abrirPonto(marker.data));
+  viewer.addEventListener('position-updated', prender);
+  viewer.addEventListener('zoom-updated', prender);
+  viewer.addEventListener('size-updated', () => { ajustarFovMaximo(); prender(); });
+  viewer.addEventListener('ready', () => { irPara(dados.cenas.indexOf(c0), true); setTimeout(mostrarDica, 900); passeio.raf = requestAnimationFrame(lacoPasseio); }, { once: true });
+  definirPasseio(passeio.ativo);
+}
+
+async function carregar() {
+  const r = await fetch('cenas.json?v=2', { cache: 'no-cache' });
+  dados = await r.json();
+  montarMiniaturas();
+  ligarEventos();
+  el.iniciar.addEventListener('click', iniciarTour);
+  if (location.hash.length > 1) iniciarTour();   // link direto para uma cena pula a abertura
+}
+
+carregar().catch((e) => {
+  console.error('[tour] não carregou', e);
+  el.abertura.querySelector('.abertura__dica').textContent = 'Não foi possível carregar a experiência. Atualize a página.';
+});
