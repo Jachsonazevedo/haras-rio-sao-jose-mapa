@@ -27,7 +27,7 @@ const ICONE_IR = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h13M
 const ICONE_FOTO = '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="6" width="18" height="13" rx="2.5" fill="none" stroke="currentColor" stroke-width="2.2"/><circle cx="12" cy="12.5" r="3.4" fill="none" stroke="currentColor" stroke-width="2.2"/><path d="M8 6l1.5-2h5L16 6" fill="none" stroke="currentColor" stroke-width="2.2"/></svg>';
 const WHATS = '5511991468192';
 let dados = null, viewer = null, markers = null, atual = -1, trocando = false;
-const passeio = { ativo: !MENOS_MOVIMENTO, dir: 1, t: 0, parado: 0, raf: 0 };
+const passeio = { ativo: false, dir: 1, t: 0, parado: 0, raf: 0 };
 let lotesDados = null, loteSel = null;
 
 // ---------------------------------------------------------------- utilidades
@@ -49,7 +49,7 @@ function limites() {
 }
 function ajustarFovMaximo() {
   const L = limites();
-  if (!L) { viewer.setOptions({ maxFov: 90, minFov: 30 }); return; }
+  if (!L) { viewer.setOptions({ maxFov: 120, minFov: 12 }); return; }
   const altura = L.pitchMax - L.pitchMin, largura = L.yawMax - L.yawMin;
   const porLargura = viewer.dataHelper.hFovToVFov(largura);
   const maxV = Math.max(20, Math.min(altura, porLargura) * 0.98);
@@ -258,7 +258,7 @@ async function irPara(i, primeira = false) {
   el.carregando.classList.add('is-ativo');
   atual = i;
   mostrarCena(c, i);
-  const inicio = { yaw: (c.inicio?.yaw || 0) * RAD, pitch: (c.inicio?.pitch || 0) * RAD };
+  const inicio = posInicial(c);
   try {
     markers.clearMarkers();
     // já entra com o campo de visão que cabe na foto nova (sem "pular" depois da transição)
@@ -269,7 +269,11 @@ async function irPara(i, primeira = false) {
       transition: MENOS_MOVIMENTO ? false : { speed: 1100, rotation: false, effect: 'fade' },
     });
     ajustarFovMaximo();
-    viewer.zoom(0);
+    viewer.zoom(zoomInicial(c));
+    if (primeira || c.inicio?.pitch <= -80) viewer.rotate(inicio);
+    // no computador o cartão da cena fecha sozinho depois de alguns segundos (não cobre o mapa)
+    clearTimeout(irPara.tCartao);
+    if (!MOVEL) irPara.tCartao = setTimeout(() => cartaoAberto(false), 9000);
     // começa pelo lado esquerdo da foto, para o passeio correr até a direita
     if (!c.esfera && passeio.ativo) {
       const L = c.limites; const hH = viewer.state.hFov / 2;
@@ -285,6 +289,29 @@ async function irPara(i, primeira = false) {
     el.carregando.classList.remove('is-ativo');
     passeio.parado = performance.now() + 1200;
   }
+}
+
+// vista de cima (olhando para baixo): com o celular em pé a faixa do Haras fica na vertical (portaria embaixo);
+// com a tela deitada, na horizontal (portaria à esquerda)
+function posInicial(c) {
+  const p = c.inicio?.pitch || 0;
+  if (p <= -80) return { yaw: (innerHeight > innerWidth ? 90 : 0) * RAD, pitch: p * RAD };
+  return { yaw: (c.inicio?.yaw || 0) * RAD, pitch: p * RAD };
+}
+// zoom de abertura da vista de cima: o Haras (≈3,6 km de ponta a ponta) ocupa ~90% do lado maior da tela
+function zoomInicial(c) {
+  if (!c || !c.camera || (c.inicio?.pitch || 0) > -80) return 0;
+  const emPe = innerHeight > innerWidth;
+  const cheio = (2 * Math.atan((emPe ? 2250 : 1900) / c.camera.alt)) / RAD;   // comprimento do Haras + margem (em pé, sobra para as barras)
+  const vFov = emPe ? cheio : viewer.dataHelper.hFovToVFov(cheio);
+  const { maxFov, minFov } = viewer.config;
+  const f = Math.min(maxFov, Math.max(minFov, vFov));
+  return Math.max(0, Math.min(100, ((maxFov - f) / (maxFov - minFov)) * 100));
+}
+function verTudo() {
+  const c = dados.cenas[atual]; if (!c) return;
+  interagiu();
+  viewer.animate({ ...posInicial(c), zoom: zoomInicial(c), speed: '8rpm' }).catch?.(() => {});
 }
 
 function precarregar(i) {
@@ -401,6 +428,9 @@ function ligarEventos() {
   el.pFechar.addEventListener('click', fecharPonto);
   el.giro.hidden = !(MOVEL && 'DeviceOrientationEvent' in window);
   el.fotos.addEventListener('click', abrirFotos);
+  $('#zoom-mais').addEventListener('click', () => { interagiu(); viewer.animate({ zoom: Math.min(100, viewer.getZoomLevel() + 20), speed: 600 }).catch?.(() => {}); });
+  $('#zoom-menos').addEventListener('click', () => { interagiu(); viewer.animate({ zoom: Math.max(0, viewer.getZoomLevel() - 20), speed: 600 }).catch?.(() => {}); });
+  $('#ver-tudo').addEventListener('click', verTudo);
   el.giro.addEventListener('click', alternarGiro);
   el.passeio.addEventListener('click', () => { definirPasseio(!passeio.ativo); passeio.parado = 0; });
   el.cheia.addEventListener('click', () => {
@@ -429,10 +459,10 @@ async function iniciarTour() {
   viewer = new Viewer({
     container: el.viewer,
     panorama: c0.imagem, panoData: c0.esfera ? undefined : c0.pano,
-    defaultYaw: (c0.inicio?.yaw || 0) * RAD, defaultPitch: (c0.inicio?.pitch || 0) * RAD,
+    defaultYaw: posInicial(c0).yaw, defaultPitch: posInicial(c0).pitch,
     navbar: false,
     loadingTxt: '', loadingImg: null,
-    defaultZoomLvl: 0, maxFov: 100, minFov: 20,
+    defaultZoomLvl: 0, maxFov: 120, minFov: 12, zoomSpeed: 1.6,
     mousewheelCtrlKey: false, touchmoveTwoFingers: false, moveInertia: true,
     plugins: [[MarkersPlugin, { markers: [] }]],
   });
@@ -450,7 +480,7 @@ async function iniciarTour() {
 }
 
 async function carregar() {
-  const r = await fetch('cenas.json?v=3', { cache: 'no-cache' });
+  const r = await fetch('cenas.json?v=4', { cache: 'no-cache' });
   dados = await r.json();
   montarMiniaturas();
   ligarEventos();

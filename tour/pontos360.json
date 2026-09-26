@@ -1,11 +1,21 @@
 [
  {
+  "id": "geral",
+  "x": 1400,
+  "z": 500,
+  "alt": 1450,
+  "yaw0": 90,
+  "pitch0": -90,
+  "largura": 8144
+ },
+ {
   "id": "portaria",
   "x": 330,
   "z": 380,
   "alt": 95,
   "yaw0": 90,
-  "pitch0": -24
+  "pitch0": -24,
+  "largura": 6144
  },
  {
   "id": "centro",
@@ -13,7 +23,8 @@
   "z": 430,
   "alt": 300,
   "yaw0": 90,
-  "pitch0": -36
+  "pitch0": -36,
+  "largura": 6144
  },
  {
   "id": "fundo",
@@ -21,7 +32,8 @@
   "z": 470,
   "alt": 230,
   "yaw0": 90,
-  "pitch0": -28
+  "pitch0": -28,
+  "largura": 6144
  },
  {
   "id": "lazer",
@@ -29,14 +41,7 @@
   "z": 830,
   "alt": 130,
   "yaw0": -150,
-  "pitch0": -30
- },
- {
-  "id": "alto",
-  "x": 1450,
-  "z": 520,
-  "alt": 1500,
-  "yaw0": 90,
-  "pitch0": -62
+  "pitch0": -30,
+  "largura": 6144
  }
 ]

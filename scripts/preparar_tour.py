@@ -174,6 +174,8 @@ def processar(c):
 # Coordenadas da planta (data/lotes.json, metros): x ao longo do Haras, z atravessado; alt = altura da câmera.
 # yaw0/pitch0 = para onde a vista abre (graus; yaw 0 = direção -z, cresce para +x).
 PONTOS360 = [
+    dict(id="geral", x=1400, z=500, alt=1450, yaw0=90, pitch0=-90, largura=8144, sobre="Visão geral", titulo="O Haras inteiro, visto de cima",
+         texto="Todo o empreendimento de uma vez: 57 glebas, as avenidas, a portaria e a área de preservação. Em verde, as unidades à venda. Aproxime com dois dedos (ou +), gire com o dedo e toque num lote para ver área e medidas."),
     dict(id="portaria", x=330, z=380, alt=95, yaw0=90, pitch0=-24, sobre="Chegada", titulo="Sobre a portaria",
          texto="Você está no alto, sobre a entrada do Haras. Gire com o dedo para olhar em volta e para baixo: em verde, as unidades à venda. Toque num lote para ver área e medidas."),
     dict(id="centro", x=1450, z=430, alt=300, yaw0=90, pitch0=-36, sobre="Vista aérea 360°", titulo="No meio das glebas",
@@ -182,8 +184,6 @@ PONTOS360 = [
          texto="As últimas glebas, junto à área de preservação ambiental (Reserva Legal e APP)."),
     dict(id="lazer", x=90, z=830, alt=130, yaw0=-150, pitch0=-30, sobre="Vista aérea 360°", titulo="Área de lazer e lago",
          texto="A área de lazer prevista no contrato, na parte baixa da faixa, e o lago natural na ponta."),
-    dict(id="alto", x=1450, z=520, alt=1500, yaw0=90, pitch0=-62, sobre="Vista aérea 360°", titulo="O Haras inteiro do alto",
-         texto="O chacreamento inteiro visto do alto: 57 glebas, avenidas Pau Ferro e Umbuzeiro, Ruas 1 a 12 e a área de preservação."),
 ]
 
 
@@ -200,8 +200,7 @@ def cenas_360():
     # (título, texto, ponto no chão, foto real, vista 360° ligada)
     info = [
         ("Portaria", "Portaria revitalizada na entrada, pela Estrada de Duas Vendas. Foto real de set/2026.", d["meta"]["entrada"], "img/foto-portaria-alto.jpg", "portaria"),
-        ("Área de lazer", "Área de lazer prevista no contrato: salão, piscina, quiosques, quadra de areia, banheiros, baias e fazendinha.", lazer.get("salao"), None, "lazer"),
-        ("Lago natural", "Lago natural na ponta da área de lazer.", cen(areas["lago"]["poly"]), "img/foto-lago.jpg", None),
+        ("Área de lazer e lago", "Área de lazer prevista no contrato (salão, piscina, quiosques, quadra de areia, banheiros, baias e fazendinha) e o lago natural na ponta. Foto real do lago.", lazer.get("salao"), "img/foto-lago.jpg", "lazer"),
         ("Área de preservação", "Reserva Legal e APP, preservadas.", cen(areas["reserva"]["poly"]), None, "fundo"),
     ]
     cenas = []
@@ -219,16 +218,9 @@ def cenas_360():
             pts.append({"id": f"{p['id']}-i{i}", "tipo": "info", "yaw": yaw, "pitch": pitch, "titulo": tit, "texto": tx, **extra})
         for q in PONTOS360:
             # setas só para as vistas que não têm ponto próprio (centro); as outras abrem pelo ponto (Portaria, Área de lazer, Área de preservação)
-            if q is p or q["id"] != "centro": continue
+            if q is p or q["id"] != "centro" or p["id"] == "geral": continue   # na vista geral, a seta cobriria o mapa
             yaw, pitch = esfera_yp(p, q["x"], q["z"])
             pts.append({"id": f"{p['id']}-ir-{q['id']}", "tipo": "cena", "cena": f"360-{q['id']}", "yaw": yaw, "pitch": pitch, "titulo": q["titulo"], "texto": ""})
-        lim = 1e9 if p["id"] == "alto" else 1300
-        for g in d["glebas"]:
-            gx, gz = g.get("label") or cen(g["poly"])
-            if math.hypot(gx - p["x"], gz - p["z"]) > lim: continue
-            yaw, pitch = esfera_yp(p, gx, gz)
-            if pitch > -9 and p["id"] != "alto": continue   # perto do horizonte os números se amontoam
-            pts.append({"id": f"{p['id']}-g{g['id']}", "tipo": "gleba", "yaw": yaw, "pitch": pitch, "titulo": f"Gleba {int(g['id'])}", "texto": ""})
         cenas.append({"id": f"360-{p['id']}", "sobre": p["sobre"], "titulo": p["titulo"], "texto": p["texto"], "esfera": True,
                       "imagem": f"img/esfera-{p['id']}.jpg", "mini": f"img/esfera-{p['id']}-mini.jpg",
                       "camera": {"x": p["x"], "z": p["z"], "alt": p["alt"]}, "inicio": {"yaw": p["yaw0"], "pitch": p["pitch0"]},
@@ -250,7 +242,7 @@ def fotos_reais():
 
 def main():
     os.makedirs(IMG, exist_ok=True)
-    json.dump([{k: p[k] for k in ("id", "x", "z", "alt", "yaw0", "pitch0")} for p in PONTOS360],
+    json.dump([{**{k: p[k] for k in ("id", "x", "z", "alt", "yaw0", "pitch0")}, "largura": p.get("largura", 6144)} for p in PONTOS360],
               open(os.path.join(SAIDA, "pontos360.json"), "w", encoding="utf-8"), indent=1)
     cenas = cenas_360()
     fotos = fotos_reais()

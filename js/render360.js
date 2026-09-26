@@ -7,7 +7,7 @@
         no console: await __r360.gerarTodas()
    ===================================================================== */
 import * as THREE from 'three';
-import { construirCena } from './cena3d.js?v=r360g';
+import { construirCena } from './cena3d.js?v=r360h';
 
 const $ = (s) => document.querySelector(s);
 const log = (t) => { $('#log').textContent += t + '\n'; };
@@ -50,12 +50,19 @@ $('#palco').appendChild(renderer.domElement);
 }
 
 // cubo → equirretangular (yaw 0 = direção -Z; yaw cresce para +X, igual ao Photo Sphere Viewer)
-const FACE = 2048;
-const alvoCubo = new THREE.WebGLCubeRenderTarget(FACE, { type: THREE.HalfFloatType, generateMipmaps: true, minFilter: THREE.LinearMipmapLinearFilter });
-const camCubo = new THREE.CubeCamera(1.5, 120000, alvoCubo);
-scene.add(camCubo);
+// um cubo por resolução (a vista geral usa faces maiores: é a que o cliente mais aproxima)
+const cubos = {};
+function cubo(face) {
+  if (!cubos[face]) {
+    const alvo = new THREE.WebGLCubeRenderTarget(face, { type: face > 2048 ? THREE.UnsignedByteType : THREE.HalfFloatType, generateMipmaps: true, minFilter: THREE.LinearMipmapLinearFilter });
+    const cam = new THREE.CubeCamera(1.5, 120000, alvo); scene.add(cam);
+    cubos[face] = { alvo, cam };
+  }
+  return cubos[face];
+}
+let camCubo = cubo(2048).cam;
 const matEqui = new THREE.ShaderMaterial({
-  uniforms: { env: { value: alvoCubo.texture } },
+  uniforms: { env: { value: cubo(2048).alvo.texture } },
   vertexShader: 'varying vec2 vUv; void main(){ vUv = uv; gl_Position = vec4(position.xy, 0.0, 1.0); }',
   fragmentShader: `uniform samplerCube env; varying vec2 vUv;
     void main(){
@@ -80,6 +87,8 @@ async function salvar(canvas, nome) {
 }
 
 async function gerar(p, { largura = 6144 } = {}) {
+  const cb = cubo(largura > 6144 ? 3072 : 2048);
+  camCubo = cb.cam; matEqui.uniforms.env.value = cb.alvo.texture;
   const alvo = new THREE.Vector3(p.x, p.alt, p.z);
   camCubo.position.copy(alvo);
   camCubo.updateMatrixWorld(true);
@@ -95,14 +104,14 @@ async function gerar(p, { largura = 6144 } = {}) {
   // miniatura 384×216 olhando para o ponto inicial
   const mini = document.createElement('canvas'); mini.width = 384; mini.height = 216;
   const W = renderer.domElement.width, H = renderer.domElement.height;
-  const cx = ((p.yaw0 || 0) / 360 + 0.5) * W, cy = (0.5 - (p.pitch0 || -30) / 180) * H;
+  const cx = ((p.yaw0 || 0) / 360 + 0.5) * W, cy = (0.5 - Math.max(-60, p.pitch0 || -30) / 180) * H;   // miniatura: no máximo 60° para baixo (no nadir a imagem é esticada)
   const sw = W * 0.2, sh = sw * 216 / 384;
   mini.getContext('2d').drawImage(renderer.domElement, cx - sw / 2, cy - sh / 2, sw, sh, 0, 0, 384, 216);
   await salvar(mini, `esfera-${p.id}-mini.jpg`);
 }
 
 async function gerarTodas() {
-  for (const p of pontos) { log(`gerando ${p.id}…`); await gerar(p); await new Promise((r) => setTimeout(r, 50)); }
+  for (const p of pontos) { log(`gerando ${p.id}…`); await gerar(p, { largura: p.largura || 6144 }); await new Promise((r) => setTimeout(r, 50)); }
   log('pronto.');
   return pontos.map((p) => p.id);
 }

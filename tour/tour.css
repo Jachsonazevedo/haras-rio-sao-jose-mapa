@@ -233,3 +233,18 @@ button { font: inherit; }
 .galeria__faixa figcaption { padding: 10px 4px 0; color: rgba(253, 250, 242, .9); font-size: .9rem; line-height: 1.45; }
 .galeria__faixa figcaption b { display: block; font-family: var(--fonte-titulo); font-size: 1.15rem; color: #fff; }
 @media (max-width: 720px) { .ponto { max-height: 62vh; overflow: auto; } }
+
+/* ---------- Zoom + / − / ver tudo ---------- */
+.zoom { position: absolute; z-index: 9; right: 14px; top: 50%; transform: translateY(-50%); display: flex; flex-direction: column; gap: 10px; }
+.ic--grande { width: 50px; height: 50px; }
+.ic--grande svg { width: 24px; height: 24px; }
+.seta--prox { right: 78px; }
+@media (max-width: 720px) {
+  .seta { display: none; }          /* no celular: miniaturas embaixo; a lateral fica para o zoom */
+  .zoom { right: 10px; top: 46%; }
+  .ic--grande { width: 48px; height: 48px; }
+}
+
+/* pinça com dois dedos = zoom do tour (não da página) */
+.tour, .tour__viewer, .psv-container, .psv-canvas-container, .psv-canvas { touch-action: none; }
+html, body { overscroll-behavior: none; }

@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
   <title>Experiência virtual — Haras Rio São José</title>
   <meta name="description" content="Passeie pelo Haras Rio São José, em Poções (BA): portaria, avenidas, rede elétrica, água, lago e chácaras. Imagens reais de drone.">
   <meta name="theme-color" content="#183827">
@@ -16,7 +16,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@photo-sphere-viewer/core@5.15.1/index.min.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@photo-sphere-viewer/markers-plugin@5.15.1/index.min.css">
-  <link rel="stylesheet" href="tour.css?v=3">
+  <link rel="stylesheet" href="tour.css?v=5">
   <script type="importmap">
     {
       "imports": {
@@ -39,7 +39,7 @@
       <img class="abertura__logo" src="../assets/logo.png" alt="" width="84" height="84">
       <p class="abertura__sobre">Chacreamento · Poções – BA</p>
       <h1 class="abertura__titulo" id="ab-titulo">Experiência virtual<br><span>Haras Rio São José</span></h1>
-      <p class="abertura__texto">Voe sobre o Haras em 360°: gire com o dedo, olhe para todos os lados e toque nos lotes verdes para ver área e medidas. E veja as fotos e o voo real de drone.</p>
+      <p class="abertura__texto">Veja o Haras inteiro de cima, aproxime com dois dedos, gire em 360° e toque nos lotes verdes para ver área e medidas. E veja as fotos e o voo real de drone.</p>
       <div class="abertura__acoes">
         <button class="bt bt--dourado bt--grande" id="ab-iniciar" type="button">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13l11-6.5z" fill="currentColor"/></svg>
@@ -47,7 +47,7 @@
         </button>
         <a class="bt bt--vidro" href="../#mapa">Ver o mapa de unidades</a>
       </div>
-      <p class="abertura__dica">Gire com o dedo · toque num lote verde · pontos dourados para saber mais</p>
+      <p class="abertura__dica">Dois dedos para aproximar · um dedo para girar · toque num lote verde</p>
     </div>
   </section>
 
@@ -108,6 +108,19 @@
       </button>
     </div>
 
+    <!-- Zoom (como no mapa de vendas) -->
+    <div class="zoom" role="group" aria-label="Aproximar ou afastar">
+      <button class="ic ic--grande" id="zoom-mais" type="button" aria-label="Aproximar" title="Aproximar">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></svg>
+      </button>
+      <button class="ic ic--grande" id="zoom-menos" type="button" aria-label="Afastar" title="Afastar">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></svg>
+      </button>
+      <button class="ic ic--grande" id="ver-tudo" type="button" aria-label="Ver o Haras inteiro" title="Ver tudo">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+    </div>
+
     <!-- Setas -->
     <button class="seta seta--ant" id="bt-ant" type="button" aria-label="Cena anterior">
       <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -139,6 +152,6 @@
   </main>
 
   <noscript><p style="padding:24px">Ative o JavaScript para ver a experiência virtual.</p></noscript>
-  <script type="module" src="tour.js?v=3"></script>
+  <script type="module" src="tour.js?v=7"></script>
 </body>
 </html>
