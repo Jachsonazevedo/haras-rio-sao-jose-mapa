@@ -409,7 +409,16 @@ function botaoSom() {
 }
 
 // o voo tem som próprio: o ambiente abaixa enquanto ele toca
-function somDoVoo(ativo) { som.voo = ativo; volumeSom(ativo ? 0.6 : 2); }
+function somDoVoo(ativo) { som.voo = ativo; volumeSom(ativo ? 0.6 : 2); if (!ativo) garantirSom(); }
+
+// No celular (principalmente iPhone), um vídeo com som interrompe o som ambiente e ele não volta
+// sozinho: religa ao fechar o filme/voo e em qualquer toque, se estiver parado.
+function garantirSom() {
+  if (!som.ligado || som.voo || som.filme) return;
+  if (!som.ctx || !som.fonte) { ligarSom(); return; }
+  if (som.ctx.state !== 'running') som.ctx.resume().then(() => volumeSom(1.5)).catch(() => {});
+  else volumeSom(1.5);
+}
 
 document.addEventListener('visibilitychange', () => {
   if (!document.hidden && som.fonte && som.ctx.state !== 'running') som.ctx.resume().catch(() => {});
@@ -439,7 +448,7 @@ function abrirFilme() {
   const fechar = () => {
     if (fechado) return; fechado = true;
     caixa.classList.add('is-saindo');
-    som.filme = false; volumeSom(3);
+    som.filme = false; volumeSom(3); garantirSom();
     setTimeout(() => { video.pause(); caixa.hidden = true; }, 950);
   };
   video.addEventListener('timeupdate', () => {
@@ -630,9 +639,10 @@ async function carregar() {
   });
   botaoSom();
   // link direto pula a abertura (sem toque): o som começa no primeiro toque na tela
-  const primeiroToque = () => { if (som.ligado && !som.fonte) ligarSom(); };
-  document.addEventListener('click', primeiroToque, { once: true });
-  document.addEventListener('touchend', primeiroToque, { once: true });
+  // todo toque confere se o som ambiente está tocando (o navegador só deixa religar num toque)
+  const aoTocar = () => { if (!som.ctx || !som.fonte || som.ctx.state !== 'running') garantirSom(); };
+  document.addEventListener('click', aoTocar, true);
+  document.addEventListener('touchend', aoTocar, true);
   if (location.hash.length > 1) iniciarTour();   // link direto para uma cena pula a abertura
 }
 
