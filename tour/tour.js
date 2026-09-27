@@ -522,7 +522,11 @@ function abrirVoo() {
   };
   video.addEventListener('timeupdate', atualizar); atualizar();
   somDoVoo(true);
+  // pássaros em 3D voando sobre o vídeo (araras, maritacas, canários-da-terra)
+  let pararPassaros = null, fechado = false;
+  import('./passaros.js?v=2').then((m) => { if (!fechado) pararPassaros = m.iniciarPassaros(video, caixa); }).catch((e) => console.warn('[tour] pássaros', e));
   const fechar = () => {
+    fechado = true; if (pararPassaros) pararPassaros();
     somDoVoo(false);
     video.pause(); caixa.remove(); document.removeEventListener('keydown', tecla);
     if (document.fullscreenElement) document.exitFullscreen().catch(() => {});
