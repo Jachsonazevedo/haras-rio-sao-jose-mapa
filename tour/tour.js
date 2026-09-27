@@ -433,7 +433,7 @@ function abrirFilme() {
   let atualF = -1, fechado = false;
   caixa.hidden = false;
   som.filme = true; volumeSom(0.3);
-  video.muted = !som.ligado;
+  video.muted = false;            // o filme sempre tenta tocar com som (o botão do tour vale só para o som ambiente)
   const fechar = () => {
     if (fechado) return; fechado = true;
     caixa.classList.add('is-saindo');
@@ -459,7 +459,12 @@ function abrirFilme() {
   video.addEventListener('ended', fechar);
   video.addEventListener('error', fechar);
   $('#filme-pular').addEventListener('click', fechar);
-  video.play().catch(() => { video.muted = true; video.play().catch(fechar); });
+  // se o navegador bloquear o som, toca mudo e mostra o botão "Ativar o som"
+  const botao = $('#filme-som');
+  const mostrarBotao = () => { botao.hidden = !video.muted; };
+  botao.addEventListener('click', () => { video.muted = false; video.play().catch(() => {}); mostrarBotao(); });
+  video.addEventListener('volumechange', mostrarBotao);
+  video.play().then(mostrarBotao).catch(() => { video.muted = true; mostrarBotao(); video.play().catch(fechar); });
   return true;
 }
 
@@ -595,7 +600,13 @@ async function carregar() {
   montarMiniaturas();
   ligarEventos();
   // pelo botão de abertura: filme com música (o tour carrega por trás) e depois o tour
-  el.iniciar.addEventListener('click', () => { iniciarTour(); abrirFilme(); });
+  el.iniciar.addEventListener('click', () => {
+    // ordem importa no celular: o play do filme (com som) tem de sair no mesmo instante do toque;
+    // o tour 3D, que é pesado, começa a carregar logo depois, por trás do filme
+    if (som.ligado) ligarSom();
+    const temFilme = abrirFilme();
+    setTimeout(iniciarTour, temFilme ? 120 : 0);
+  });
   botaoSom();
   // link direto pula a abertura (sem toque): o som começa no primeiro toque na tela
   const primeiroToque = () => { if (som.ligado && !som.fonte) ligarSom(); };

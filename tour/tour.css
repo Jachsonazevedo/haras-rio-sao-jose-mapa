@@ -280,3 +280,5 @@ html, body { overscroll-behavior: none; }
 .filme__barra { position: absolute; left: 0; right: 0; bottom: 0; height: 3px; background: rgba(253, 250, 242, .15); }
 .filme__barra i { display: block; height: 100%; width: 0; background: var(--dourado); transition: width .25s linear; }
 @media (max-width: 720px) { .filme__frase { bottom: calc(18% + var(--seguro-b)); } }
+.filme__som { position: absolute; top: calc(14px + env(safe-area-inset-top, 0px)); left: 14px; min-height: 42px; padding: 0 16px; font-size: .9rem; animation: pulsar 1.6s ease-in-out infinite; }
+@keyframes pulsar { 50% { box-shadow: 0 0 0 8px rgba(200, 168, 107, .25); } }
