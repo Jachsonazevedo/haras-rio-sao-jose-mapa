@@ -282,3 +282,5 @@ html, body { overscroll-behavior: none; }
 @media (max-width: 720px) { .filme__frase { bottom: calc(18% + var(--seguro-b)); } }
 .filme__som { position: absolute; top: calc(14px + env(safe-area-inset-top, 0px)); left: 14px; min-height: 42px; padding: 0 16px; font-size: .9rem; animation: pulsar 1.6s ease-in-out infinite; }
 @keyframes pulsar { 50% { box-shadow: 0 0 0 8px rgba(200, 168, 107, .25); } }
+.voo .filme__som { z-index: 3; }
+.voo__erro { position: absolute; left: 50%; top: 40%; transform: translate(-50%, -50%); z-index: 3; margin: 0; max-width: min(88vw, 420px); padding: 16px 18px; border-radius: 14px; background: var(--vidro); border: 1px solid var(--vidro-borda); text-align: center; line-height: 1.45; cursor: pointer; }

@@ -240,3 +240,6 @@ Ao tocar em "Iniciar a experiência" roda um filme de 44,5 s (`tour/img/filme.mp
 - As frases **não estão gravadas na imagem**: ficam em `FRASES` no `tour/tour.js` (tempos casados com as tomadas de `scripts/gerar_filme.py`), por cima do vídeo, para ficarem inteiras no celular em pé.
 - Regerar: `python scripts/gerar_trilha_natureza.py && python scripts/gerar_filme.py` → subir `filme.mp4?v=` no `tour/index.html`. Mudar tomadas = ajustar `TOMADAS` e os tempos de `FRASES` juntos.
 - As esferas do tour levam `?v=<data do arquivo>` (gerado por `preparar_tour.py`), para o verde novo aparecer sem cache depois de regerar.
+
+### Voo pelo Haras com trilha (desde 27/09/2026)
+O voo (3 min 36 s) tem trilha própria de música + natureza acompanhando os capítulos (portaria → avenidas → água → reservatório → chácaras → chuva passando nas glebas → vida no Haras → volta à portaria), `scripts/gerar_trilha_voo.py`. Versões leves geradas por `scripts/gerar_video_voo.py` a partir do mestre sem som `voo-1080.mp4` (não usado pela página): `voo-720.mp4` (31 MB, computador) e `voo-540.mp4` (21 MB, celular/tablet — escolhido por `pointer: coarse`, também deitado). O player tenta tocar com som no toque, mostra "Ativar o som" se o navegador bloquear, cai para a outra versão se uma falhar e mostra aviso de erro com nova tentativa.

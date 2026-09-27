@@ -9,6 +9,8 @@ import { MarkersPlugin } from '@photo-sphere-viewer/markers-plugin';
 const $ = (s) => document.querySelector(s);
 const RAD = Math.PI / 180;
 const MOVEL = window.matchMedia('(max-width: 720px)').matches;
+// aparelho de toque (celular/tablet, em pé ou deitado): recebe o vídeo mais leve
+const CELULAR = window.matchMedia('(pointer: coarse)').matches || Math.min(screen.width, screen.height) <= 820;
 const MENOS_MOVIMENTO = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 const el = {
@@ -475,9 +477,15 @@ function abrirVoo() {
   const caixa = document.createElement('section');
   caixa.className = 'voo'; caixa.setAttribute('aria-label', 'Voo guiado pelo Haras');
   caixa.innerHTML = `
-    <video class="voo__video" playsinline controls autoplay preload="auto" poster="${esc(v.capa || '')}">
-      <source src="${esc(MOVEL && v.video_movel ? v.video_movel : v.video)}" type="video/mp4">
+    <video class="voo__video" playsinline controls preload="auto" poster="${esc(v.capa || '')}">
+      <source src="${esc(CELULAR && v.video_movel ? v.video_movel : v.video)}" type="video/mp4">
+      ${v.video_movel ? `<source src="${esc(CELULAR ? v.video : v.video_movel)}" type="video/mp4">` : ''}
     </video>
+    <button class="bt bt--dourado filme__som" type="button" hidden>
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z" fill="currentColor"/><path d="M15.5 9a4.2 4.2 0 0 1 0 6M18 6.5a7.8 7.8 0 0 1 0 11" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      Ativar o som
+    </button>
+    <p class="voo__erro" hidden>Não foi possível carregar o vídeo agora. Verifique a internet e toque para tentar de novo.</p>
     <div class="voo__legenda" aria-live="polite"><b></b><small></small></div>
     <nav class="voo__capitulos" aria-label="Capítulos do voo"></nav>
     <button class="ic voo__fechar" type="button" aria-label="Fechar o voo">
@@ -489,6 +497,15 @@ function abrirVoo() {
     caixa.requestFullscreen({ navigationUI: 'hide' }).then(() => screen.orientation?.lock?.('landscape')).catch(() => {});
   }
   const video = caixa.querySelector('video'), leg = caixa.querySelector('.voo__legenda'), nav = caixa.querySelector('.voo__capitulos');
+  // play com som já no toque; se o navegador bloquear, toca mudo e mostra "Ativar o som"
+  const btSom = caixa.querySelector('.filme__som'), erro = caixa.querySelector('.voo__erro');
+  const botaoSomVoo = () => { btSom.hidden = !video.muted; };
+  btSom.addEventListener('click', () => { video.muted = false; video.play().catch(() => {}); botaoSomVoo(); });
+  video.addEventListener('volumechange', botaoSomVoo);
+  video.play().then(botaoSomVoo).catch(() => { video.muted = true; botaoSomVoo(); video.play().catch(() => {}); });
+  // erro de rede/arquivo: mensagem e nova tentativa no toque (o <video> já tenta a outra versão sozinho)
+  video.querySelector('source:last-of-type').addEventListener('error', () => { erro.hidden = false; });
+  erro.addEventListener('click', () => { erro.hidden = true; const t = video.currentTime; video.load(); video.currentTime = t; video.play().catch(() => {}); });
   const caps = v.capitulos.map((c, i) => {
     const b = document.createElement('button'); b.type = 'button'; b.className = 'cap'; b.textContent = c.titulo;
     b.addEventListener('click', () => { video.currentTime = c.t + 0.05; video.play().catch(() => {}); });
@@ -595,7 +612,7 @@ async function iniciarTour() {
 }
 
 async function carregar() {
-  const r = await fetch('cenas.json?v=5', { cache: 'no-cache' });
+  const r = await fetch('cenas.json?v=6', { cache: 'no-cache' });
   dados = await r.json();
   montarMiniaturas();
   ligarEventos();

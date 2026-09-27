@@ -1,6 +1,6 @@
 {
- "video": "img/voo-1080.mp4",
- "video_movel": "img/voo-720.mp4",
+ "video": "img/voo-720.mp4?v=2",
+ "video_movel": "img/voo-540.mp4?v=2",
  "capa": "img/voo-mini.jpg",
  "duracao": 216,
  "capitulos": [
