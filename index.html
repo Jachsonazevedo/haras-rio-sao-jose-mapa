@@ -18,7 +18,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
-  <link rel="stylesheet" href="css/styles.css?v=20260926a">
+  <link rel="stylesheet" href="css/styles.css?v=20260929a">
 
   <!-- Planta 3D: Three.js (r160) pelo CDN jsDelivr, sem build. Sem WebGL, ou com ?2d=1, fica o mapa SVG. -->
   <link rel="modulepreload" href="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.min.js" crossorigin>
@@ -60,7 +60,8 @@
       <a href="#pronto">Fotos</a>
       <a href="#como-chegar">Como chegar</a>
     </nav>
-    <a class="topo__cta" href="#mapa">Ver o mapa</a>
+    <a class="topo__cta so-pc-flex" href="#mapa">Ver o mapa</a>
+    <a class="topo__cta so-cel-flex" href="tour/">Passeio virtual</a>
   </header>
 
   <main id="inicio">
@@ -90,10 +91,10 @@
       <div class="secao__inner">
         <div class="mapa-secao__cabeca">
           <div>
-            <p class="secao__sobre">Planta humanizada em 3D · disponibilidade atualizada</p>
+            <p class="secao__sobre"><span class="so-pc">Planta humanizada em 3D · disponibilidade atualizada</span><span class="so-cel">Chacreamento · Poções – BA</span></p>
             <h2 class="secao__titulo" id="mapa-titulo">Escolha a sua unidade</h2>
           </div>
-          <p class="mapa-secao__dica"><span class="so-pc">Arraste para passear pelo Haras, gire com o botão direito do mouse e aproxime para ver cada lote: verde disponível, vermelho vendido, azul reservado. Clique em um lote para ver área e medidas, ou busque pelo número.</span><span class="so-cel"><strong>Toque em um lote</strong> para ver área e medidas. Arraste para mover, use + e − para ampliar, o botão de girar e a tela cheia. Verde disponível · vermelho vendido · azul reservado.</span></p>
+          <p class="mapa-secao__dica"><span class="so-pc">Arraste para passear pelo Haras, gire com o botão direito do mouse e aproxime para ver cada lote: verde disponível, vermelho vendido, azul reservado. Clique em um lote para ver área e medidas, ou busque pelo número.</span><span class="so-cel"><strong>Toque num lote verde</strong> para ver área e medidas.</span></p>
         </div>
 
           <!-- ---------- Quadro do mapa ---------- -->
@@ -269,16 +270,12 @@
                 <div><dt>Direita</dt><dd id="p-dir">—</dd></div>
               </dl>
 
-              <div class="painel__valor" id="p-valor" hidden>
-                <span class="painel__valor-rotulo">Valor de referência</span>
-                <strong id="p-valor-num">—</strong>
-                <small>sujeito a confirmação</small>
-              </div>
+              <p class="painel__consulta">Valores e condições: fale com o corretor pelo WhatsApp.</p>
 
               <div class="painel__acoes">
                 <a class="btn btn--primario" id="p-whats" href="#" target="_blank" rel="noopener noreferrer">
                   <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="currentColor" d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2Zm0 1.8a8.2 8.2 0 1 1-4.2 15.3l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 0 1 12 3.8Zm-3.3 4.4c-.2 0-.5 0-.7.3-.3.3-1 1-1 2.4s1 2.8 1.2 3c.1.2 2 3.2 5 4.4 2.5 1 3 .8 3.5.7.5 0 1.7-.7 2-1.4.2-.7.2-1.2.1-1.4l-.5-.3-1.9-.9c-.3-.1-.5-.2-.7.2l-.9 1.1c-.2.2-.3.2-.6.1a6.8 6.8 0 0 1-3.4-3c-.2-.4 0-.5.2-.7l.4-.5.3-.5c.1-.2 0-.4 0-.5l-.9-2.1c-.2-.5-.4-.5-.6-.5h-.5Z"/></svg>
-                  WhatsApp
+                  <span class="so-pc">WhatsApp</span><span class="so-cel">Valores no WhatsApp</span>
                 </a>
                 <button class="btn btn--secundario" id="p-share" type="button">
                   <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M18 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6ZM6 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Zm12 7a3 3 0 1 0 0-6 3 3 0 0 0 0 6ZM8.6 10.6l6.8-3.9M8.6 13.4l6.8 3.9" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -301,7 +298,7 @@
           </div>
 
         <div class="comuns-barra" id="comuns-barra" hidden>
-          <span class="comuns-barra__titulo">Áreas comuns</span>
+          <span class="comuns-barra__titulo">Áreas comuns <span class="so-cel">· toque para ver no mapa</span></span>
           <div class="comuns-barra__chips" id="comuns-chips"></div>
           <a class="comuns-barra__link" href="assets/planta-humanizada.jpg" target="_blank" rel="noopener" download>Baixar a planta em imagem</a>
         </div>
@@ -406,7 +403,7 @@
     </div>
   </footer>
 
-  <script src="js/app.js?v=20260926a" defer></script>
-  <script type="module" src="js/mapa3d.js?v=20260926a" onerror="window.dispatchEvent(new CustomEvent('haras:3d-falhou'))"></script>
+  <script src="js/app.js?v=20260929a" defer></script>
+  <script type="module" src="js/mapa3d.js?v=20260929a" onerror="window.dispatchEvent(new CustomEvent('haras:3d-falhou'))"></script>
 </body>
 </html>

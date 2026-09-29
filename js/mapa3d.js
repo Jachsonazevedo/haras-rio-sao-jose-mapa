@@ -179,8 +179,11 @@ async function iniciar() {
   function vistaInicial() {
     const asp = vista.w / vista.h;
     if (asp >= 1.05) return enquadrar(0.72, -0.18, { x: 0.02, topo: 0.13, base: 0.16 });
-    // tela em pé (celular): faixa na horizontal, como no computador, com a câmera mais alta (fica mais fácil tocar nos lotes)
-    return enquadrar(0.36, -0.12, { x: 0.02, topo: 0.2, base: 0.22 });
+    // tela em pé (celular, 29/09/2026): o mapa ocupa quase a tela toda, então a faixa fica EM PÉ, com a portaria
+    // embaixo — os lotes aparecem ~1,5× maiores do que deitados. O botão de girar deita a faixa, se o cliente preferir.
+    const v = enquadrar(0.3, -0.12 - Math.PI / 2, { x: 0.1, topo: 0.11, base: 0.05 });
+    vista.distIni = v.dist;
+    return v;
   }
 
   // Enquadra o contorno do imóvel com as margens pedidas (vale para qualquer ângulo e formato de tela)
@@ -348,6 +351,10 @@ async function iniciar() {
 
   function atualizarRotulos(dAlvo) {
     ocupados.length = 0;
+    // celular com o mapa inteiro na tela: menos rótulos (uma placa por avenida, marcadores só com ícone)
+    const longe = MOVEL && dAlvo > (vista.distIni || 2000) * 0.62;
+    if (rot._longe !== longe) { rot.classList.toggle('is-longe', longe); rot._longe = longe; marcadores.forEach((m) => { m.el._hw = 0; }); }
+    const avenidasVistas = new Set();
     const cam = camera.position;
     // 1) lote selecionado
     if (selecionado) {
@@ -391,7 +398,8 @@ async function iniciar() {
       let ok = false, s = null, dy = 0;
       const d = cam.distanceTo(v.p);
       const limite = v.tipo === 'rua' ? 6000 : 8000;
-      if (d < limite && (v.tipo !== 'rua' || v.principal || dAlvo < 900)) {
+      const repetida = longe && ((v.tipo === 'avenida' && avenidasVistas.has(v.texto)) || v.tipo === 'rua');
+      if (!repetida && d < limite && (v.tipo !== 'rua' || v.principal || dAlvo < 900)) {
         s = tela(v.p);
         if (s) {
           const w = v.texto.length * 3.6 + 10;
@@ -399,7 +407,7 @@ async function iniciar() {
           for (const t of tent) { if (livreEm(s.x, s.y + t, w, 11)) { ok = true; dy = t; break; } }
         }
       }
-      vis(v.el, ok); if (ok) pos(v.el, s.x, s.y + dy);
+      vis(v.el, ok); if (ok) { pos(v.el, s.x, s.y + dy); if (v.tipo === 'avenida') avenidasVistas.add(v.texto); }
     };
     for (const v of placas) if (v.tipo !== 'rua') placa(v);
     for (const v of placas) if (v.tipo === 'rua') placa(v);

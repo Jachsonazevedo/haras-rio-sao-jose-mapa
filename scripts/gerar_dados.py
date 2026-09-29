@@ -242,7 +242,7 @@ bbox = [round(min(p[0] for p in allpts), 1), round(min(p[1] for p in allpts), 1)
 cnt = Counter(l["status"] for l in lotes_out)
 out = {"meta": {"gerado_em": datetime.datetime.now().isoformat(timespec="minutes"), "fonte": "Planilha Mestre 01/09/2026 · Memorial de Lotes · Planta Fracionada (Jan/2021)",
                 "unidade": "m", "bbox": bbox, "total": len(lotes_out), "disponiveis": cnt["disponivel"], "vendidos": cnt["vendido"], "reservados": cnt["reservado"], "reserva_tecnica": cnt["reserva_tecnica"], "area_total_ha": 198,
-                "preco_m2": 27.5, "whatsapp": "5511991468192", "escala_pt_m": round(PT_M, 5), "reserva_estrategica": origem_res, "entrada": entrada[0] if entrada else None},
+                "whatsapp": "5511991468192", "escala_pt_m": round(PT_M, 5), "reserva_estrategica": origem_res, "entrada": entrada[0] if entrada else None},
        "glebas": glebas_out, "lotes": lotes_out, "vias": [], "areas": areas_out}
 os.makedirs(os.path.join(OUTDIR, "data"), exist_ok=True)
 json.dump(out, open(os.path.join(OUTDIR, "data", "lotes.json"), "w", encoding="utf-8"), ensure_ascii=False, separators=(",", ":"))

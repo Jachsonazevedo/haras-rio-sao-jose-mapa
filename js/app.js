@@ -89,7 +89,7 @@
     painel: $('#painel'), painelAlca: $('#painel-alca'), painelFechar: $('#painel-fechar'), painelTitulo: $('#painel-titulo'),
     pLote: $('#p-lote'), pGleba: $('#p-gleba'), pStatus: $('#p-status'), pArea: $('#p-area'),
     pFrente: $('#p-frente'), pFundo: $('#p-fundo'), pEsq: $('#p-esq'), pDir: $('#p-dir'),
-    pValor: $('#p-valor'), pValorNum: $('#p-valor-num'), pWhats: $('#p-whats'), pShare: $('#p-share'),
+    pWhats: $('#p-whats'), pShare: $('#p-share'),
     estado: $('#estado'), estadoTitulo: $('#estado-titulo'), estadoTexto: $('#estado-texto'), estadoTentar: $('#estado-tentar'),
     hGlebas: $('#h-glebas'), hArea: $('#h-area'),
     chegarWhats: $('#chegar-whats'),
@@ -143,7 +143,6 @@
   const fmtNum = new Intl.NumberFormat('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   const fmtInt = new Intl.NumberFormat('pt-BR', { maximumFractionDigits: 0 });
   const fmtHa = new Intl.NumberFormat('pt-BR', { maximumFractionDigits: 1 });
-  const fmtBRL = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
   const fmtArea = (v) => Number.isFinite(v) ? `${fmtNum.format(v)} m²` : '—';
   const fmtMetro = (v) => Number.isFinite(v) ? `${fmtNum.format(v)} m` : '—';
   function fmtData(iso) {
@@ -972,14 +971,7 @@
     el.pEsq.textContent = fmtMetro(lote.esq);
     el.pDir.textContent = fmtMetro(lote.dir);
 
-    // Valor de referência: só quando preco_m2 é número, há área e o lote está disponível
-    const preco = typeof m.preco_m2 === 'number' && Number.isFinite(m.preco_m2) ? m.preco_m2 : null;
-    if (preco !== null && Number.isFinite(lote.area) && lote.status === 'disponivel') {
-      el.pValorNum.textContent = fmtBRL.format(lote.area * preco);
-      el.pValor.hidden = false;
-    } else {
-      el.pValor.hidden = true;
-    }
+    // Sem preço na página: o valor é apresentado pelo corretor na conversa (decisão do Jachson, 29/09/2026)
 
     // WhatsApp: número E.164 sem "+"; sem número, o botão some
     const numero = numeroWhats();
@@ -1252,7 +1244,23 @@
     if (painel) new MutationObserver(atualizar).observe(painel, { attributes: true, attributeFilter: ['class'] });
   }
 
+  // Celular: a legenda sai de cima do mapa e fica numa faixa logo abaixo dele (volta para dentro na tela cheia)
+  function ligarLegendaCelular() {
+    const quadro = document.getElementById('mapa-quadro'), legenda = document.getElementById('legenda');
+    if (!quadro || !legenda) return;
+    const cel = window.matchMedia('(max-width: 720px)');
+    const posicionar = () => {
+      const fora = cel.matches && !quadro.classList.contains('is-cheia');
+      if (fora && legenda.parentElement === quadro) quadro.after(legenda);
+      else if (!fora && legenda.parentElement !== quadro) quadro.appendChild(legenda);
+    };
+    posicionar();
+    cel.addEventListener('change', posicionar);
+    new MutationObserver(posicionar).observe(quadro, { attributes: true, attributeFilter: ['class'] });
+  }
+
   function iniciar() {
+    ligarLegendaCelular();
     ligarVideo();
     ligarWhatsFlutuante();
     medirTopo();

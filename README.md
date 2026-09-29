@@ -246,3 +246,8 @@ O voo (3 min 36 s) tem trilha própria de música + natureza acompanhando os cap
 
 ### Pássaros em 3D no voo (desde 27/09/2026)
 `tour/passaros.js`: araras-vermelhas (pares, batida lenta; coberteiras vermelhas, faixa amarela, rêmiges azuis, cauda longa), maritacas (bandos verdes, asa rápida) e canários-da-terra (amarelos com cabeça laranja, voo em "pulos") voam por cima do "Voo pelo Haras" de vez em quando (12 passagens em 3 min 36 s). Modelos e texturas de penas feitos em código (Three.js, sem arquivos externos), vistos um pouco de cima como pelo drone. Tudo segue o tempo do vídeo (pausa congela, capítulo pula para a posição certa); a agenda é fixa (`agenda()`, semente 2609). Canvas só sobre a imagem do vídeo, sem bloquear toques.
+
+### Celular: mapa como protagonista, sem preço (29/09/2026)
+- No celular (≤720 px) a seção do mapa vem primeiro (antes da faixa de apresentação), com largura total e quase a tela toda; a faixa do empreendimento fica **em pé** com a portaria embaixo (`vistaInicial` em `js/mapa3d.js`) — o botão de girar deita a faixa.
+- Legenda e "Só disponíveis" saem de cima do mapa para uma faixa fina logo abaixo (`ligarLegendaCelular` em `js/app.js`; voltam para dentro na tela cheia). Áreas comuns numa linha deslizante discreta. Visão geral com menos rótulos (uma placa por avenida, sem ruas, marcadores só com ícone). Painel do lote compacto (medidas numa linha, WhatsApp à vista).
+- **Sem valor na página**: o painel não mostra preço e `data/lotes.json` não traz mais `preco_m2` (o cliente vê valores só com o corretor).
