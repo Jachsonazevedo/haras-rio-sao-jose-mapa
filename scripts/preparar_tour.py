@@ -174,8 +174,8 @@ def processar(c):
 # Coordenadas da planta (data/lotes.json, metros): x ao longo do Haras, z atravessado; alt = altura da câmera.
 # yaw0/pitch0 = para onde a vista abre (graus; yaw 0 = direção -z, cresce para +x).
 PONTOS360 = [
-    dict(id="geral", x=1400, z=500, alt=1450, yaw0=90, pitch0=-90, largura=8144, sobre="Visão geral", titulo="O Haras inteiro, visto de cima",
-         texto="Todo o empreendimento de uma vez: 57 glebas, as avenidas, a portaria e a área de preservação. Em verde, as unidades à venda. Aproxime com dois dedos (ou +), gire com o dedo e toque num lote para ver área e medidas."),
+    dict(id="geral", x=1400, z=500, alt=1450, yaw0=90, pitch0=-90, largura=8144, sobre="Mapa 3D", titulo="Escolha a sua unidade",
+         texto="O Haras inteiro em 3D: avenidas, portaria, área de lazer e preservação. Em verde, as unidades à venda. Toque num lote verde para ver área e medidas."),
     dict(id="portaria", x=330, z=380, alt=95, yaw0=90, pitch0=-24, sobre="Chegada", titulo="Sobre a portaria",
          texto="Você está no alto, sobre a entrada do Haras. Gire com o dedo para olhar em volta e para baixo: em verde, as unidades à venda. Toque num lote para ver área e medidas."),
     dict(id="centro", x=1450, z=430, alt=300, yaw0=90, pitch0=-36, sobre="Vista aérea 360°", titulo="No meio das glebas",

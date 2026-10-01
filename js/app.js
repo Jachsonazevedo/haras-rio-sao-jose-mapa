@@ -1250,7 +1250,7 @@
     if (!quadro || !legenda) return;
     const cel = window.matchMedia('(max-width: 720px)');
     const posicionar = () => {
-      const fora = cel.matches && !quadro.classList.contains('is-cheia');
+      const fora = cel.matches && !quadro.classList.contains('is-cheia') && !document.documentElement.classList.contains('embed');
       if (fora && legenda.parentElement === quadro) quadro.after(legenda);
       else if (!fora && legenda.parentElement !== quadro) quadro.appendChild(legenda);
     };

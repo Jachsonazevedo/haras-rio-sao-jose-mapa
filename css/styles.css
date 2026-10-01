@@ -970,3 +970,18 @@ html.mapa-cheia .whats-flutuante { display: none; }
   .painel .status { position: absolute; top: 50px; right: 62px; margin: 0; }
   .painel__acoes .btn { white-space: nowrap; }
 }
+
+/* =====================================================================
+   ?embed=1 — só o mapa, dentro do passeio virtual (tour/), 01/10/2026
+   ===================================================================== */
+html.embed, html.embed body { height: 100%; overflow: hidden; background: #EFE9DA; }
+html.embed .topo, html.embed .faixa, html.embed main > section:not(#mapa), html.embed .rodape, html.embed footer,
+html.embed .mapa-secao__cabeca, html.embed .comuns-barra, html.embed .whats-flutuante, html.embed .ctrl--cheia { display: none !important; }
+html.embed .mapa-secao { padding: 0; border: 0; background: none; }
+html.embed .mapa { position: fixed; inset: 0; width: 100%; height: 100%; min-height: 0; max-height: none; border: 0; border-radius: 0; box-shadow: none; }
+html.embed .legenda { left: 8px; bottom: 8px; padding: 6px 9px; gap: 5px; font-size: .74rem; max-width: calc(100% - 70px); }
+html.embed .legenda__itens { gap: 3px 9px; }
+html.embed .legenda__cor { width: 11px; height: 11px; }
+html.embed .rosa3d { left: auto; right: 8px; bottom: 8px; top: auto; width: 48px; height: 48px; }
+html.embed .busca { top: 8px; left: 8px; }
+html.embed .controles { top: 8px; right: 8px; }

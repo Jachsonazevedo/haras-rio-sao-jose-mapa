@@ -21,7 +21,27 @@ const el = {
   ant: $('#bt-ant'), prox: $('#bt-prox'), info: $('#bt-info'), passeio: $('#bt-passeio'), cheia: $('#bt-cheia'),
   minis: $('#miniaturas'), carregando: $('#carregando'), giro: $('#bt-giro'), dica: $('#dica-arraste'), dicaTexto: $('#dica-texto'),
   pExtra: $('#ponto-extra'), fotos: $('#bt-fotos'),
+  mapa: $('#mapa-embed'), mapaFrame: $('#mapa-embed-frame'),
 };
+
+// ---------------------------------------------------------------- cena "Mapa 3D" (abertura): o mapa do app de vendas embutido
+const ehMapa = (c) => !!c && c.id === '360-geral';
+function encaixarMapa() {
+  if (el.mapa.hidden) return;
+  const topo = document.querySelector('.topo').getBoundingClientRect().bottom;
+  const base = document.querySelector('.base').getBoundingClientRect().top;
+  el.mapa.style.top = `${Math.max(0, Math.round(topo))}px`;
+  el.mapa.style.bottom = `${Math.max(0, Math.round(innerHeight - base))}px`;
+}
+function mostrarMapa(sim) {
+  el.tour.classList.toggle('is-mapa', sim);
+  el.mapa.hidden = !sim;
+  if (!sim) return;
+  if (!el.mapaFrame.getAttribute('src')) el.mapaFrame.src = '../?embed=1&v=20261001a';
+  definirPasseio(false); cartaoAberto(false); esconderDica();
+  requestAnimationFrame(encaixarMapa); setTimeout(encaixarMapa, 300);
+}
+window.addEventListener('resize', () => encaixarMapa());
 
 const ICONE_INFO = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 10.5v6.5M12 7v.6" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></svg>';
 
@@ -260,6 +280,8 @@ async function irPara(i, primeira = false) {
   el.carregando.classList.add('is-ativo');
   atual = i;
   mostrarCena(c, i);
+  mostrarMapa(ehMapa(c));
+  if (ehMapa(c)) { markers.clearMarkers(); trocando = false; el.carregando.classList.remove('is-ativo'); return; }
   const inicio = posInicial(c);
   try {
     markers.clearMarkers();
@@ -625,7 +647,7 @@ async function iniciarTour() {
 }
 
 async function carregar() {
-  const r = await fetch('cenas.json?v=7', { cache: 'no-cache' });
+  const r = await fetch('cenas.json?v=8', { cache: 'no-cache' });
   dados = await r.json();
   montarMiniaturas();
   ligarEventos();

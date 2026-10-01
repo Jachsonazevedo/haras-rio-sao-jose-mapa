@@ -285,3 +285,12 @@ html, body { overscroll-behavior: none; }
 .voo .filme__som { z-index: 3; }
 .voo__erro { position: absolute; left: 50%; top: 40%; transform: translate(-50%, -50%); z-index: 3; margin: 0; max-width: min(88vw, 420px); padding: 16px 18px; border-radius: 14px; background: var(--vidro); border: 1px solid var(--vidro-borda); text-align: center; line-height: 1.45; cursor: pointer; }
 .voo__passaros { position: absolute; z-index: 1; pointer-events: none; }
+
+/* ---------- Cena de abertura = mapa 3D do app (01/10/2026) ---------- */
+.mapa-embed { position: absolute; left: 0; right: 0; top: 0; bottom: 0; z-index: 8; background: #EFE9DA; }
+.mapa-embed iframe { display: block; width: 100%; height: 100%; border: 0; }
+.tour.is-mapa .topo { background: var(--verde); padding-bottom: 12px; }
+.tour.is-mapa .base { background: var(--verde); }
+.tour.is-mapa .zoom, .tour.is-mapa .seta, .tour.is-mapa #bt-giro, .tour.is-mapa #bt-passeio,
+.tour.is-mapa .dica-arraste, .tour.is-mapa .base__acoes .bt--dourado { display: none !important; }
+@media (max-width: 720px) { .tour.is-mapa .base__acoes { display: none; } }

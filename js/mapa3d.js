@@ -181,7 +181,9 @@ async function iniciar() {
     if (asp >= 1.05) return enquadrar(0.72, -0.18, { x: 0.02, topo: 0.13, base: 0.16 });
     // tela em pé (celular, 29/09/2026): o mapa ocupa quase a tela toda, então a faixa fica EM PÉ, com a portaria
     // embaixo — os lotes aparecem ~1,5× maiores do que deitados. O botão de girar deita a faixa, se o cliente preferir.
-    const v = enquadrar(0.3, -0.12 - Math.PI / 2, { x: 0.1, topo: 0.11, base: 0.05 });
+    // dentro do passeio virtual (?embed=1) a legenda fica sobre o mapa: margem de baixo maior
+    const embutido = document.documentElement.classList.contains('embed');
+    const v = enquadrar(0.3, -0.12 - Math.PI / 2, { x: 0.1, topo: 0.11, base: embutido ? 0.18 : 0.05 });
     vista.distIni = v.dist;
     return v;
   }

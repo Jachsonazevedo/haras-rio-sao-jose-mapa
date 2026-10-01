@@ -62,12 +62,12 @@
  "cenas": [
   {
    "id": "360-geral",
-   "sobre": "Visão geral",
-   "titulo": "O Haras inteiro, visto de cima",
-   "texto": "Todo o empreendimento de uma vez: 57 glebas, as avenidas, a portaria e a área de preservação. Em verde, as unidades à venda. Aproxime com dois dedos (ou +), gire com o dedo e toque num lote para ver área e medidas.",
+   "sobre": "Mapa 3D",
+   "titulo": "Escolha a sua unidade",
+   "texto": "O Haras inteiro em 3D: avenidas, portaria, área de lazer e preservação. Em verde, as unidades à venda. Toque num lote verde para ver área e medidas.",
    "esfera": true,
-   "imagem": "img/esfera-geral.jpg?v=1790689228",
-   "mini": "img/esfera-geral-mini.jpg?v=1790689228",
+   "imagem": "img/esfera-geral.jpg?v=1790861602",
+   "mini": "img/esfera-geral-mini.jpg?v=1790861602",
    "camera": {
     "x": 1400,
     "z": 500,
@@ -116,8 +116,8 @@
    "titulo": "Sobre a portaria",
    "texto": "Você está no alto, sobre a entrada do Haras. Gire com o dedo para olhar em volta e para baixo: em verde, as unidades à venda. Toque num lote para ver área e medidas.",
    "esfera": true,
-   "imagem": "img/esfera-portaria.jpg?v=1790689233",
-   "mini": "img/esfera-portaria-mini.jpg?v=1790689233",
+   "imagem": "img/esfera-portaria.jpg?v=1790861606",
+   "mini": "img/esfera-portaria-mini.jpg?v=1790861606",
    "camera": {
     "x": 330,
     "z": 380,
@@ -174,8 +174,8 @@
    "titulo": "No meio das glebas",
    "texto": "O coração do Haras: avenidas, ruas e as glebas em volta. Em verde, as unidades à venda. Toque num lote para ver área e medidas.",
    "esfera": true,
-   "imagem": "img/esfera-centro.jpg?v=1790689236",
-   "mini": "img/esfera-centro-mini.jpg?v=1790689236",
+   "imagem": "img/esfera-centro.jpg?v=1790861609",
+   "mini": "img/esfera-centro-mini.jpg?v=1790861609",
    "camera": {
     "x": 1450,
     "z": 430,
@@ -224,8 +224,8 @@
    "titulo": "Perto da área de preservação",
    "texto": "As últimas glebas, junto à área de preservação ambiental (Reserva Legal e APP).",
    "esfera": true,
-   "imagem": "img/esfera-fundo.jpg?v=1790689240",
-   "mini": "img/esfera-fundo-mini.jpg?v=1790689240",
+   "imagem": "img/esfera-fundo.jpg?v=1790861612",
+   "mini": "img/esfera-fundo-mini.jpg?v=1790861612",
    "camera": {
     "x": 2550,
     "z": 470,
@@ -282,8 +282,8 @@
    "titulo": "Área de lazer e lago",
    "texto": "A área de lazer prevista no contrato, na parte baixa da faixa, e o lago natural na ponta.",
    "esfera": true,
-   "imagem": "img/esfera-lazer.jpg?v=1790689243",
-   "mini": "img/esfera-lazer-mini.jpg?v=1790689243",
+   "imagem": "img/esfera-lazer.jpg?v=1790861615",
+   "mini": "img/esfera-lazer-mini.jpg?v=1790861615",
    "camera": {
     "x": 90,
     "z": 830,

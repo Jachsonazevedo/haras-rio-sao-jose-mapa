@@ -251,3 +251,6 @@ O voo (3 min 36 s) tem trilha própria de música + natureza acompanhando os cap
 - No celular (≤720 px) a seção do mapa vem primeiro (antes da faixa de apresentação), com largura total e quase a tela toda; a faixa do empreendimento fica **em pé** com a portaria embaixo (`vistaInicial` em `js/mapa3d.js`) — o botão de girar deita a faixa.
 - Legenda e "Só disponíveis" saem de cima do mapa para uma faixa fina logo abaixo (`ligarLegendaCelular` em `js/app.js`; voltam para dentro na tela cheia). Áreas comuns numa linha deslizante discreta. Visão geral com menos rótulos (uma placa por avenida, sem ruas, marcadores só com ícone). Painel do lote compacto (medidas numa linha, WhatsApp à vista).
 - **Sem valor na página**: o painel não mostra preço e `data/lotes.json` não traz mais `preco_m2` (o cliente vê valores só com o corretor).
+
+### Tour: abertura com o mapa 3D do app (01/10/2026)
+A cena "360-geral" do passeio virtual não mostra mais a esfera vista de cima: mostra o mapa 3D do app (`../?embed=1`, modo só-mapa definido em `index.html` + `css/styles.css` `html.embed`) num iframe entre o topo e as miniaturas (`mostrarMapa()` em `tour/tour.js`). Toque no lote, painel com medidas e WhatsApp funcionam dentro do tour; setas, zoom da foto e "Escolher unidade" somem nessa cena.

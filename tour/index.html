@@ -16,7 +16,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@photo-sphere-viewer/core@5.15.1/index.min.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@photo-sphere-viewer/markers-plugin@5.15.1/index.min.css">
-  <link rel="stylesheet" href="tour.css?v=10">
+  <link rel="stylesheet" href="tour.css?v=11">
   <script type="importmap">
     {
       "imports": {
@@ -73,6 +73,10 @@
   <!-- ===================== TOUR ===================== -->
   <main class="tour" id="tour" hidden>
     <div class="tour__viewer" id="viewer" aria-label="Visualizador do tour virtual"></div>
+    <!-- Cena de abertura: o mapa 3D do app de vendas (../?embed=1), entre o topo e as miniaturas -->
+    <div class="mapa-embed" id="mapa-embed" hidden>
+      <iframe id="mapa-embed-frame" title="Mapa 3D das unidades do Haras Rio São José" allow="fullscreen"></iframe>
+    </div>
 
     <!-- Topo: marca + título da cena -->
     <header class="topo">
@@ -175,6 +179,6 @@
   </main>
 
   <noscript><p style="padding:24px">Ative o JavaScript para ver a experiência virtual.</p></noscript>
-  <script type="module" src="tour.js?v=16"></script>
+  <script type="module" src="tour.js?v=17"></script>
 </body>
 </html>
